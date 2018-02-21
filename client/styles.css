@@ -1,0 +1,16 @@
+.container {
+    padding: 15px;
+    text-align: center;
+}
+
+button {
+    margin-bottom: 5px !important;
+}
+
+button:last-child {
+    margin-bottom: 0px !important;
+}
+
+hidden {
+    display: none;
+}
