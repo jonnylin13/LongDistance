@@ -5,7 +5,9 @@
   "version": "0.1",
   "manifest_version": 2,
   "permissions": [
-      "tabs"
+      "tabs",
+      "storage",
+      "http://localhost:3000/register_client"
   ],
   "background": {
       "scripts": ["background.js"]
