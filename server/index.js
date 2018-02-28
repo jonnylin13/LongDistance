@@ -14,15 +14,23 @@ var body_parser = require("body-parser");
 
 // Variables
 var lobbies = [];
-var clients = [];
 
-/** GET handshake request **/
+/** Returns true if client_id has lobby */
+function has_lobby(client_id) {
+    for (var i = 0; i < lobbies.length; i++) {
+        if (lobbies[i].master.client_id === client_id)
+            return true;
+    }
+    return false;
+}
+
+/** GET handshake request */
 function register_client(req, res) {
     res.json({msg: "Success!"});
     console.log(req.query.client_id);
 }
 
-/** Registers REST endpoints **/
+/** Registers REST endpoints */
 function register_endpoints() {
     app.get("/register_client", register_client);
 }
