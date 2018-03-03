@@ -74,6 +74,12 @@ function pause_play_keyup_listener($event) {
     }
 }
 
+function msg_listener(req, sender, res) {
+    if (req.type === "url_change") {
+        console.log(req.url);
+    }
+}
+
 /** Register listeners
  *  Called after the main function determines NF player has been loaded
  */
@@ -81,12 +87,12 @@ function register_listeners() {
 
     get_pause_play().addEventListener("click", pause_play_click_listener);
     document.addEventListener("keyup", pause_play_keyup_listener);
+    chrome.runtime.onMessage.addListener(msg_listener);
 
 }
 
 /** Main function (entry point) */
 function main() {
-
     var load = setInterval(function() {
         if (is_loaded()) {
             if (debug)

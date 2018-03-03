@@ -16,7 +16,7 @@ function tab_update_listener(tab_id, change_info, tab) {
     }
 }
 
-/** Main function (entry point) */
+/** Main function (entry point) TODO start a port connection w/ content script */
 function main() {
     chrome.tabs.onUpdated.addListener(tab_update_listener);
 }
