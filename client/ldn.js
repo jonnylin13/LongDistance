@@ -4,14 +4,25 @@
 */
 
 const ready_state = Object.freeze({
-    "UNSENT": 0,
-    "OPENED": 1,
-    "HEADERS": 2,
-    "LOADED": 3,
-    "DONE": 4
+    "Unsent": 0,
+    "Opened": 1,
+    "Headers": 2,
+    "Loaded": 3,
+    "Done": 4
 });
 
 var client_id;
+
+// Utility
+
+function create_params(url, params) {
+    var output = url + "?";
+    for (param in params) {
+        if (output.substr(output.length - 1) === "?") output += param;
+        else output += "&" + param;
+    }
+    return output;
+}
 
 function uniq_id() {
     return Date.now() + Math.random();
@@ -29,6 +40,8 @@ function check_id() {
     });
 }
 
+// Listeners
+
 /** Start lobby button event listener
  *  Called when user clicks the "Start Lobby" button
  */
@@ -37,27 +50,43 @@ function start_lobby_click_listener($event) {
         start_lobby();
 }
 
-/** Sends an AJAX request to backend */
+/** Triggered when a message is sent to background */
+function msg_listener(req, sender, res) {
+    if (req.type === "url_change") {
+        // req.url
+    }
+}
+
+// AJAX entry points
+
+/** Starts a lobby with client_id
+ * Sends an AJAX request to backend 
+ */
 function start_lobby() {
     var req = new XMLHttpRequest();
     var url = "http://localhost:3000/register_client";
-    var params = "client_id=" + client_id;
-    req.open("GET", url+"?"+params, true);
+    var client_id_param = "client_id=" + client_id;
+    req.open("GET", create_params(url, [client_id_param]), true);
 
     req.onreadystatechange = function() {
-        if (req.readyState == ready_state.DONE) {
+        if (req.readyState == ready_state.Done) {
             console.log(req);
         }
     }
     req.send();
 }
 
-/** Main function (entry point) */
-function main() {
-    check_id();
+function register_listeners() {
     document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("start-lobby-btn").addEventListener("click", start_lobby_click_listener);
     });
+    chrome.runtime.onMessage.addListener(msg_listener);
+}
+
+/** Main function (entry point) */
+function main() {
+    check_id();
+    register_listeners();
 }
 
 main();

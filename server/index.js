@@ -13,21 +13,51 @@ var cors =  require("cors");
 var body_parser = require("body-parser");
 
 // Variables
-var lobbies = [];
+var lobbies = {
+    ctl_token: null,
+    clients: []
+};
 
-/** Returns true if client_id has lobby */
+/** Returns true if client_id is in a lobby 
+ * Uses linear search for now, can be optimized in the future
+*/
 function has_lobby(client_id) {
-    for (var i = 0; i < lobbies.length; i++) {
-        if (lobbies[i].master.client_id === client_id)
-            return true;
-    }
+    for (var lobby in lobbies)
+        for (var client in lobby.clients)
+            if (client.id === client_id) return true;
     return false;
 }
 
-/** GET handshake request */
+/** Returns true if client_id has control */
+function has_ctl_token(client_id) {
+    if (lobbies.ctl_token === client_id) return true;
+    return false;
+}
+
+/** GET handshake request
+ * Receives a client_id token
+ * Creates a lobby in lobbies with client_id as control
+ */
 function register_client(req, res) {
-    res.json({msg: "Success!"});
-    console.log(req.query.client_id);
+
+    var client_id = req.query.client_id;
+    // Validate client id
+
+    if (has_lobby(client_id)) {
+        res.json({msg: "Error: client is already in a lobby"});
+        return;
+    }
+
+    var new_lobby = {
+        ctl_token: client_id,
+        clients: [
+            {
+                id: client_id,
+                data: null
+            }
+        ] 
+    };
+
 }
 
 /** Registers REST endpoints */

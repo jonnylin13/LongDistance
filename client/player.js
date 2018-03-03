@@ -6,6 +6,7 @@
 // Constants
 
 const PLAYER_STATE = Object.freeze({
+    "Inactive": -1,
     "Play": 0,
     "Pause": 1
 });
@@ -55,7 +56,7 @@ function get_pause_play() {
 
 // NF Listeners
 
-/** Called when pause play button is clicked
+/** Triggered when pause play button is clicked
  *  Will set the player state manually as a re-calibration (if keyup fails)
  *  Because the click event is called after the element is changed, Pause when the element is Play
  */
@@ -64,7 +65,7 @@ function pause_play_click_listener($event) {
     else if (contains($event.target.classList, "button-nfplayerPause")) player_state = PLAYER_STATE.Play;
 }
 
-/** Called when NF detects a keyup  */
+/** Triggered when NF detects a keyup  */
 function pause_play_keyup_listener($event) {
     if ($event.keyCode == 32) {
         var el = get_pause_play();
