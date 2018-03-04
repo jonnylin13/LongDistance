@@ -10,6 +10,8 @@ Long Distance Netflix Chrome extension to replace Showgoers
 * Load unpacked extension
 * Select the client folder
 
+Be sure to run `npm install` in `server/`
+
 # Structure
 * client/background.js
 
