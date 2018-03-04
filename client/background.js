@@ -31,6 +31,7 @@ function param(key, value) {
     return output;
 }
 
+/** Uses for/statement loop because I'm too lazy to change params to JSO */
 function create_params(url, params) {
     var output = url + '?';
     for (var i = 0; i < params.length; i++) {
@@ -40,10 +41,12 @@ function create_params(url, params) {
     return output;
 }
 
+/** Generates a unique token id, this will work in practice but it's not very safe lmao */
 function uniq_id() {
     return Date.now() + Math.random();
 }
 
+/** Generates a client id if one is not found in chrome sync storage */
 function update_id(callback) {
     chrome.storage.sync.get('client_id', function(items) {
         var id = items.client_id;
@@ -59,6 +62,7 @@ function update_id(callback) {
 
 /** Starts a lobby with client_id
  * Sends an AJAX request to backend 
+ * We could use a JS Object for _params, but this works for now (for/in loop vs numeral loop)
  */
 function start_lobby() {
     var req = new XMLHttpRequest();

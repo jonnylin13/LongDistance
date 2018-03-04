@@ -9,7 +9,6 @@ const PLAYER_STATE = Object.freeze({
     'Play': 0,
     'Pause': 1
 });
-const debug = true;
 
 // Script local
 var player_state = PLAYER_STATE.Inactive;
@@ -24,7 +23,7 @@ function update_player_state(state) {
 
 /** Linear contains function, searches given array for item, == comparison */
 function contains(arr, item) { // Uses linear search for now...
-    for (var i in arr)
+    for (var i = 0; i < arr.length; i++)
         if (item === i) return true;
     return false;
 }
@@ -109,8 +108,7 @@ function register_listeners() {
 function main() {
     var load = setInterval(function() {
         if (is_loaded()) {
-            if (debug)
-                console.log('LDN has been loaded!');
+            console.log('LDN has been loaded!');
             clearInterval(load);
             register_listeners();
         }
