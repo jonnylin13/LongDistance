@@ -4,6 +4,20 @@
 * Initialized when NF Player is created
 */
 
+/**"content_scripts": [
+    {
+      "matches": ["*://netflix.com/watch/*", "*://*.netflix.com/watch/*"],
+      "js": ["player.js"],
+      "run_at": "document_idle"
+    }
+  ]*/
+
+/** Wrapped in a function so executeScript knows the script has been run */
+(function() {
+    if (window.hasRun === true)
+        return true;
+    window.hasRun = true;
+
 const PLAYER_STATE = Object.freeze({
     "Inactive": -1, // Initialization state
     "Play": 0,
@@ -13,8 +27,6 @@ const PLAYER_STATE = Object.freeze({
 // Script local
 var player_state = PLAYER_STATE.Inactive;
 var prev_state;
-/** var background_port;
-var connected = false; */
 
 function update_player_state(state) {
     chrome.runtime.sendMessage({
@@ -86,14 +98,15 @@ function pause_play_keyup_listener($event) {
 
 /** Triggered by messages from background.js */
  function msg_listener(req, sender, send_response) {
-     if (msg.type === 'update_player_state_ack') {
-         send_response({type:'ay_lmao'});
-         console.log(msg.type);
+     if (req.type) {
+         console.log(req.type);
+         if (req.type === 'check') {
+             send_response({type: 'check_ack'});
+         }
      }
-     send_response();
 }
 
-/** Register listeners
+/** Register listeners  
  *  Called after the main function determines NF player has been loaded
  */
 function register_listeners() {
@@ -101,8 +114,6 @@ function register_listeners() {
     get_pause_play().addEventListener('click', pause_play_click_listener);
     document.addEventListener('keyup', pause_play_keyup_listener);
     chrome.runtime.onMessage.addListener(msg_listener);
-
-    // connect_port();
 
 }
 
@@ -118,3 +129,4 @@ function main() {
 }
 
 main();
+})();

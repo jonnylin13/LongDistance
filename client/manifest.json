@@ -6,6 +6,9 @@
   "permissions": [
       "tabs",
       "storage",
+      "activeTab",
+      "*://*.netflix.com/watch/*",
+      "*://netflix.com/watch/*",
       "http://localhost:3000/start_lobby"
   ],
   "background": {
@@ -13,13 +16,8 @@
   },
   "page_action": {
       "default_popup": "popup.html"
-  },
+  }
 
-  "content_scripts": [
-    {
-      "matches": ["*://netflix.com/watch/*", "*://*.netflix.com/watch/*"],
-      "js": ["player.js"],
-      "run_at": "document_idle"
-    }
-  ]
+  
 }
+

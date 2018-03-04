@@ -21,8 +21,8 @@ var player_port;
 var player_state = PLAYER_STATE.Inactive;
 var client_id;
 
-function is_watching() {
-    if (current_url_params.split('/')[0] === 'watch') return true;
+function is_watching(params) {
+    if (params.split('/')[0] === 'watch' && params.includes('watch')) return true;
     return false;
 }
 
@@ -88,7 +88,16 @@ function start_lobby() {
 function tab_update_listener(tab_id, change_info, tab) {
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
         chrome.pageAction.show(tab_id);
-        current_url_params = tab.url.split('netflix.com/')[1];
+        var new_url_params = tab.url.split('netflix.com/')[1];
+        if (current_url_params != new_url_params) {
+            current_url_params = new_url_params;
+            if (is_watching(new_url_params)) {
+                chrome.tabs.executeScript(null, {file: 'player.js', runAt: 'document_idle'}, function(results) {
+                    if (chrome.runtime.lastError || !results || !results.length) return;
+                });
+            }
+        }
+            
     }
 }
 
@@ -99,27 +108,30 @@ function start_background() {
 
 /** Triggered with connection-less messages from popup.js */
 function msg_listener(req, sender, send_response) {
-    if (req.type === 'ldn_loaded') {
-        start_background();
-        send_response({
-            type: 'start_background_ack'
-        });
-    } else if (req.type === 'start_lobby_ack') {
-        start_lobby();
-        send_response({
-            type: 'update_player_state_ack'
-        });
-    } else if (req.type === 'update_player_state') {
-        var result = false;
-        if (player_state !== req.new_state)  {
-            player_state = req.new_state;
-            result = true;
-        }
+    if (req.type) {
+        console.log(req.type);
+        if (req.type === 'ldn_loaded') {
+            start_background();
+            send_response({
+                type: 'start_background_ack'
+            });
+        } else if (req.type === 'start_lobby_ack') {
+            start_lobby();
+            send_response({
+                type: 'update_player_state_ack'
+            });
+        } else if (req.type === 'update_player_state') {
+            var result = false;
+            if (player_state !== req.new_state)  {
+                player_state = req.new_state;
+                result = true;
+            }
 
-        send_response({
-            type: 'update_player_state_ack',
-            result: result
-        });
+            send_response({
+                type: 'update_player_state_ack',
+                result: result
+            });
+        }
     }
 }
 
