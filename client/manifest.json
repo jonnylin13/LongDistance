@@ -9,7 +9,7 @@
       "activeTab",
       "*://*.netflix.com/watch/*",
       "*://netflix.com/watch/*",
-      "http://localhost:3000/start_lobby"
+      "http://jlin.club:3000/start_lobby"
   ],
   "background": {
       "scripts": ["background.js"]

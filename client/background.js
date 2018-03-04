@@ -65,7 +65,7 @@ function update_id() {
  */
 function start_lobby() {
     var req = new XMLHttpRequest();
-    var url = 'http://localhost:3000/start_lobby';
+    var url = 'http://jlin.club:3000/start_lobby';
 
     var _params = [];
     _params.push(param('client_id', client_id));

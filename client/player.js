@@ -12,7 +12,9 @@
     }
   ]*/
 
-/** Wrapped in a function so executeScript knows the script has been run */
+/** Wrapped in a function so executeScript knows the script has been run 
+ *  https://stackoverflow.com/questions/34528785/chrome-extension-checking-if-content-script-has-been-injected-or-not
+*/
 (function() {
     if (window.hasRun === true)
         return true;
