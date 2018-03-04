@@ -12,6 +12,8 @@ Create lobbies to synchronize Netflix viewing among multiple clients through thi
 
 Be sure to run `npm install` in `server/`
 
+* Run the server on localhost using `node server/index`
+
 # Structure
 * client/background.js
 
