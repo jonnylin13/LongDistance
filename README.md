@@ -1,5 +1,5 @@
 # LDN
-Long Distance Netflix Chrome extension to replace Showgoers. Create lobbies to synchronize Netflix viewing among multiple clients through this Chrome extension
+Create lobbies to synchronize Netflix viewing among multiple clients through this Chrome extension
 
 # How to contribute
 * Suggest new ideas/submit issues
