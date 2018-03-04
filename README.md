@@ -5,7 +5,7 @@ Long Distance Netflix Chrome extension to replace Showgoers
 * Suggest new ideas/submit issues
 * I will accept pretty much all pull requests if it works and I can make sense of it
 
-# How to Test
+# How to deploy/test
 * Navigate to chrome://extensions
 * Load unpacked extension
 * Select the client folder
