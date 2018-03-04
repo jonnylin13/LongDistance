@@ -5,16 +5,21 @@ Long Distance Netflix Chrome extension to replace Showgoers
 * Suggest new ideas/submit issues
 * I will accept pretty much all pull requests if it works and I can make sense of it
 
+# How to Test
+* Navigate to chrome://extensions
+* Load unpacked extension
+* Select the client folder
+
 # Structure
-* background.js
+* client/background.js
 
 Runs in the background of the extension. Controls all AJAX entrypoints/local state variables/acts as intermediary/master between popup.js and player.js
 
-* player.js
+* client/player.js
 
 Runs when Netflix player is running (when client is watching something). Will send client state updates to background.js based on event listeners
 
-* popup.js
+* client/popup.js
 
 Runs with popup.html, which is only accessible when client's active tab is netflix.com. Controls the UI bindings for popup.html
 
