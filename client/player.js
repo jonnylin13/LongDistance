@@ -12,17 +12,19 @@ const PLAYER_STATE = Object.freeze({
 
 // Script local
 var player_state = PLAYER_STATE.Inactive;
-var background_port;
-var connected = false;
+var prev_state;
+/** var background_port;
+var connected = false; */
 
 function update_player_state(state) {
-    if (!connected) {
-        background_port = chrome.runtime.connect({name: 'ldn'});
-        connected = true;
-    }
-    background_port.postMessage({
+    chrome.runtime.sendMessage({
         'type': 'update_player_state',
         'new_state': state
+    }, function(response) {
+        if (response.result) {
+            console.log(response.type);
+            console.log("updated player state: " + state);
+        }
     });
 }
 
@@ -66,6 +68,7 @@ function get_pause_play() {
  *  Because the click event is called after the element is changed, Pause when the element is Play
  */
 function pause_play_click_listener($event) {
+    console.log("click");
     if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
     else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
 }
@@ -73,26 +76,21 @@ function pause_play_click_listener($event) {
 /** Triggered when NF detects a keyup  */
 function pause_play_keyup_listener($event) {
     if ($event.keyCode == 32) {
+        console.log("space");
         var el = get_pause_play();
-        if ($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
-        else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
+        // This will produce duplicate messages, handle this in background.js
+        if (el.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
+        else if (el.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
     }
 }
 
 /** Triggered by messages from background.js */
-function msg_listener(msg) {
-
-}
-
-function disconnect_listener() {
-    connected = false;
-}
-
-function connect_port() {
-    background_port = chrome.runtime.connect({name: 'ldn'});
-    background_port.onMessage.addListener(msg_listener);
-    background_port.onDisconnect.addListener(disconnect_listener);
-    connected = true;
+ function msg_listener(req, sender, send_response) {
+     if (msg.type === 'update_player_state_ack') {
+         send_response({type:'ay_lmao'});
+         console.log(msg.type);
+     }
+     send_response();
 }
 
 /** Register listeners
@@ -102,8 +100,9 @@ function register_listeners() {
 
     get_pause_play().addEventListener('click', pause_play_click_listener);
     document.addEventListener('keyup', pause_play_keyup_listener);
+    chrome.runtime.onMessage.addListener(msg_listener);
 
-    connect_port();
+    // connect_port();
 
 }
 

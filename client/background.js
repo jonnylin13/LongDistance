@@ -47,7 +47,7 @@ function uniq_id() {
 }
 
 /** Generates a client id if one is not found in chrome sync storage */
-function update_id(callback) {
+function update_id() {
     chrome.storage.sync.get('client_id', function(items) {
         var id = items.client_id;
         if (id) {
@@ -56,7 +56,6 @@ function update_id(callback) {
             client_id = uniq_id();
             chrome.storage.sync.set({'client_id': client_id});
         }
-        callback();
     });
 }
 
@@ -93,32 +92,34 @@ function tab_update_listener(tab_id, change_info, tab) {
     }
 }
 
-/** Triggered when player.js sends messages */
-function player_msg_listener(msg) {
-    alert(msg.type);
-    if (msg.type === 'update_player_state') {
-        if (!msg.new_state) return;
-        player_state = msg.new_state;
-    }
-}
-
-/** Registers connection with player.js */
-function connect_port() {
-    player_port = chrome.runtime.connect({name: 'ldn'});
-    player_port.onMessage.addListener(player_msg_listener);
-}
-
 /** Triggered when popup.js has notified background that it has completed init */
 function start_background() {
-    update_id(connect_port);
+    update_id();
 }
 
 /** Triggered with connection-less messages from popup.js */
-function msg_listener(req, sender, res) {
+function msg_listener(req, sender, send_response) {
     if (req.type === 'ldn_loaded') {
         start_background();
-    } else if (req.type === 'start_lobby') {
+        send_response({
+            type: 'start_background_ack'
+        });
+    } else if (req.type === 'start_lobby_ack') {
         start_lobby();
+        send_response({
+            type: 'update_player_state_ack'
+        });
+    } else if (req.type === 'update_player_state') {
+        var result = false;
+        if (player_state !== req.new_state)  {
+            player_state = req.new_state;
+            result = true;
+        }
+
+        send_response({
+            type: 'update_player_state_ack',
+            result: result
+        });
     }
 }
 
