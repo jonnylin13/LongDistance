@@ -62,7 +62,7 @@ function update_id(callback) {
 
 /** Starts a lobby with client_id
  * Sends an AJAX request to backend 
- * We could use a JS Object for _params, but this works for now (for/in loop vs numeral loop)
+ * We could use a JS Object for _params, but this works for now (for/in loop vs for/statement loop)
  */
 function start_lobby() {
     var req = new XMLHttpRequest();
@@ -73,7 +73,7 @@ function start_lobby() {
     _params.push(param('player_state', player_state));
 
     if (player_state && player_state !== PLAYER_STATE.Inactive && is_watching()) {
-        params.push(param('url_params', current_url_params));
+        _params.push(param('url_params', current_url_params));
     }
     req.open('GET', create_params(url, _params), true);
 
@@ -95,6 +95,7 @@ function tab_update_listener(tab_id, change_info, tab) {
 
 /** Triggered when player.js sends messages */
 function player_msg_listener(msg) {
+    alert(msg.type);
     if (msg.type === 'update_player_state') {
         if (!msg.new_state) return;
         player_state = msg.new_state;

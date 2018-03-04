@@ -5,29 +5,26 @@
 */
 
 const PLAYER_STATE = Object.freeze({
-    'Inactive': -1, // Initialization state
-    'Play': 0,
-    'Pause': 1
+    "Inactive": -1, // Initialization state
+    "Play": 0,
+    "Pause": 1
 });
 
 // Script local
 var player_state = PLAYER_STATE.Inactive;
 var background_port;
+var connected = false;
 
 function update_player_state(state) {
+    if (!connected) {
+        background_port = chrome.runtime.connect({name: 'ldn'});
+        connected = true;
+    }
     background_port.postMessage({
         'type': 'update_player_state',
         'new_state': state
     });
 }
-
-/** Linear contains function, searches given array for item, == comparison */
-function contains(arr, item) { // Uses linear search for now...
-    for (var i = 0; i < arr.length; i++)
-        if (item === i) return true;
-    return false;
-}
-
 
 /** Returns the button control element from NF by class name, undefined if NF player not loaded */
 function get_controls() {
@@ -40,12 +37,12 @@ function get_progress_controls() {
 
 /** Returns the progress from NF player */
 function get_progress() {
-    var dataElement = get_progress_controls().children[0].children[0].children[0].children[2];
+    var data_element = get_progress_controls().children[0].children[0].children[0].children[2];
     var progress = {
-        'elapsed': dataElement.getAttribute('aria-valuenow'),
-        'max': dataElement.getAttribute('aria-valuemax'),
+        'elapsed': data_element.getAttribute('aria-valuenow'),
+        'max': data_element.getAttribute('aria-valuemax'),
     }
-    if (!dataElement) {
+    if (!data_element) {
         progress = {
             'elapsed': 0,
             'max': 0
@@ -69,16 +66,16 @@ function get_pause_play() {
  *  Because the click event is called after the element is changed, Pause when the element is Play
  */
 function pause_play_click_listener($event) {
-    if(contains($event.target.classList, 'button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
-    else if (contains($event.target.classList, 'button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
+    if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
+    else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
 }
 
 /** Triggered when NF detects a keyup  */
 function pause_play_keyup_listener($event) {
     if ($event.keyCode == 32) {
         var el = get_pause_play();
-        if (contains(el.classList, 'button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
-        else if (contains(el.classList, 'button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
+        if ($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
+        else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
     }
 }
 
@@ -87,9 +84,15 @@ function msg_listener(msg) {
 
 }
 
+function disconnect_listener() {
+    connected = false;
+}
+
 function connect_port() {
     background_port = chrome.runtime.connect({name: 'ldn'});
     background_port.onMessage.addListener(msg_listener);
+    background_port.onDisconnect.addListener(disconnect_listener);
+    connected = true;
 }
 
 /** Register listeners
@@ -108,9 +111,9 @@ function register_listeners() {
 function main() {
     var load = setInterval(function() {
         if (is_loaded()) {
-            console.log('LDN has been loaded!');
             clearInterval(load);
             register_listeners();
+            console.log('LDN has been loaded!');
         }
     }, 1000);
 }
