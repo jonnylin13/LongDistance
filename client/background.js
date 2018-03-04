@@ -11,7 +11,7 @@ const ready_state = Object.freeze({
 });
 
 var previous_url;
-var client_port;
+var player_port;
 var client_id;
 
 
@@ -41,17 +41,6 @@ function update_id(callback) {
     });
 }
 
-function connect_port() {
-    client_port = chrome.runtime.connect({name: client_id});
-}
-
-/** Triggered when ldn.js has notified background that it has completed init */
-function start_background() {
-    update_id(connect_port);
-}
-
-// AJAX entry points
-
 /** Starts a lobby with client_id
  * Sends an AJAX request to backend 
  */
@@ -63,7 +52,7 @@ function start_lobby() {
 
     req.onreadystatechange = function() {
         if (req.readyState == ready_state.Done) {
-            console.log(req);
+            // Start lobby done
         }
     }
     req.send();
@@ -81,8 +70,21 @@ function tab_update_listener(tab_id, change_info, tab) {
     }
 }
 
+function player_msg_listener(msg) {
+
+}
+
+function connect_port() {
+    player_port = chrome.runtime.connect({name: "ldn"});
+    player_port.onMessage.addListener(player_msg_listener);
+}
+
+/** Triggered when ldn.js has notified background that it has completed init */
+function start_background() {
+    update_id(connect_port);
+}
+
 function msg_listener(req, sender, res) {
-    console.log(req);
     if (req.type === "ldn_loaded") {
         start_background();
     } else if (req.type === "start_lobby") {

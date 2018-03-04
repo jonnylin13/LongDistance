@@ -6,7 +6,7 @@
   "permissions": [
       "tabs",
       "storage",
-      "http://localhost:3000/register_client"
+      "http://localhost:3000/start_lobby"
   ],
   "background": {
       "scripts": ["background.js"]

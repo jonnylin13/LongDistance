@@ -14,8 +14,8 @@ var body_parser = require("body-parser");
 
 // Variables
 var lobbies = {
-    ctl_token: null,
-    clients: []
+    "ctl_token": null,
+    "clients": []
 };
 
 /** Returns true if client_id is in a lobby 
@@ -38,7 +38,7 @@ function has_ctl_token(client_id) {
  * Receives a client_id token
  * Creates a lobby in lobbies with client_id as control
  */
-function register_client(req, res) {
+function start_lobby(req, res) {
 
     var client_id = req.query.client_id;
     // Validate client id
@@ -62,7 +62,7 @@ function register_client(req, res) {
 
 /** Registers REST endpoints */
 function register_endpoints() {
-    app.get("/register_client", register_client);
+    app.get("/start_lobby", start_lobby);
 }
 
 /** Listen function */

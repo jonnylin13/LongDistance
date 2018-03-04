@@ -15,6 +15,7 @@ const debug = true;
 
 // Script locals
 var player_state;
+var background_port;
 
 // Utility
 
@@ -75,6 +76,15 @@ function pause_play_keyup_listener($event) {
     }
 }
 
+function msg_listener(msg) {
+
+}
+
+function connect_port() {
+    background_port = chrome.runtime.connect({name: "ldn"});
+    background_port.onMessage.addListener(msg_listener);
+}
+
 /** Register listeners
  *  Called after the main function determines NF player has been loaded
  */
@@ -82,6 +92,8 @@ function register_listeners() {
 
     get_pause_play().addEventListener("click", pause_play_click_listener);
     document.addEventListener("keyup", pause_play_keyup_listener);
+
+    connect_port();
 
 }
 
