@@ -7,16 +7,16 @@
 // Listeners
 
 /** Start lobby button event listener
- *  Called when user clicks the "Start Lobby" button
+ *  Called when user clicks the 'Start Lobby' button
  */
 function start_lobby_click_listener($event) {
-    chrome.runtime.sendMessage({type: "start_lobby"});
+    chrome.runtime.sendMessage({type: 'start_lobby'});
 }
 
 function register_listeners() {
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("start-lobby-btn").addEventListener("click", start_lobby_click_listener);
-        chrome.runtime.sendMessage({type: "ldn_loaded"});
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('start-lobby-btn').addEventListener('click', start_lobby_click_listener);
+        chrome.runtime.sendMessage({type: 'ldn_loaded'});
     });
 }
 

@@ -7,15 +7,15 @@
 const PORT = 3000;
 
 // Imports
-var express = require("express");
+var express = require('express');
 var app = express();
-var cors =  require("cors");
-var body_parser = require("body-parser");
+var cors =  require('cors');
+var body_parser = require('body-parser');
 
 // Variables
 var lobbies = {
-    "ctl_token": null,
-    "clients": []
+    'ctl_token': null,
+    'clients': []
 };
 
 /** Returns true if client_id is in a lobby 
@@ -44,30 +44,23 @@ function start_lobby(req, res) {
     // Validate client id
 
     if (has_lobby(client_id)) {
-        res.json({msg: "Error: client is already in a lobby"});
+        res.json({msg: 'Error: client is already in a lobby'});
         return;
     }
 
-    var new_lobby = {
-        ctl_token: client_id,
-        clients: [
-            {
-                id: client_id,
-                data: null
-            }
-        ] 
-    };
+    console.log(req.query.client_id);
+    console.log(req.query.player_state);
 
 }
 
 /** Registers REST endpoints */
 function register_endpoints() {
-    app.get("/start_lobby", start_lobby);
+    app.get('/start_lobby', start_lobby);
 }
 
 /** Listen function */
 function listen() {
-    console.log("Listening on port " + PORT + "!");
+    console.log('Listening on port ' + PORT + '!');
     // Set API endpoints
     register_endpoints();
 }
@@ -77,7 +70,7 @@ function start_server() {
     // Middleware
     app.use(body_parser.json());
     app.use(body_parser.urlencoded({extended: true}));
-    app.use(cors({origin: "*"}));
+    app.use(cors({origin: '*'}));
 
     app.listen(PORT, listen);
 }
