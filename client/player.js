@@ -99,15 +99,20 @@ function destroy() {
     document.removeEventListener('keyup', pause_play_keyup_listener);
 }
 
-function register_DOM_listeners() {
-    var load = setInterval(function() {
-        if (is_loaded()) {
-            clearInterval(load);
-            destroy();
-            get_pause_play().addEventListener('click', pause_play_click_listener);
-            document.addEventListener('keyup', pause_play_keyup_listener);
-        }
-    }, 500);
+function register_DOM_listeners(first_call) {
+    if (!first_call) {
+        var load = setInterval(function() {
+            if (is_loaded()) {
+                clearInterval(load);
+                destroy();
+                get_pause_play().addEventListener('click', pause_play_click_listener);
+                document.addEventListener('keyup', pause_play_keyup_listener);
+            }
+        }, 500);
+        return;
+    }
+    get_pause_play().addEventListener('click', pause_play_click_listener);
+    document.addEventListener('keyup', pause_play_keyup_listener);
 }
 
 /** Triggered by messages from background.js */
@@ -116,7 +121,7 @@ function msg_listener(req, sender, send_response) {
         console.log(req.type);
         if (req.type === 'register_listeners') {
 
-           register_DOM_listeners();
+           register_DOM_listeners(false);
            send_response({type: 'register_listeners_ack'});
 
         }
@@ -128,7 +133,7 @@ function msg_listener(req, sender, send_response) {
  */
 function register_listeners() {
 
-    register_DOM_listeners();
+    register_DOM_listeners(true);
     chrome.runtime.onMessage.addListener(msg_listener);
 
 }

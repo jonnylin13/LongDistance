@@ -45,7 +45,7 @@ function create_params(url, params) {
     return output;
 }
 
-/** Generates a unique token id, this will work in practice but it's not very safe lmao */
+/** Generates a unique token id, this will work for testing but it's not good lmao */
 function uniq_id() {
     return Date.now() + Math.random();
 }
@@ -101,6 +101,8 @@ function tab_update_listener(tab_id, change_info, tab) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
                     chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);
                 });
+            } else if (!is_watching(new_url_params)) {
+                player_state = PLAYER_STATE.Inactive;
             }
         }
             

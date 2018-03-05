@@ -50,6 +50,7 @@ function start_lobby(req, res) {
 
     console.log(req.query.client_id);
     console.log(req.query.player_state);
+    if (req.query.url_params) console.log(req.query.url_params);
 
 }
 
