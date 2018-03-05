@@ -63,7 +63,7 @@ function start_lobby(req, res) {
 
     // Generate and store
     var lid = short_id.generate();
-    lobbies[lid] = lobby(client_id, player_state);
+    lobbies[lid] = lobby(client_id, req.query.player_state);
     res.json(lobbies[lid]);
     console.log(lobbies);
 
