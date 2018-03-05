@@ -25,7 +25,7 @@ function lobby(ctl_id, player_state) {
     lobby.clients[ctl_id] = {
         'player_state': player_state
     };
-    return lobby
+    return lobby;
 }
 
 /** Returns true if client_id is in a lobby 
@@ -58,14 +58,11 @@ function start_lobby(req, res) {
         return;
     }
 
-    console.log(req.query.client_id);
-    console.log(req.query.player_state);
-    if (req.query.url_params) console.log(req.query.url_params);
-
     // Generate and store
     var lid = short_id.generate();
     lobbies[lid] = lobby(client_id, req.query.player_state);
     res.json(lobbies[lid]);
+    console.log('Created lobby: ');
     console.log(lobbies);
 
 }

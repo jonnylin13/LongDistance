@@ -45,9 +45,16 @@ function create_params(url, params) {
     return output;
 }
 
-/** Generates a unique token id, this will work for testing but it's not good lmao */
-function uniq_id() {
-    return Date.now() + Math.random();
+/** Generates UUIDv4 token character 
+ * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
+*/
+function v4() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+}
+
+/**Generates a unique token id, this will work for testing but it's not good lmao */
+function uuidv4() {
+    return v4()+v4()+'-'+v4()+'-'+v4()+'-'+v4()+'-'+v4()+v4()+v4();
 }
 
 /** Generates a client id if one is not found in chrome sync storage */
@@ -57,7 +64,7 @@ function update_id() {
         if (id) {
             client_id = id;
         } else {
-            client_id = uniq_id();
+            client_id = uuidv4();
             chrome.storage.sync.set({'client_id': client_id});
         }
     });
