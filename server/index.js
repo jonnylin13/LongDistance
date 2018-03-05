@@ -17,7 +17,6 @@ var short_id = require('shortid');
 var lobbies = {};
 
 function lobby(ctl_id, player_state) {
-    var lid = short_id.generate();
     return lobby = {
         'ctl_id': ctl_id,
         'clients': {
@@ -63,8 +62,9 @@ function start_lobby(req, res) {
     if (req.query.url_params) console.log(req.query.url_params);
 
     // Generate and store
-    lobbies[lobby_id] = lobby(client_id, player_state);
-    res.json(lobbies[lobby_id]);
+    var lid = short_id.generate();
+    lobbies[lid] = lobby(client_id, player_state);
+    res.json(lobbies[lid]);
     console.log(lobbies);
 
 }
