@@ -17,14 +17,15 @@ var short_id = require('shortid');
 var lobbies = {};
 
 function lobby(ctl_id, player_state) {
-    return lobby = {
+    var lobby = {
         'ctl_id': ctl_id,
         'clients': {
-            ctl_id: {
-                'player_state': player_state
-            }
         }
     };
+    lobby.clients[ctl_id] = {
+        'player_state': player_state
+    };
+    return lobby
 }
 
 /** Returns true if client_id is in a lobby 
