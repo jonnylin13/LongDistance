@@ -21,6 +21,10 @@ var player_port;
 var player_state = PLAYER_STATE.Inactive;
 var client_id;
 
+function default_response(response) {
+    if (response && response.type) console.log(response.type);
+}
+
 function is_watching(params) {
     if (params.split('/')[0] === 'watch' && params.includes('watch')) return true;
     return false;
@@ -95,9 +99,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
-                });
-                chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
-                    if (response && response.type) console.log(response.type);
+                    chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);
                 });
             }
         }
@@ -110,7 +112,7 @@ function start_background() {
     update_id();
 }
 
-/** Triggered with connection-less messages from content scripts */
+/** Triggered with messages from content scripts */
 function msg_listener(req, sender, send_response) {
     if (req.type) {
         console.log(req.type);

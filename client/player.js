@@ -26,10 +26,6 @@ const PLAYER_STATE = Object.freeze({
     "Pause": 1
 });
 
-// Script local
-var player_state = PLAYER_STATE.Inactive;
-var prev_state;
-
 function update_player_state(state) {
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
@@ -80,7 +76,7 @@ function get_pause_play() {
 /** Triggered when pause play button is clicked
  *  Will set the player state manually as a re-calibration (if keyup fails)
  *  Because the click event is called after the element is changed, Pause when the element is Play
- */
+ */ 
 function pause_play_click_listener($event) {
     console.log("click");
     if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
@@ -98,24 +94,33 @@ function pause_play_keyup_listener($event) {
     }
 }
 
-/** Triggered by messages from background.js */
- function msg_listener(req, sender, send_response) {
-     if (req.type) {
-         console.log(req.type);
-         if (req.type === 'register_listeners') {
-
-            register_DOM_listeners();
-            send_response({type: 'register_listeners_ack'});
-
-         }
-     } 
+function destroy() {
+    get_pause_play().removeEventListener('click', pause_play_click_listener);
+    document.removeEventListener('keyup', pause_play_keyup_listener);
 }
 
 function register_DOM_listeners() {
+    var load = setInterval(function() {
+        if (is_loaded()) {
+            clearInterval(load);
+            destroy();
+            get_pause_play().addEventListener('click', pause_play_click_listener);
+            document.addEventListener('keyup', pause_play_keyup_listener);
+        }
+    }, 500);
+}
 
-    get_pause_play().addEventListener('click', pause_play_click_listener);
-    document.addEventListener('keyup', pause_play_keyup_listener);
+/** Triggered by messages from background.js */
+function msg_listener(req, sender, send_response) {
+    if (req.type) {
+        console.log(req.type);
+        if (req.type === 'register_listeners') {
 
+           register_DOM_listeners();
+           send_response({type: 'register_listeners_ack'});
+
+        }
+    } 
 }
 
 /** Register listeners  
@@ -136,7 +141,7 @@ function main() {
             register_listeners();
             console.log('LDN has been loaded!');
         }
-    }, 1000);
+    }, 500);
 }
 
 main();
