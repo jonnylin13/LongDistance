@@ -11,27 +11,36 @@ var express = require('express');
 var app = express();
 var cors =  require('cors');
 var body_parser = require('body-parser');
+var short_id = require('shortid');
 
 // Variables
-var lobbies = {
-    'ctl_token': null,
-    'clients': []
-};
+var lobbies = {};
+
+function lobby(ctl_id, player_state) {
+    var lid = short_id.generate();
+    return lobby = {
+        'ctl_id': ctl_id,
+        'clients': {
+            ctl_id: {
+                'player_state': player_state
+            }
+        }
+    };
+}
 
 /** Returns true if client_id is in a lobby 
  * Uses linear search for now, can be optimized in the future
 */
 function has_lobby(client_id) {
-    for (var lobby in lobbies)
-        for (var client in lobby.clients)
-            if (client.id === client_id) return true;
+    for (var lobby_id in lobbies)
+        for (var cid in lobbies[lobby_id].clients)
+            if (cid == client_id) return true;
     return false;
 }
 
 /** Returns true if client_id has control */
-function has_ctl_token(client_id) {
-    if (lobbies.ctl_token === client_id) return true;
-    return false;
+function has_ctl_token(lobby, client_id) {
+    return (lobby.ctl_id === client_id);
 }
 
 /** GET handshake request
@@ -45,12 +54,18 @@ function start_lobby(req, res) {
 
     if (has_lobby(client_id)) {
         res.json({msg: 'Error: client is already in a lobby'});
+        console.log('Error: client is already in a lobby');
         return;
     }
 
     console.log(req.query.client_id);
     console.log(req.query.player_state);
     if (req.query.url_params) console.log(req.query.url_params);
+
+    // Generate and store
+    lobbies[lobby_id] = lobby(client_id, player_state);
+    res.json(lobbies[lobby_id]);
+    console.log(lobbies);
 
 }
 

@@ -88,7 +88,7 @@ function pause_play_keyup_listener($event) {
     if ($event.keyCode == 32) {
         console.log("space");
         var el = get_pause_play();
-        // This will produce duplicate messages, handle this in background.js
+        // This will produce duplicate messages, handle this in background.js recv
         if (el.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
         else if (el.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
     }

@@ -99,7 +99,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
-                    chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);
+                    chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);    
                 });
             } else if (!is_watching(new_url_params)) {
                 player_state = PLAYER_STATE.Inactive;
@@ -130,7 +130,7 @@ function msg_listener(req, sender, send_response) {
             });
         } else if (req.type === 'update_player_state') {
             var result = false;
-            if (player_state !== req.new_state)  {
+            if (player_state !== req.new_state)  { // Handle duplicate messages
                 player_state = req.new_state;
                 result = true;
             }
