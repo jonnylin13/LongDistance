@@ -53,7 +53,7 @@ function start_lobby(req, res) {
     // Validate client id
 
     if (has_lobby(client_id)) {
-        res.json({msg: 'Error: client is already in a lobby'});
+        res.json({msg: 'Error: client is already in a lobby', success:false});
         console.log('Error: client is already in a lobby');
         return;
     }
@@ -61,10 +61,9 @@ function start_lobby(req, res) {
     // Generate and store
     var lid = short_id.generate();
     lobbies[lid] = lobby(client_id, req.query.player_state, req.query.url_params);
-    res.json(lobbies[lid]);
+    res.json({success: true, lobby: lobbies[lid]});
     console.log('Created lobby: ');
     console.log(lobbies);
-    console.log(req.query.url_params);
 
 }
 

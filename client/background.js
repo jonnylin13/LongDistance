@@ -20,6 +20,7 @@ var current_url_params;
 var player_port;
 var player_state = PLAYER_STATE.Inactive;
 var client_id;
+var current_lobby;
 
 function default_response(response) {
     if (response && response.type) console.log(response.type);
@@ -89,8 +90,12 @@ function start_lobby() {
 
     req.onreadystatechange = function() {
         if (req.readyState == READY_STATE.Done) {
-            // Start lobby done
-            console.log(res);
+            var response = JSON.parse(req.responseText);
+            if (response && response.success) {
+                lobby = response.lobby;
+                console.log(response.lobby);
+            }
+            
         }
     }
     console.log(_query);
