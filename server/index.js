@@ -16,14 +16,24 @@ var short_id = require('shortid');
 // Variables
 var lobbies = {};
 
-function lobby(ctl_id, player_state, url_params) {
+function error(msg, res) {
+    if (res) {
+        res.json({
+            'msg': msg,
+            'success': false
+        });
+    }
+    console.log(msg);
+}
+
+function lobby(args) {
     var lobby = {
-        'ctl_id': ctl_id,   
+        'ctl_id': args.ctl_id,   
         'clients': {}
     };
-    lobby.clients[ctl_id] = {
-        'player_state': player_state,
-        'url_params': url_params
+    lobby.clients[args.ctl_id] = {
+        'player_state': args.player_state,
+        'url_params': args.url_params
     };
     return lobby;
 }
@@ -53,14 +63,17 @@ function start_lobby(req, res) {
     // Validate client id
 
     if (has_lobby(client_id)) {
-        res.json({msg: 'Error: client is already in a lobby', success:false});
-        console.log('Error: client is already in a lobby');
+        error('Error: client is already in a lobby', res);
         return;
     }
 
     // Generate and store
     var lid = short_id.generate();
-    lobbies[lid] = lobby(client_id, req.query.player_state, req.query.url_params);
+    lobbies[lid] = lobby({
+        'client_id': client_id, 
+        'player_state': req.query.player_state, 
+        'url_params': req.query.url_params
+    });
     res.json({success: true, lobby: lobbies[lid]});
     console.log('Created lobby: ');
     console.log(lobbies);

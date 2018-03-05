@@ -20,7 +20,7 @@ var current_url_params;
 var player_port;
 var player_state = PLAYER_STATE.Inactive;
 var client_id;
-var current_lobby;
+var current_lobby; // Local lobby reference (needs to be synced over network)
 
 function default_response(response) {
     if (response && response.type) console.log(response.type);
@@ -53,7 +53,7 @@ function v4() {
     return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
 }
 
-/**Generates a unique token id, this will work for testing but it's not good lmao */
+/** Generates a UUIDv4 compliant random UUID */
 function uuidv4() {
     return v4()+v4()+'-'+v4()+'-'+v4()+'-'+v4()+'-'+v4()+v4()+v4();
 }
@@ -94,6 +94,8 @@ function start_lobby() {
             if (response && response.success) {
                 lobby = response.lobby;
                 console.log(response.lobby);
+            } else if (response) {
+                console.log(response.msg);
             }
             
         }
@@ -110,6 +112,8 @@ function tab_update_listener(tab_id, change_info, tab) {
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
             if (is_watching(new_url_params)) {
+                // Assumption that Netflix always auto-plays
+                player_state = PLAYER_STATE.Play;
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
                     chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);    
