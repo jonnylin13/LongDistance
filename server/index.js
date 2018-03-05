@@ -16,14 +16,14 @@ var short_id = require('shortid');
 // Variables
 var lobbies = {};
 
-function lobby(ctl_id, player_state) {
+function lobby(ctl_id, player_state, url_params) {
     var lobby = {
         'ctl_id': ctl_id,
-        'clients': {
-        }
+        'clients': {}
     };
     lobby.clients[ctl_id] = {
-        'player_state': player_state
+        'player_state': player_state,
+        'url_params': url_params
     };
     return lobby;
 }
@@ -60,7 +60,7 @@ function start_lobby(req, res) {
 
     // Generate and store
     var lid = short_id.generate();
-    lobbies[lid] = lobby(client_id, req.query.player_state);
+    lobbies[lid] = lobby(client_id, req.query.player_state, req.query.url_params);
     res.json(lobbies[lid]);
     console.log('Created lobby: ');
     console.log(lobbies);
