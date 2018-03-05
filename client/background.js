@@ -81,6 +81,7 @@ function start_lobby() {
             // Start lobby done
         }
     }
+    console.log(url);
     req.send();
 }
 
@@ -92,8 +93,11 @@ function tab_update_listener(tab_id, change_info, tab) {
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
             if (is_watching(new_url_params)) {
-                chrome.tabs.executeScript(null, {file: 'player.js', runAt: 'document_idle'}, function(results) {
+                chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
+                });
+                chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
+                    if (response && response.type) console.log(response.type);
                 });
             }
         }
@@ -106,7 +110,7 @@ function start_background() {
     update_id();
 }
 
-/** Triggered with connection-less messages from popup.js */
+/** Triggered with connection-less messages from content scripts */
 function msg_listener(req, sender, send_response) {
     if (req.type) {
         console.log(req.type);
@@ -115,10 +119,10 @@ function msg_listener(req, sender, send_response) {
             send_response({
                 type: 'start_background_ack'
             });
-        } else if (req.type === 'start_lobby_ack') {
+        } else if (req.type === 'start_lobby') {
             start_lobby();
             send_response({
-                type: 'update_player_state_ack'
+                type: 'start_lobby_ack'
             });
         } else if (req.type === 'update_player_state') {
             var result = false;

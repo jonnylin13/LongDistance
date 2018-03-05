@@ -102,10 +102,20 @@ function pause_play_keyup_listener($event) {
  function msg_listener(req, sender, send_response) {
      if (req.type) {
          console.log(req.type);
-         if (req.type === 'check') {
-             send_response({type: 'check_ack'});
+         if (req.type === 'register_listeners') {
+
+            register_DOM_listeners();
+            send_response({type: 'register_listeners_ack'});
+
          }
-     }
+     } 
+}
+
+function register_DOM_listeners() {
+
+    get_pause_play().addEventListener('click', pause_play_click_listener);
+    document.addEventListener('keyup', pause_play_keyup_listener);
+
 }
 
 /** Register listeners  
@@ -113,8 +123,7 @@ function pause_play_keyup_listener($event) {
  */
 function register_listeners() {
 
-    get_pause_play().addEventListener('click', pause_play_click_listener);
-    document.addEventListener('keyup', pause_play_keyup_listener);
+    register_DOM_listeners();
     chrome.runtime.onMessage.addListener(msg_listener);
 
 }
