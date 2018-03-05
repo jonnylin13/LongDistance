@@ -18,7 +18,7 @@ var lobbies = {};
 
 function lobby(ctl_id, player_state, url_params) {
     var lobby = {
-        'ctl_id': ctl_id,
+        'ctl_id': ctl_id,   
         'clients': {}
     };
     lobby.clients[ctl_id] = {
@@ -64,6 +64,7 @@ function start_lobby(req, res) {
     res.json(lobbies[lid]);
     console.log('Created lobby: ');
     console.log(lobbies);
+    console.log(req.query.url_params);
 
 }
 

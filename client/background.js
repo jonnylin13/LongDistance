@@ -81,18 +81,19 @@ function start_lobby() {
     var _params = [];
     _params.push(param('client_id', client_id));
     _params.push(param('player_state', player_state));
+    _params.push(param('url_params', current_url_params));
 
-    if (player_state && player_state !== PLAYER_STATE.Inactive && is_watching()) {
-        _params.push(param('url_params', current_url_params));
-    }
-    req.open('GET', create_params(url, _params), true);
+    var _query = create_params(url, _params);
+
+    req.open('GET', _query, true);
 
     req.onreadystatechange = function() {
         if (req.readyState == READY_STATE.Done) {
             // Start lobby done
+            console.log(res);
         }
     }
-    console.log(url);
+    console.log(_query);
     req.send();
 }
 
