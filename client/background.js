@@ -16,9 +16,15 @@ const READY_STATE = Object.freeze({
     "Done": 4
 });
 
+const POPUP_STATE = Object.freeze({
+    "OutLobby": 0,
+    "InLobby": 1
+});
+
 var current_url_params;
 var player_port;
 var player_state = PLAYER_STATE.Inactive;
+var popup_state = POPUP_STATE.OutLobby;
 var client_id;
 var current_lobby; // Local lobby reference (needs to be synced over network)
 
@@ -75,7 +81,7 @@ function update_id() {
  * Sends an AJAX request to backend 
  * We could use a JS Object for _params, but this works for now (for/in loop vs for/statement loop)
  */
-function start_lobby() {
+function start_lobby(send_response) {
     var req = new XMLHttpRequest();
     var url = 'http://jlin.club:3000/start_lobby';
 
@@ -93,6 +99,10 @@ function start_lobby() {
             var response = JSON.parse(req.responseText);
             if (response && response.success) {
                 lobby = response.lobby;
+                send_response({
+                    type: 'start_lobby_ack',
+                    success: true
+                });
                 console.log(response.lobby);
             } else if (response) {
                 console.log(response.msg);
@@ -141,10 +151,7 @@ function msg_listener(req, sender, send_response) {
                 type: 'start_background_ack'
             });
         } else if (req.type === 'start_lobby') {
-            start_lobby();
-            send_response({
-                type: 'start_lobby_ack'
-            });
+            start_lobby(send_response);
         } else if (req.type === 'update_player_state') {
             var result = false;
             if (player_state !== req.new_state)  { // Handle duplicate messages
@@ -154,7 +161,24 @@ function msg_listener(req, sender, send_response) {
 
             send_response({
                 type: 'update_player_state_ack',
-                result: result
+                success: result
+            });
+        } else if (req.type === 'disconnect') {
+            // TODO disconnect
+            send_response({
+                type: 'disconnect_ack',
+                success: true
+            });
+        } else if (req.type === 'update_popup_state') {
+            popup_state = req.new_state;
+            send_response({
+                type: 'update_popup_state_ack',
+                success: true
+            });
+        } else if (req.type === 'get_popup_state') {
+            send_response({
+                type: 'get_popup_state_ack',
+                state: popup_state
             });
         }
     }

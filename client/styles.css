@@ -11,6 +11,6 @@ button:last-child {
     margin-bottom: 0px !important;
 }
 
-hidden {
+.hidden {
     display: none;
 }

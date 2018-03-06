@@ -31,7 +31,7 @@ function update_player_state(state) {
         'type': 'update_player_state',
         'new_state': state
     }, function(response) {
-        if (response.result) {
+        if (response.success) {
             console.log(response.type);
             console.log("updated player state: " + state);
         }

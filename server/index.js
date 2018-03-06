@@ -26,7 +26,7 @@ function error(msg, res) {
     console.log(msg);
 }
 
-function lobby(args) {
+function lobby(ctl_id, player_state, url_params) {
     var lobby = {
         'ctl_id': args.ctl_id,   
         'clients': {}
@@ -69,13 +69,8 @@ function start_lobby(req, res) {
 
     // Generate and store
     var lid = short_id.generate();
-    lobbies[lid] = lobby({
-        'client_id': client_id, 
-        'player_state': req.query.player_state, 
-        'url_params': req.query.url_params
-    });
+    lobbies[lid] = lobby(client_id, req.query.player_state, req.query.url_params);
     res.json({success: true, lobby: lobbies[lid]});
-    console.log('Created lobby: ');
     console.log(lobbies);
 
 }
