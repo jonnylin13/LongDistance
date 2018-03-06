@@ -24,8 +24,9 @@ function error(msg, ws) {
     console.log(msg);
 }
 
-function lobby(ctl_id, player_state, url_params) {
+function lobby(id, ctl_id, player_state, url_params) {
     var lobby = {
+        'id': id,
         'ctl_id': ctl_id,   
         'clients': {}
     };
@@ -74,7 +75,7 @@ function listen() {
     
                 // Generate and store
                 var lid = short_id.generate();
-                lobbies[lid] = lobby(client_id, data.player_state, data.url_params);
+                lobbies[lid] = lobby(lid, client_id, data.player_state, data.url_params);
                 ws.send(JSON.stringify({
                     type: 'start_lobby_ack', 
                     success: true, 
@@ -103,6 +104,29 @@ function listen() {
                     }
                 }
                 console.log(lobbies);
+
+            } else if (data.type == 'lifecycle') {
+
+                if (!lobbies[data.lobby_id]) {
+                    ws.send(JSON.stringify({
+                        type: 'lifecycle_ack',
+                        stop: true
+                    }));
+                    return;
+                }
+                
+                var client = lobbies[data.lobby_id].clients[data.client_id];
+                client.player_state = data.player_state;
+                client.url_params = data.url_params;
+                client.progress = data.progress;
+
+                ws.send(JSON.stringify({
+                    type: 'lifecycle_ack',
+                    stop: false
+                }));
+
+                console.log(client);
+
             }
 
         });

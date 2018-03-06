@@ -31,6 +31,10 @@ function get_out_lobby_container() {
     return document.getElementById('out-lobby-container');
 }
 
+function get_lobby_id_text() {
+    return document.getElementById('lobby-id-text');
+}
+
 function init_views() {
 
     // Re-update reference 
@@ -40,7 +44,10 @@ function init_views() {
 
 function update_state(new_state) {
 
-    chrome.runtime.sendMessage({'type': 'update_popup_state', 'new_state': new_state}, function(response) {
+    chrome.runtime.sendMessage({
+        'type': 'update_popup_state', 
+        'new_state': new_state
+    }, function(response) {
         default_response(response);
     });
 
@@ -48,6 +55,18 @@ function update_state(new_state) {
         if (state == new_state) views[state].style.display = 'block';
         else views[state].style.display = 'none';
     }
+
+    if (new_state == POPUP_STATE.InLobby) {
+        chrome.runtime.sendMessage({
+            'type': 'get_lobby_id'
+        }, function(response) {
+            if (response && response.lobby_id) get_lobby_id_text().innerHTML = response.lobby_id;
+            default_response(response);
+        });
+    } else {
+        get_lobby_id_text().innerHTML = '';
+    }
+
 }
 
 /** Start lobby button event listener

@@ -4,14 +4,6 @@
 * Initialized when NF Player is created
 */
 
-/**"content_scripts": [
-    {
-      "matches": ["*://netflix.com/watch/*", "*://*.netflix.com/watch/*"],
-      "js": ["player.js"],
-      "run_at": "document_idle"
-    }
-  ]*/
-
 /** Wrapped in a function so executeScript knows the script has been run 
  *  https://stackoverflow.com/questions/34528785/chrome-extension-checking-if-content-script-has-been-injected-or-not
 */
@@ -22,9 +14,11 @@
 
 const PLAYER_STATE = Object.freeze({
     "Inactive": -1, // Initialization state
-    "Play": 0,
-    "Pause": 1
+    "Play": 1,
+    "Pause": 0
 });
+
+var lifecycle_interval;
 
 function update_player_state(state) {
     chrome.runtime.sendMessage({
@@ -38,23 +32,23 @@ function update_player_state(state) {
     });
 }
 
+function get_video() {
+    return document.getElementsByTagName('video')[0];
+}
+
 /** Returns the button control element from NF by class name, undefined if NF player not loaded */
 function get_controls() {
     return document.getElementsByClassName('PlayerControls--button-control-row')[0];
 }
-/** Returns the progress control row element from NF player by class name, undefined if NF player not loaded */
-function get_progress_controls() {
-    return document.getElementsByClassName('PlayerControls--progress-control-row')[0];
-}
 
 /** Returns the progress from NF player */
 function get_progress() {
-    var data_element = get_progress_controls().children[0].children[0].children[0].children[2];
+    var video = get_video();
     var progress = {
-        'elapsed': data_element.getAttribute('aria-valuenow'),
-        'max': data_element.getAttribute('aria-valuemax'),
+        'elapsed': video.currentTime,
+        'max': video.duration,
     }
-    if (!data_element) {
+    if (!video) {
         progress = {
             'elapsed': 0,
             'max': 0
@@ -79,8 +73,8 @@ function get_pause_play() {
  */ 
 function pause_play_click_listener($event) {
     console.log("click");
-    if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
-    else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
+    if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
+    else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
 }
 
 /** Triggered when NF detects a keyup  */
@@ -89,20 +83,22 @@ function pause_play_keyup_listener($event) {
         console.log("space");
         var el = get_pause_play();
         // This will produce duplicate messages, handle this in background.js recv
-        if (el.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
-        else if (el.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
+        if (el.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
+        else if (el.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
     }
 }
 
 function destroy() {
     get_pause_play().removeEventListener('click', pause_play_click_listener);
     document.removeEventListener('keyup', pause_play_keyup_listener);
+    clearInterval(lifecycle_interval);
 }
 
 function register_DOM_listeners(first_call) {
     if (!first_call) {
         var load = setInterval(function() {
             if (is_loaded()) {
+                check_player_state();
                 clearInterval(load);
                 destroy();
                 get_pause_play().addEventListener('click', pause_play_click_listener);
@@ -111,8 +107,21 @@ function register_DOM_listeners(first_call) {
         }, 500);
         return;
     }
+    check_player_state();
     get_pause_play().addEventListener('click', pause_play_click_listener);
     document.addEventListener('keyup', pause_play_keyup_listener);
+}
+
+function lifecycle() {
+    chrome.runtime.sendMessage({
+        'type': 'lifecycle',
+        'progress': get_progress()
+    }, function(response) {
+        if (response && response.stop) {
+            clearInterval(lifecycle_interval);
+            lifecycle_interval = null;
+        }
+    });
 }
 
 /** Triggered by messages from background.js */
@@ -121,8 +130,9 @@ function msg_listener(req, sender, send_response) {
         console.log(req.type);
         if (req.type === 'register_listeners') {
 
-           register_DOM_listeners(false);
-           send_response({type: 'register_listeners_ack'});
+            register_DOM_listeners(false);
+            lifecycle_interval = setInterval(lifecycle, 5000);
+            send_response({type: 'register_listeners_ack'});
 
         }
     } 
@@ -134,8 +144,14 @@ function msg_listener(req, sender, send_response) {
 function register_listeners() {
 
     register_DOM_listeners(true);
+    lifecycle_interval = setInterval(lifecycle, 5000);
     chrome.runtime.onMessage.addListener(msg_listener);
 
+}
+
+function check_player_state() {
+    if (get_pause_play().classList.contains('button-nfPlayerPlay')) update_player_state(PLAYER_STATE.Pause);
+    else update_player_state(PLAYER_STATE.Play);
 }
 
 /** Main function (entry point) */

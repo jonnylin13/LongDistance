@@ -17,7 +17,7 @@ Be sure to run `npm install` in `server/`
 # Structure
 * client/background.js
 
-Runs in the background of the extension. Controls all AJAX entrypoints/local state variables/acts as intermediary/master between popup.js and player.js
+Runs in the background of the extension. Controls all WS entrypoints/local state variables/acts as intermediary/master between popup.js and player.js
 
 * client/player.js
 

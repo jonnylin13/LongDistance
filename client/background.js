@@ -36,23 +36,8 @@ function default_response(response) {
 }
 
 function is_watching(params) {
-    if (params.split('/')[0] === 'watch' && params.includes('watch')) return true;
+    if (params.includes('watch')) return true;
     return false;
-}
-
-function param(key, value) {
-    var output = key + '=' + value;
-    return output;
-}
-
-/** Uses for/statement loop because I'm too lazy to change params to JSO */
-function create_params(url, params) {
-    var output = url + '?';
-    for (var i = 0; i < params.length; i++) {
-        if (output.substr(output.length - 1) === '?') output += params[i];
-        else output += '&' + params[i];
-    }   
-    return output;
 }
 
 /** Generates UUIDv4 token character 
@@ -80,6 +65,42 @@ function update_id() {
     });
 }
 
+function lifecycle_ping(done) {
+    if (!ws) {
+        ws = new WebSocket(ws_url);
+        ws.onopen = function() {
+            ws.send(
+                JSON.stringify({
+                    'type': 'lifecycle',
+                    'lobby_id': current_lobby.id,
+                    'client_id': client_id,
+                    'player_state': player_state,
+                    'url_params': current_url_params,
+                    'progress': current_lobby.clients[client_id].progress
+                })
+            );
+        }
+    }
+
+    ws.send(
+        JSON.stringify({
+            'type': 'lifecycle',
+            'lobby_id': current_lobby.id,
+            'client_id': client_id,
+            'player_state': player_state,
+            'url_params': current_url_params,
+            'progress': current_lobby.clients[client_id].progress
+        })
+    );
+    
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        if (data.type == 'lifecycle_ack') {
+            done(data.stop);
+        }
+    }
+}
+
 function disconnect(done) {
     if (!ws) {
         ws = new WebSocket(ws_url);
@@ -102,7 +123,6 @@ function disconnect(done) {
 
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        if (!data) return;
         if (data.type == 'disconnect_ack') {
             if (data.success) {
                 current_lobby = null;
@@ -146,7 +166,7 @@ function start_lobby(done) {
         if (data.type == 'start_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby;
-                console.log(lobby);
+                console.log(current_lobby);
                 done();
             } else if (!data.success) {
                 console.log(data.msg);
@@ -164,18 +184,24 @@ function start_lobby(done) {
 function tab_update_listener(tab_id, change_info, tab) {
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
         chrome.pageAction.show(tab_id);
+
         var new_url_params = tab.url.split('netflix.com/')[1];
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
+
             if (is_watching(new_url_params)) {
-                // Assumption that Netflix always auto-plays
-                player_state = PLAYER_STATE.Play;
+
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
                     chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);    
                 });
-            } else if (!is_watching(new_url_params)) {
+
+            } else {
                 player_state = PLAYER_STATE.Inactive;
+            }
+
+            if (current_lobby) {
+                current_lobby.clients[client_id].url_params = new_url_params;
             }
         }
             
@@ -203,7 +229,7 @@ function msg_listener(req, sender, send_response) {
 
         } else if (req.type === 'update_player_state') {
             var result = false;
-            if (player_state !== req.new_state)  { // Handle duplicate messages
+            if (player_state != req.new_state)  { // Handle duplicate messages
                 player_state = req.new_state;
                 result = true;
             }
@@ -233,6 +259,19 @@ function msg_listener(req, sender, send_response) {
             send_response({
                 type: 'get_popup_state_ack',
                 state: popup_state
+            });
+        } else if (req.type === 'get_lobby_id') {
+            send_response({
+                type: 'get_lobby_id_ack',
+                lobby_id: current_lobby.id
+            });
+        } else if (req.type === 'lifecycle') {
+            current_lobby.clients[client_id].progress = req.progress;
+            lifecycle_ping(function(stop) {
+                send_response({
+                    'type': 'lifecycle_ack',
+                    'stop': stop
+                });
             });
         }
     }
