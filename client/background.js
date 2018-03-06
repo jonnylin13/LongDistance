@@ -124,7 +124,7 @@ function connect_lobby(lobby_id, done) {
     }
 
     ws.onmessage = function(event) {
-        var data = event.data;
+        var data = JSON.parse(event.data);
         if (data.type == 'connect_lobby_ack') {
             if (data.success) done(true);
             else done(false);
