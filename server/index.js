@@ -51,19 +51,6 @@ function has_ctl_token(lobby, client_id) {
     return (lobby.ctl_id === client_id);
 }
 
-/** GET handshake request
- * Receives a client_id token
- * Creates a lobby in lobbies with client_id as control
- */
-function start_lobby(req, res) {
-
-    var client_id = req.query.client_id;
-    // Validate client id
-
-    
-
-}
-
 /** Listen function */
 function listen() {
     wss.on('connection', function(ws, req) {
@@ -75,6 +62,7 @@ function listen() {
             var data = JSON.parse(msg);
             if (!data) return;
 
+            // CLIENT MESSAGES
             if (data.type == 'start_lobby') {
 
                 var client_id = data.client_id;
@@ -92,6 +80,28 @@ function listen() {
                     success: true, 
                     lobby: lobbies[lid]
                 }));
+                console.log(lobbies);
+
+            } else if (data.type == 'disconnect') {
+
+                var client_id = data.client_id;
+
+                for (var lobby_id in lobbies)  {
+                    for (var cid in lobbies[lobby_id].clients) {
+
+                        if (cid == client_id) {
+                            delete lobbies[lobby_id].clients[cid];
+                            if (Object.keys(lobbies[lobby_id].clients).length == 0) delete lobbies[lobby_id];
+                            if (client_id == lobbies[lobby_id].ctl_id) 
+                                lobbies[lobby_id].ctl_id = Object.keys(lobbies[lobby_id].clients)[0];
+                            ws.send(JSON.stringify({
+                                type: 'disconnect_ack',
+                                success: true
+                            }));
+                        }
+
+                    }
+                }
                 console.log(lobbies);
             }
 

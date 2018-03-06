@@ -21,6 +21,8 @@ const POPUP_STATE = Object.freeze({
     "InLobby": 1
 });
 
+const ws_url = 'ws://jlin.club:3000/ldn';
+
 var current_url_params;
 var player_port;
 var player_state = PLAYER_STATE.Inactive;
@@ -28,6 +30,7 @@ var popup_state = POPUP_STATE.OutLobby;
 var client_id;
 var current_lobby; // Local lobby reference (needs to be synced over network)
 var ws;
+var connected = false;
 
 function default_response(response) {
     if (response && response.type) console.log(response.type);
@@ -78,14 +81,40 @@ function update_id() {
     });
 }
 
+function disconnect(done) {
+    if (!ws) {
+        ws = new WebSocket(ws_url);
+    } 
+
+    ws.send(
+        JSON.stringify({
+            'type': 'disconnect',
+            'client_id': client_id
+        })
+    );
+
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        if (!data) return;
+        if (data.type == 'disconnect_ack') {
+            if (data.success) {
+                lobby = null;
+                console.log('Exited lobby');
+                done();
+            }
+        }
+    };
+
+}
+
 /** Starts a lobby with client_id
- * Sends an AJAX request to backend 
  * We could use a JS Object for _params, but this works for now (for/in loop vs for/statement loop)
  */
 function start_lobby(done) {
 
-    if (!ws) {
-        ws = new WebSocket('ws://jlin.club:3000/ldn');
+    if (!connected) {
+        ws = new WebSocket(ws_url);
+        connected = true;
 
         ws.onopen = function() {
             ws.send(JSON.stringify({
@@ -94,7 +123,7 @@ function start_lobby(done) {
                 'player_state': player_state, 
                 'url_params': current_url_params
             }));
-        }
+        };
 
         ws.onmessage = function(event) {
             var data = JSON.parse(event.data);
@@ -104,15 +133,15 @@ function start_lobby(done) {
                     lobby = data.lobby;
                     console.log(lobby);
                     done();
-                    
+                    ws.disconnect();
                 } else if (!data.success) {
                     console.log(data.msg);
                 }
             }
-        }
+        };
 
-        ws.onclose = function() {
-            ws = null;
+        ws.ondisconnect = function() {
+            alert('ws disconnected!!!');
         }
     }
 }
@@ -172,10 +201,13 @@ function msg_listener(req, sender, send_response) {
             });
         } else if (req.type === 'disconnect') {
             // TODO disconnect
-            send_response({
-                type: 'disconnect_ack',
-                success: true
+            disconnect(function() {
+                send_response({
+                    type: 'disconnect_ack',
+                    success: true
+                });
             });
+            
         } else if (req.type === 'update_popup_state') {
             
             console.log('popup_state: ', popup_state, ' -> ', req.new_state);
