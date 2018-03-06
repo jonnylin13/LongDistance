@@ -358,6 +358,14 @@ function msg_listener(req, sender, send_response) {
             if (player_state != req.new_state)  { // Handle duplicate messages
                 player_state = req.new_state;
                 result = true;
+                // CHECK THIS TOMORROW
+                if (current_lobby && client_id) {
+                    if (current_lobby.ctl_id == client_id) {
+                        if (req.new_state == PLAYER_STATE.Pause || req.new_state == PLAYER_STATE.Play) {
+                            broadcast_update();
+                        }
+                    }
+                }
             }
 
             send_response({
