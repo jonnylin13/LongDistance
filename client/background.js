@@ -78,15 +78,15 @@ function connect_lobby(lobby_id, done) {
                 })           
             );
         }
+    } else {
+        ws.send(
+            JSON.stringify({
+                'type': 'connect_lobby',
+                'lobby_id': lobby_id,
+                'client_id': client_id,
+            })           
+        );
     }
-
-    ws.send(
-        JSON.stringify({
-            'type': 'connect_lobby',
-            'lobby_id': lobby_id,
-            'client_id': client_id,
-        })           
-    );
 
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
@@ -130,18 +130,18 @@ function lifecycle_ping(done) {
                 })
             );
         }
+    } else {
+        ws.send(
+            JSON.stringify({
+                'type': 'lifecycle',
+                'lobby_id': current_lobby.id,
+                'client_id': client_id,
+                'player_state': player_state,
+                'url_params': current_url_params,
+                'progress': current_lobby.clients[client_id].progress
+            })
+        );
     }
-
-    ws.send(
-        JSON.stringify({
-            'type': 'lifecycle',
-            'lobby_id': current_lobby.id,
-            'client_id': client_id,
-            'player_state': player_state,
-            'url_params': current_url_params,
-            'progress': current_lobby.clients[client_id].progress
-        })
-    );
     
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
@@ -162,14 +162,14 @@ function disconnect(done) {
                 })
             );
         };
-    } 
-
-    ws.send(
-        JSON.stringify({
-            'type': 'disconnect',
-            'client_id': client_id
-        })
-    );
+    } else {
+        ws.send(
+            JSON.stringify({
+                'type': 'disconnect',
+                'client_id': client_id
+            })
+        );
+    }
 
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);

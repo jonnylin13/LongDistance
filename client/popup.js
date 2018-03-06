@@ -82,6 +82,19 @@ function disconnect_lobby_click_listener($event) {
     });
 }
 
+function connect_confirm_click_listener($event) {
+    chrome.runtime.sendMessage({
+        type: 'connect_lobby',
+        lobby_id: document.getElementById('lobby-id').value,
+    }, function(response) {
+        if (response) {
+            if (response.type === 'connect_lobby_ack' && response.success) {
+                update_state(POPUP_STATE.InLobby);
+            }
+        }
+    });
+}
+
 function connect_click_listener($event) {
     update_state(POPUP_STATE.ConnectLobby);
 }
@@ -100,6 +113,7 @@ function register_listeners() {
         document.getElementById('disconnect-btn').addEventListener('click', disconnect_lobby_click_listener);
         document.getElementById('connect-btn').addEventListener('click', connect_click_listener);
         document.getElementById('connect-btn-back').addEventListener('click', connect_back_click_listener);
+        document.getElementById('connect-confirm-btn').addEventListener('click', connect_confirm_click_listener);
         chrome.runtime.sendMessage({type: 'ldn_loaded'}, function(response) {
             default_response(response);
         });
