@@ -7,16 +7,16 @@
 const PORT = 3000;
 
 // Imports
-var ws = require('ws');
+var WebSocket = require('ws');
 var short_id = require('shortid');
 
 // Variables
 var lobbies = {};
 var wss;
 
-function error(msg, _ws) {
-    if (_ws) {
-        _ws.send({
+function error(msg, ws) {
+    if (ws) {
+        ws.send({
             'msg': msg,
             'success': false
         });
@@ -66,8 +66,8 @@ function start_lobby(req, res) {
 
 /** Listen function */
 function listen() {
-    wss.on('connection', function(_ws) {
-        _ws.on('message', function(msg) {
+    wss.on('connection', function(ws) {
+        ws.on('message', function(msg) {
 
             var data = JSON.parse(msg);
 
@@ -76,14 +76,14 @@ function listen() {
                 var client_id = data.client_id;
 
                 if (has_lobby(client_id)) {
-                    error('Error: client is already in a lobby', _ws);
+                    error('Error: client is already in a lobby', ws);
                     return;
                 }
     
                 // Generate and store
                 var lid = short_id.generate();
                 lobbies[lid] = lobby(client_id, data.player_state, data.url_params);
-                _ws.send({type: 'start_lobby_ack', success: true, lobby: lobbies[lid]});
+                ws.send({type: 'start_lobby_ack', success: true, lobby: lobbies[lid]});
                 console.log(lobbies);
             }
 
