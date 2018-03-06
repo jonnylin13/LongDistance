@@ -131,6 +131,8 @@ function listen() {
 
                 var cid = data.client_id;
                 var lid = data.lobby_id;
+                console.log(lid);
+
                 if (has_lobby(cid)) {
                     error('client is already in a lobby', ws);
                     return;

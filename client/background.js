@@ -22,7 +22,7 @@ const POPUP_STATE = Object.freeze({
     "ConnectLobby": 2,
 });
 
-const ws_url = 'ws://jlin.club:3000/ldn';
+const ws_url = 'ws://192.168.0.2:3000/ldn';
 
 var current_url_params;
 var player_port;
