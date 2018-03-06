@@ -46,7 +46,7 @@ function update_state(new_state) {
         chrome.runtime.sendMessage({
             'type': 'get_lobby_id'
         }, function(response) {
-            if (response && response.lobby_id) get_lobby_id_text().innerHTML = response.lobby_id;
+            if (response && response.success) get_lobby_id_text().innerHTML = response.lobby_id;
             default_response(response);
         });
     } else {

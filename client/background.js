@@ -67,10 +67,13 @@ function update_id() {
 }
 
 function update_listener(event) {
+    
+    if (!current_lobby) return;
     var data = JSON.parse(event.data);
 
      if (data.type == 'update') {
         var lobbies = data.lobbies;
+
         for (var l in lobbies) {
             if (l == current_lobby.id) { 
                 var controller = lobbies[l].clients[lobbies[l].ctl_id];
@@ -395,9 +398,17 @@ function msg_listener(req, sender, send_response) {
                 state: popup_state
             });
         } else if (req.type === 'get_lobby_id') {
+            if (!current_lobby) {
+                send_response({
+                    type: 'get_lobby_id_ack',
+                    msg: 'Error: no current lobby',
+                    success: false
+                });
+            }
             send_response({
                 type: 'get_lobby_id_ack',
-                lobby_id: current_lobby.id
+                lobby_id: current_lobby.id,
+                success: true
             });
         } else if (req.type === 'lifecycle') {
             if (!current_lobby) {
