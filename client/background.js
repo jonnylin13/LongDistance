@@ -164,6 +164,7 @@ function send_update(type) {
     }
 
     ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
         if (data.type == 'connect_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby;
@@ -195,7 +196,7 @@ function broadcast_update() {
     send_update('broadcast_update');
 
     ws.onmessage = function(event) {
-        var data = event.data;
+        var data = JSON.parse(event.data);
         if (data.type == 'broadcast_update_ack') {
             console.log(data.type);
         }  else {
@@ -238,7 +239,8 @@ function disconnect(done) {
         );
     }
 
-    ws.onmessage = function() {
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
         if (data.type == 'disconnect_ack') {
             if (data.success) {
                 current_lobby = null;
