@@ -125,6 +125,7 @@ function connect_lobby(lobby_id, done) {
 
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
+        console.log(data);
         if (data.type == 'connect_lobby_ack') {
             if (data.success) done(true);
             else done(false);
@@ -135,7 +136,7 @@ function connect_lobby(lobby_id, done) {
     };
 }
 
-function send_update(type) {
+function send_update(type, done) {
     if (!ws) {
         ws = new WebSocket(ws_url);
         ws.onopen = function() {
@@ -282,7 +283,6 @@ function start_lobby(done) {
 
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
-        if (!data) return;
         if (data.type == 'start_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby;
