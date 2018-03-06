@@ -55,10 +55,10 @@ function has_ctl_token(lobby, client_id) {
 function broadcast_update() {
     wss.clients.forEach(function each(client) {
         if (client.readyState == WebSocket.OPEN) {
-            client.send({
+            client.send(JSON.stringify({
                 type: 'update',
-                lobbies: JSON.stringify(lobbies)
-            });
+                lobbies: lobbies
+            }));
         }
     });
 }
