@@ -24,6 +24,10 @@ function init_views() {
     views[POPUP_STATE.ConnectLobby] = document.getElementById('connect-lobby-container');
 }
 
+function get_lobby_id_text() {
+    return document.getElementById('lobby-id-text');
+}
+
 function update_state(new_state) {
 
     chrome.runtime.sendMessage({
@@ -45,6 +49,8 @@ function update_state(new_state) {
             if (response && response.lobby_id) get_lobby_id_text().innerHTML = response.lobby_id;
             default_response(response);
         });
+    } else {
+        get_lobby_id_text().innerHTML = '';
     }
 
 }
