@@ -66,12 +66,10 @@ function update_id() {
     });
 }
 
-function server_msg_listener(event) {
+function update_listener(event) {
     var data = JSON.parse(event.data);
 
-    if (data.type == 'broadcast_update_ack') {
-        console.log(data.type);
-    } else if (data.type == 'update') {
+     if (data.type == 'update') {
         var lobbies = data.lobbies;
         for (var l in lobbies) {
             if (l == current_lobby.id) { 
@@ -130,11 +128,10 @@ function connect_lobby(lobby_id, done) {
         if (data.type == 'connect_lobby_ack') {
             if (data.success) done(true);
             else done(false);
-            console.log(data.lobby);
-            console.log(data.success);
         } else {
-            server_msg_listener(event);
+            update_listener(event);
         }
+        done(false);
     };
 }
 
@@ -189,7 +186,7 @@ function send_update(type) {
                 done(true);
             } else done(false);
         } else {
-            server_msg_listener(event);
+            update_listener(event);
         }
     }
 }
@@ -197,7 +194,14 @@ function send_update(type) {
 function broadcast_update() {
     send_update('broadcast_update');
 
-    ws.onmessage = server_msg_listener;
+    ws.onmessage = function(event) {
+        var data = event.data;
+        if (data.type == 'broadcast_update_ack') {
+            console.log(data.type);
+        }  else {
+            update_listener(event);
+        }
+    };
 }
 
 function lifecycle_ping(done) {
@@ -209,7 +213,7 @@ function lifecycle_ping(done) {
         if (data.type == 'lifecycle_ack') {
             done(data.stop);
         } else {
-            server_msg_listener(event);
+            update_listener(event);
         }
     }
 }
@@ -242,7 +246,7 @@ function disconnect(done) {
                 done();
             }
         } else {
-            server_msg_listener(event);
+            update_listener(event);
         }
     };
 
@@ -286,7 +290,7 @@ function start_lobby(done) {
                 console.log(data.msg);
             }
         } else {
-            server_msg_listener(event);
+            update_listener(event);
         }
     };
 
