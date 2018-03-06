@@ -7,18 +7,16 @@
 const PORT = 3000;
 
 // Imports
-var express = require('express');
-var app = express();
-var cors =  require('cors');
-var body_parser = require('body-parser');
+var ws = require('ws');
 var short_id = require('shortid');
 
 // Variables
 var lobbies = {};
+var wss;
 
-function error(msg, res) {
-    if (res) {
-        res.json({
+function error(msg, _ws) {
+    if (_ws) {
+        _ws.send({
             'msg': msg,
             'success': false
         });
@@ -62,39 +60,42 @@ function start_lobby(req, res) {
     var client_id = req.query.client_id;
     // Validate client id
 
-    if (has_lobby(client_id)) {
-        error('Error: client is already in a lobby', res);
-        return;
-    }
+    
 
-    // Generate and store
-    var lid = short_id.generate();
-    lobbies[lid] = lobby(client_id, req.query.player_state, req.query.url_params);
-    res.json({success: true, lobby: lobbies[lid]});
-    console.log(lobbies);
-
-}
-
-/** Registers REST endpoints */
-function register_endpoints() {
-    app.get('/start_lobby', start_lobby);
 }
 
 /** Listen function */
 function listen() {
+    wss.on('connection', function(_ws) {
+        _ws.on('message', function(msg) {
+
+            var data = JSON.parse(msg);
+
+            if (data && data.type == 'start_lobby') {
+
+                var client_id = data.client_id;
+
+                if (has_lobby(client_id)) {
+                    error('Error: client is already in a lobby', _ws);
+                    return;
+                }
+    
+                // Generate and store
+                var lid = short_id.generate();
+                lobbies[lid] = lobby(client_id, data.player_state, data.url_params);
+                _ws.send({type: 'start_lobby_ack', success: true, lobby: lobbies[lid]});
+                console.log(lobbies);
+            }
+
+        });
+    });
     console.log('Listening on port ' + PORT + '!');
-    // Set API endpoints
-    register_endpoints();
 }
 
 /** Main function (entry point) */
 function start_server() {
-    // Middleware
-    app.use(body_parser.json());
-    app.use(body_parser.urlencoded({extended: true}));
-    app.use(cors({origin: '*'}));
-
-    app.listen(PORT, listen);
+    wss = new WebSocket.Server({port: PORT, path: '/ldn'});
+    listen();
 }
 
 start_server();
