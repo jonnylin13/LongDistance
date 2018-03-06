@@ -87,7 +87,16 @@ function listen() {
                 // Generate and store
                 var lid = short_id.generate();
                 lobbies[lid] = lobby(client_id, data.player_state, data.url_params);
-                ws.send(JSON.stringify({type: 'start_lobby_ack', success: true, lobby: lobbies[lid]}));
+                ws.send(JSON.stringify({
+                    type: 'start_lobby_ack', 
+                    success: true, 
+                    lobby: lobbies[lid]
+                }));
+                console.log(JSON.stringify({
+                    type: 'start_lobby_ack', 
+                    success: true, 
+                    lobby: lobbies[lid]
+                }));
                 console.log(JSON.stringify(lobbies));
             }
 

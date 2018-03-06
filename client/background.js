@@ -27,6 +27,7 @@ var player_state = PLAYER_STATE.Inactive;
 var popup_state = POPUP_STATE.OutLobby;
 var client_id;
 var current_lobby; // Local lobby reference (needs to be synced over network)
+var ws;
 
 function default_response(response) {
     if (response && response.type) console.log(response.type);
@@ -82,36 +83,45 @@ function update_id() {
  * We could use a JS Object for _params, but this works for now (for/in loop vs for/statement loop)
  */
 function start_lobby(send_response) {
-    var req = new XMLHttpRequest();
-    var url = 'http://jlin.club:3000/start_lobby';
 
-    var _params = [];
-    _params.push(param('client_id', client_id));
-    _params.push(param('player_state', player_state));
-    _params.push(param('url_params', current_url_params));
+    if (!ws) {
+        ws = new WebSocket('ws://jlin.club:3000/ldn');
 
-    var _query = create_params(url, _params);
+        ws.onopen = function() {
+            ws.send(JSON.stringify({
+                'type': 'start_lobby',
+                'client_id': client_id, 
+                'player_state': player_state, 
+                'url_params': current_url_params
+            }));
+        }
 
-    req.open('GET', _query, true);
-
-    req.onreadystatechange = function() {
-        if (req.readyState == READY_STATE.Done) {
-            var response = JSON.parse(req.responseText);
-            if (response && response.success) {
-                lobby = response.lobby;
-                send_response({
-                    type: 'start_lobby_ack',
-                    success: true
-                });
-                console.log(response.lobby);
-            } else if (response) {
-                console.log(response.msg);
+        ws.onmessage = function(str_data) {
+            var data = JSON.parse(str_data);
+            if (!data) return;
+            if (data.type == 'start_lobby_ack') {
+                if (data.success) {
+                    lobby = data.lobby;
+                    console.log(JSON.stringify(data.lobby));
+                    send_response({
+                        type: 'start_lobby_ack',
+                        success: true
+                    });
+                    
+                } else if (!data.success) {
+                    console.log(data.msg);
+                    send_response({
+                        type: 'start_lobby_ack',
+                        success: false
+                    });
+                }
             }
-            
+        }
+
+        ws.onclose = function() {
+            ws = null;
         }
     }
-    console.log(_query);
-    req.send();
 }
 
 /** Called when a chrome tab is updated */
