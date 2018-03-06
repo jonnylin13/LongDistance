@@ -66,12 +66,16 @@ function start_lobby(req, res) {
 
 /** Listen function */
 function listen() {
-    wss.on('connection', function(ws) {
+    wss.on('connection', function(ws, req) {
+
+        console.log("Received a connection from: ", req.connection.remoteAddress);
+
         ws.on('message', function(msg) {
 
             var data = JSON.parse(msg);
+            if (!data) return;
 
-            if (data && data.type == 'start_lobby') {
+            if (data.type == 'start_lobby') {
 
                 var client_id = data.client_id;
 
