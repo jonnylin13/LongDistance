@@ -45,8 +45,6 @@ function update_state(new_state) {
             if (response && response.lobby_id) get_lobby_id_text().innerHTML = response.lobby_id;
             default_response(response);
         });
-    } else {
-        document.getElementById('lobby-id-text').innerHTML = '';
     }
 
 }
