@@ -130,6 +130,8 @@ function connect_lobby(lobby_id, done) {
         if (data.type == 'connect_lobby_ack') {
             if (data.success) done(true);
             else done(false);
+            console.log(data.lobby);
+            console.log(data.success);
         } else {
             server_msg_listener(event);
         }
