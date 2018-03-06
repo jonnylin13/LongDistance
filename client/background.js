@@ -82,7 +82,7 @@ function update_id() {
  * Sends an AJAX request to backend 
  * We could use a JS Object for _params, but this works for now (for/in loop vs for/statement loop)
  */
-function start_lobby(send_response) {
+function start_lobby(done) {
 
     if (!ws) {
         ws = new WebSocket('ws://jlin.club:3000/ldn');
@@ -96,24 +96,17 @@ function start_lobby(send_response) {
             }));
         }
 
-        ws.onmessage = function(str_data) {
-            var data = JSON.parse(str_data);
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data);
             if (!data) return;
             if (data.type == 'start_lobby_ack') {
                 if (data.success) {
                     lobby = data.lobby;
-                    console.log(JSON.stringify(data.lobby));
-                    send_response({
-                        type: 'start_lobby_ack',
-                        success: true
-                    });
+                    console.log(lobby);
+                    done();
                     
                 } else if (!data.success) {
                     console.log(data.msg);
-                    send_response({
-                        type: 'start_lobby_ack',
-                        success: false
-                    });
                 }
             }
         }
@@ -161,7 +154,11 @@ function msg_listener(req, sender, send_response) {
                 type: 'start_background_ack'
             });
         } else if (req.type === 'start_lobby') {
-            start_lobby(send_response);
+            start_lobby(function() {
+                console.log('test');
+                send_response({type:'start_lobby_ack', success: true});
+            });
+
         } else if (req.type === 'update_player_state') {
             var result = false;
             if (player_state !== req.new_state)  { // Handle duplicate messages
@@ -180,6 +177,8 @@ function msg_listener(req, sender, send_response) {
                 success: true
             });
         } else if (req.type === 'update_popup_state') {
+            
+            console.log('popup_state: ', popup_state, ' -> ', req.new_state);
             popup_state = req.new_state;
             send_response({
                 type: 'update_popup_state_ack',
@@ -192,6 +191,7 @@ function msg_listener(req, sender, send_response) {
             });
         }
     }
+    return true;
 }
 
 function register_listeners() {
