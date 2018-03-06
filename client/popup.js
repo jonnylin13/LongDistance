@@ -6,7 +6,8 @@
 
 const POPUP_STATE = Object.freeze({
     "OutLobby": 0,
-    "InLobby": 1
+    "InLobby": 1,
+    "ConnectLobby": 2
 });
 
 var views = {};
@@ -15,31 +16,12 @@ function default_response(response) {
     if (response && response.type) console.log(response.type);
 }
 
-function get_start_lobby_btn() {
-    return document.getElementById('start-lobby-btn');
-}
-
-function get_disconnect_btn() {
-    return document.getElementById('disconnect-btn');
-}
-
-function get_in_lobby_container() {
-    return document.getElementById('in-lobby-container');
-}
-
-function get_out_lobby_container() {
-    return document.getElementById('out-lobby-container');
-}
-
-function get_lobby_id_text() {
-    return document.getElementById('lobby-id-text');
-}
-
 function init_views() {
 
     // Re-update reference 
-    views[POPUP_STATE.InLobby] = get_in_lobby_container();
-    views[POPUP_STATE.OutLobby] = get_out_lobby_container();
+    views[POPUP_STATE.InLobby] = document.getElementById('in-lobby-container');
+    views[POPUP_STATE.OutLobby] = document.getElementById('out-lobby-container');
+    views[POPUP_STATE.ConnectLobby] = document.getElementById('connect-lobby-container');
 }
 
 function update_state(new_state) {
@@ -64,7 +46,7 @@ function update_state(new_state) {
             default_response(response);
         });
     } else {
-        get_lobby_id_text().innerHTML = '';
+        document.getElementById('lobby-id-text').innerHTML = '';
     }
 
 }
@@ -96,14 +78,24 @@ function disconnect_lobby_click_listener($event) {
     });
 }
 
+function connect_click_listener($event) {
+    update_state(POPUP_STATE.ConnectLobby);
+}
+
+function connect_back_click_listener($event) {
+    update_state(POPUP_STATE.OutLobby);
+}
+
 function register_listeners() {
     document.addEventListener('DOMContentLoaded', function() {
         init_views();
         chrome.runtime.sendMessage({type: 'get_popup_state'}, function(response) {
             if (response && response.type == 'get_popup_state_ack') update_state(response.state);
         });
-        get_start_lobby_btn().addEventListener('click', start_lobby_click_listener);
-        get_disconnect_btn().addEventListener('click', disconnect_lobby_click_listener);
+        document.getElementById('start-lobby-btn').addEventListener('click', start_lobby_click_listener);
+        document.getElementById('disconnect-btn').addEventListener('click', disconnect_lobby_click_listener);
+        document.getElementById('connect-btn').addEventListener('click', connect_click_listener);
+        document.getElementById('connect-btn-back').addEventListener('click', connect_back_click_listener);
         chrome.runtime.sendMessage({type: 'ldn_loaded'}, function(response) {
             default_response(response);
         });

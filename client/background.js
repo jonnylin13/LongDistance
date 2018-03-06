@@ -18,10 +18,11 @@ const READY_STATE = Object.freeze({
 
 const POPUP_STATE = Object.freeze({
     "OutLobby": 0,
-    "InLobby": 1
+    "InLobby": 1,
+    "ConnectLobby": 2,
 });
 
-const ws_url = 'ws://127.0.0.1:3000/ldn';
+const ws_url = 'ws://jlin.club:3000/ldn';
 
 var current_url_params;
 var player_port;
@@ -63,6 +64,55 @@ function update_id() {
             chrome.storage.sync.set({'client_id': client_id});
         }
     });
+}
+
+function connect_lobby(lobby_id, done) {
+    if (!ws) {
+        ws = new WebSocket(ws_url);
+        ws.onopen = function() {
+            ws.send(
+                JSON.stringify({
+                    'type': 'connect_lobby',
+                    'lobby_id': lobby_id,
+                    'client_id': client_id,
+                })           
+            );
+        }
+    }
+
+    ws.send(
+        JSON.stringify({
+            'type': 'connect_lobby',
+            'lobby_id': lobby_id,
+            'client_id': client_id,
+        })           
+    );
+
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        if (data.type == 'connect_lobby_ack') {
+            if (data.success) {
+                current_lobby = data.lobby;
+                var controller = current_lobby.clients[current_lobby.ctl_id];
+                if (controller.player_state == PLAYER_STATE.Pause 
+                    || controller.player_state == PLAYER_STATE.Play) {
+                        // Assuming only one tab of Netflix
+                        chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                            chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
+                                chrome.tabs.sendMessage(tabs[0].id, {
+                                    type: 'player_update',
+                                    player_state: controller.player_state,
+                                    progress: controller.progress
+                                }, function(response) {
+                                    default_response(response);
+                                });
+                            });
+                        });
+                }
+                done(true);
+            } else done(false);
+        }
+    };
 }
 
 function lifecycle_ping(done) {
@@ -224,6 +274,14 @@ function msg_listener(req, sender, send_response) {
             });
         } else if (req.type === 'start_lobby') {
             start_lobby(function() {
+                // This makes assumption that only 1 Netflix tab is open...
+                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, {
+                        type: 'check_lifecycle'
+                    }, function(response) {
+                        default_response(response);
+                    });
+                });
                 send_response({type:'start_lobby_ack', success: true});
             });
 
@@ -266,11 +324,25 @@ function msg_listener(req, sender, send_response) {
                 lobby_id: current_lobby.id
             });
         } else if (req.type === 'lifecycle') {
+            if (!current_lobby) {
+                send_response({
+                    'type': 'lifecycle_ack',
+                    'stop': true
+                });
+                return;
+            }
             current_lobby.clients[client_id].progress = req.progress;
             lifecycle_ping(function(stop) {
                 send_response({
                     'type': 'lifecycle_ack',
                     'stop': stop
+                });
+            });
+        } else if (req.type === 'connect_lobby') {
+            connect_lobby(function(success) {
+                send_response({
+                    'type': 'connect_lobby_ack',
+                    'success': success
                 });
             });
         }

@@ -6,7 +6,6 @@
   "permissions": [
       "tabs",
       "storage",
-      "activeTab",
       "*://*.netflix.com/watch/*",
       "*://netflix.com/watch/*",
       "http://jlin.club:3000/start_lobby"

@@ -17,7 +17,7 @@ var wss;
 function error(msg, ws) {
     if (ws) {
         ws.send(JSON.stringify({
-            'msg': msg,
+            'msg': 'Error: ' + msg,
             'success': false
         }));
     }
@@ -126,6 +126,27 @@ function listen() {
                 }));
 
                 console.log(client);
+
+            } else if (data.type == 'connect_lobby') {
+
+                var cid = data.client_id;
+                var lid = data.lobby_id;
+                if (has_lobby(cid)) {
+                    error('client is already in a lobby', ws);
+                    return;
+                }
+
+                if (lobbies[lid]) {
+                    lobbies[lid].clients[cid] = {};
+                    ws.send(JSON.stringify({
+                        type: 'connect_lobby_ack',
+                        lobby: lobbies[lid],
+                        success: true
+                    }));
+                } else {
+                    error('lobby not found', ws);
+                    return;
+                }
 
             }
 

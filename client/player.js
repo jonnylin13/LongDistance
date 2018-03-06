@@ -134,6 +134,16 @@ function msg_listener(req, sender, send_response) {
             lifecycle_interval = setInterval(lifecycle, 5000);
             send_response({type: 'register_listeners_ack'});
 
+        } else if (req.type === 'check_lifecycle') {
+            if (!lifecycle_interval) {
+                lifecycle_interval = setInterval(lifecycle, 5000);
+            }
+        } else if (req.type === 'player_update') {
+            var video = get_video();
+            video.currentTime = req.progress.elapsed;
+            if (req.player_state == PLAYER_STATE.Play) video.paused = false;
+            else video.paused = true;
+            send_response({type: 'player_update_ack'});
         }
     } 
 }
