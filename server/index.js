@@ -28,12 +28,12 @@ function error(msg, res) {
 
 function lobby(ctl_id, player_state, url_params) {
     var lobby = {
-        'ctl_id': args.ctl_id,   
+        'ctl_id': ctl_id,   
         'clients': {}
     };
-    lobby.clients[args.ctl_id] = {
-        'player_state': args.player_state,
-        'url_params': args.url_params
+    lobby.clients[ctl_id] = {
+        'player_state': player_state,
+        'url_params': url_params
     };
     return lobby;
 }
