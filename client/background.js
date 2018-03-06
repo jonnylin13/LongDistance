@@ -339,7 +339,7 @@ function msg_listener(req, sender, send_response) {
                 });
             });
         } else if (req.type === 'connect_lobby') {
-            connect_lobby(function(success) {
+            connect_lobby(req.lobby_id, function(success) {
                 send_response({
                     'type': 'connect_lobby_ack',
                     'success': success
