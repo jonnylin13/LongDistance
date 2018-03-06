@@ -52,6 +52,17 @@ function has_ctl_token(lobby, client_id) {
     return (lobby.ctl_id === client_id);
 }
 
+function broadcast_update() {
+    wss.clients.forEach(function each(client) {
+        if (client.readyState == WebSocket.OPEN) {
+            client.send({
+                type: 'update',
+                lobbies: JSON.stringify(lobbies)
+            });
+        }
+    });
+}
+
 /** Listen function */
 function listen() {
     wss.on('connection', function(ws, req) {
@@ -131,7 +142,6 @@ function listen() {
 
                 var cid = data.client_id;
                 var lid = data.lobby_id;
-                console.log(lid);
 
                 if (has_lobby(cid)) {
                     error('client is already in a lobby', ws);
@@ -145,11 +155,36 @@ function listen() {
                         lobby: lobbies[lid],
                         success: true
                     }));
+                    console.log(lobbies[lid]);  
                 } else {
                     error('lobby not found', ws);
                     return;
                 }
 
+
+            } else if (data.type == 'broadcast_update') {
+
+                if (!lobbies[data.lobby_id]) {
+                    ws.send(JSON.stringify({
+                        type: 'broadcast_update_ack',
+                        success: false
+                    }));
+                    return;
+                }
+                
+                var client = lobbies[data.lobby_id].clients[data.client_id];
+                client.player_state = data.player_state;
+                client.url_params = data.url_params;
+                client.progress = data.progress;
+
+                broadcast_update();
+
+                ws.send(JSON.stringify({
+                    type: 'broadcast_update_ack',
+                    success: true
+                }));
+
+                console.log(client);
             }
 
         });

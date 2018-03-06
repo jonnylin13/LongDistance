@@ -66,6 +66,43 @@ function update_id() {
     });
 }
 
+function server_msg_listener(event) {
+    var data = JSON.parse(event.data);
+
+    if (data.type == 'broadcast_update_ack') {
+        console.log(data.type);
+    } else if (data.type == 'update') {
+        var lobbies = data.lobbies;
+        for (var l in lobbies) {
+            if (l == current_lobby.id) { 
+                var controller = lobbies[l].clients[lobbies[l].ctl_id];
+                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                    if (current_url_params != controller.url_params) {
+                        chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
+                            chrome.tabs.sendMessage(tabs[0].id, {
+                                type: 'player_update',
+                                player_state: controller.player_state,
+                                progress: controller.progress
+                            }, function(response) {
+                                default_response(response);
+                            });
+                        });
+                    } else {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            type: 'player_update',
+                            player_state: controller.player_state,
+                            progress: controller.progress
+                        }, function(response) {
+                            default_response(response);
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+}
+
 function connect_lobby(lobby_id, done) {
     if (!ws) {
         ws = new WebSocket(ws_url);
@@ -88,8 +125,38 @@ function connect_lobby(lobby_id, done) {
         );
     }
 
+    ws.onmessage = server_msg_listener;
+}
+
+function send_update(type) {
+    if (!ws) {
+        ws = new WebSocket(ws_url);
+        ws.onopen = function() {
+            ws.send(
+                JSON.stringify({
+                    'type': type,
+                    'lobby_id': current_lobby.id,
+                    'client_id': client_id,
+                    'player_state': player_state,
+                    'url_params': current_url_params,
+                    'progress': current_lobby.clients[client_id].progress
+                })
+            );
+        }
+    } else {
+        ws.send(
+            JSON.stringify({
+                'type': type,
+                'lobby_id': current_lobby.id,
+                'client_id': client_id,
+                'player_state': player_state,
+                'url_params': current_url_params,
+                'progress': current_lobby.clients[client_id].progress
+            })
+        );
+    }
+
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
         if (data.type == 'connect_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby;
@@ -111,42 +178,28 @@ function connect_lobby(lobby_id, done) {
                 }
                 done(true);
             } else done(false);
+        } else {
+            server_msg_listener(event);
         }
-    };
+    }
+}
+
+function broadcast_update() {
+    send_update('broadcast_update');
+
+    ws.onmessage = server_msg_listener;
 }
 
 function lifecycle_ping(done) {
-    if (!ws) {
-        ws = new WebSocket(ws_url);
-        ws.onopen = function() {
-            ws.send(
-                JSON.stringify({
-                    'type': 'lifecycle',
-                    'lobby_id': current_lobby.id,
-                    'client_id': client_id,
-                    'player_state': player_state,
-                    'url_params': current_url_params,
-                    'progress': current_lobby.clients[client_id].progress
-                })
-            );
-        }
-    } else {
-        ws.send(
-            JSON.stringify({
-                'type': 'lifecycle',
-                'lobby_id': current_lobby.id,
-                'client_id': client_id,
-                'player_state': player_state,
-                'url_params': current_url_params,
-                'progress': current_lobby.clients[client_id].progress
-            })
-        );
-    }
+    
+    send_update('lifecycle');
     
     ws.onmessage = function(event) {
         var data = JSON.parse(event.data);
         if (data.type == 'lifecycle_ack') {
             done(data.stop);
+        } else {
+            server_msg_listener(event);
         }
     }
 }
@@ -171,14 +224,15 @@ function disconnect(done) {
         );
     }
 
-    ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+    ws.onmessage = function() {
         if (data.type == 'disconnect_ack') {
             if (data.success) {
                 current_lobby = null;
                 console.log('exited lobby');
                 done();
             }
+        } else {
+            server_msg_listener(event);
         }
     };
 
@@ -221,6 +275,8 @@ function start_lobby(done) {
             } else if (!data.success) {
                 console.log(data.msg);
             }
+        } else {
+            server_msg_listener(event);
         }
     };
 
@@ -240,6 +296,10 @@ function tab_update_listener(tab_id, change_info, tab) {
             current_url_params = new_url_params;
 
             if (is_watching(new_url_params)) {
+
+                if (current_lobby && current_lobby.ctl_id == client_id) {
+                    broadcast_update();
+                }
 
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
