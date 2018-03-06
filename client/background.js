@@ -125,7 +125,15 @@ function connect_lobby(lobby_id, done) {
         );
     }
 
-    ws.onmessage = server_msg_listener;
+    ws.onmessage = function(event) {
+        var data = event.data;
+        if (data.type == 'connect_lobby_ack') {
+            if (data.success) done(true);
+            else done(false);
+        } else {
+            server_msg_listener(event);
+        }
+    };
 }
 
 function send_update(type) {
