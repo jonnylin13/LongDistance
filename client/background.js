@@ -21,16 +21,15 @@ const POPUP_STATE = Object.freeze({
     "InLobby": 1
 });
 
-const ws_url = 'ws://jlin.club:3000/ldn';
+const ws_url = 'ws://127.0.0.1:3000/ldn';
 
 var current_url_params;
 var player_port;
 var player_state = PLAYER_STATE.Inactive;
 var popup_state = POPUP_STATE.OutLobby;
 var client_id;
-var current_lobby; // Local lobby reference (needs to be synced over network)
+var current_lobby; 
 var ws;
-var connected = false;
 
 function default_response(response) {
     if (response && response.type) console.log(response.type);
@@ -84,6 +83,14 @@ function update_id() {
 function disconnect(done) {
     if (!ws) {
         ws = new WebSocket(ws_url);
+        ws.onopen = function() {
+            ws.send(
+                JSON.stringify({
+                    'type': 'disconnect',
+                    'client_id': client_id
+                })
+            );
+        };
     } 
 
     ws.send(
@@ -98,8 +105,8 @@ function disconnect(done) {
         if (!data) return;
         if (data.type == 'disconnect_ack') {
             if (data.success) {
-                lobby = null;
-                console.log('Exited lobby');
+                current_lobby = null;
+                console.log('exited lobby');
                 done();
             }
         }
@@ -112,10 +119,10 @@ function disconnect(done) {
  */
 function start_lobby(done) {
 
-    if (!connected) {
+    if (!ws) {
         ws = new WebSocket(ws_url);
-        connected = true;
 
+        // When the socket is initially opened
         ws.onopen = function() {
             ws.send(JSON.stringify({
                 'type': 'start_lobby',
@@ -124,25 +131,32 @@ function start_lobby(done) {
                 'url_params': current_url_params
             }));
         };
+    } else {
+        ws.send(JSON.stringify({
+            'type': 'start_lobby',
+            'client_id': client_id, 
+            'player_state': player_state, 
+            'url_params': current_url_params
+        }));
+    }
 
-        ws.onmessage = function(event) {
-            var data = JSON.parse(event.data);
-            if (!data) return;
-            if (data.type == 'start_lobby_ack') {
-                if (data.success) {
-                    lobby = data.lobby;
-                    console.log(lobby);
-                    done();
-                    ws.disconnect();
-                } else if (!data.success) {
-                    console.log(data.msg);
-                }
+    ws.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        if (!data) return;
+        if (data.type == 'start_lobby_ack') {
+            if (data.success) {
+                current_lobby = data.lobby;
+                console.log(lobby);
+                done();
+            } else if (!data.success) {
+                console.log(data.msg);
             }
-        };
-
-        ws.ondisconnect = function() {
-            alert('ws disconnected!!!');
         }
+    };
+
+    ws.ondisconnect = function() {
+        alert('WEBSOCKET DISCONNECTED');
+        ws = null;
     }
 }
 
@@ -184,7 +198,6 @@ function msg_listener(req, sender, send_response) {
             });
         } else if (req.type === 'start_lobby') {
             start_lobby(function() {
-                console.log('test');
                 send_response({type:'start_lobby_ack', success: true});
             });
 
@@ -200,7 +213,7 @@ function msg_listener(req, sender, send_response) {
                 success: result
             });
         } else if (req.type === 'disconnect') {
-            // TODO disconnect
+
             disconnect(function() {
                 send_response({
                     type: 'disconnect_ack',
@@ -209,7 +222,7 @@ function msg_listener(req, sender, send_response) {
             });
             
         } else if (req.type === 'update_popup_state') {
-            
+            if (popup_state == req.new_state) return;
             console.log('popup_state: ', popup_state, ' -> ', req.new_state);
             popup_state = req.new_state;
             send_response({

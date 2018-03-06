@@ -92,7 +92,7 @@ function listen() {
                         if (cid == client_id) {
                             delete lobbies[lobby_id].clients[cid];
                             if (Object.keys(lobbies[lobby_id].clients).length == 0) delete lobbies[lobby_id];
-                            if (client_id == lobbies[lobby_id].ctl_id) 
+                            if (lobbies[lobby_id] && client_id == lobbies[lobby_id].ctl_id) 
                                 lobbies[lobby_id].ctl_id = Object.keys(lobbies[lobby_id].clients)[0];
                             ws.send(JSON.stringify({
                                 type: 'disconnect_ack',
