@@ -16,10 +16,10 @@ var wss;
 
 function error(msg, ws) {
     if (ws) {
-        ws.send({
+        ws.send(JSON.stringify({
             'msg': msg,
             'success': false
-        });
+        }));
     }
     console.log(msg);
 }
@@ -92,12 +92,7 @@ function listen() {
                     success: true, 
                     lobby: lobbies[lid]
                 }));
-                console.log(JSON.stringify({
-                    type: 'start_lobby_ack', 
-                    success: true, 
-                    lobby: lobbies[lid]
-                }));
-                console.log(JSON.stringify(lobbies));
+                console.log(lobbies);
             }
 
         });
