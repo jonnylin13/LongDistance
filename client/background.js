@@ -130,12 +130,29 @@ function connect_lobby(lobby_id, done) {
         var data = JSON.parse(event.data);
         console.log(data);
         if (data.type == 'connect_lobby_ack') {
-            if (data.success) done(true);
-            else done(false);
+            if (data.success) {
+                current_lobby = data.lobby;
+                var controller = current_lobby.clients[current_lobby.ctl_id];
+                if (controller.player_state == PLAYER_STATE.Pause 
+                    || controller.player_state == PLAYER_STATE.Play) {
+                        // Assuming only one tab of Netflix
+                        chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                            chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
+                                chrome.tabs.sendMessage(tabs[0].id, {
+                                    type: 'player_update',
+                                    player_state: controller.player_state,
+                                    progress: controller.progress
+                                }, function(response) {
+                                    default_response(response);
+                                });
+                            });
+                        });
+                }
+                done(true);
+            } else done(false);
         } else {
             update_listener(event);
         }
-        done(false);
     };
 }
 
@@ -165,34 +182,6 @@ function send_update(type, done) {
                 'progress': current_lobby.clients[client_id].progress
             })
         );
-    }
-
-    ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
-        if (data.type == 'connect_lobby_ack') {
-            if (data.success) {
-                current_lobby = data.lobby;
-                var controller = current_lobby.clients[current_lobby.ctl_id];
-                if (controller.player_state == PLAYER_STATE.Pause 
-                    || controller.player_state == PLAYER_STATE.Play) {
-                        // Assuming only one tab of Netflix
-                        chrome.tabs.query({title: 'Netflix'}, function(tabs) {
-                            chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
-                                chrome.tabs.sendMessage(tabs[0].id, {
-                                    type: 'player_update',
-                                    player_state: controller.player_state,
-                                    progress: controller.progress
-                                }, function(response) {
-                                    default_response(response);
-                                });
-                            });
-                        });
-                }
-                done(true);
-            } else done(false);
-        } else {
-            update_listener(event);
-        }
     }
 }
 
