@@ -21,6 +21,16 @@ const PLAYER_STATE = Object.freeze({
 var timeout = false;
 var lifecycle_interval;
 
+function fire_event(element, event) {
+    if (element.fireEvent) {
+        element.fireEvent('on' + event);
+    } else {
+        var event_obj = document.createEvent('Events');
+        event_obj.initEvent(type, true, false);
+        element.dispatchEvent(event_obj);
+    }
+}
+
 function update_nf_player_time(progress) {
 }
 
@@ -44,6 +54,14 @@ function update_player_state(state) {
 
 function get_video() {
     return document.getElementsByTagName('video')[0];
+}
+
+function get_play() {
+    return document.getElementsByClassName('button-nfPlayerPlay')[0].children[0];
+}
+
+function play() {
+    fire_event(get_play(), 'click');
 }
 
 function pause() {
