@@ -21,6 +21,15 @@ const PLAYER_STATE = Object.freeze({
 var timeout = false;
 var lifecycle_interval;
 
+function update_nf_player_time(progress) {
+    get_video().seek(progress.elapsed + 5);
+}
+
+function update_nf_player_state(state) {
+    if (req.player_state == PLAYER_STATE.Pause && !get_video().paused) pause();
+    else if (req.player_state == PLAYER_STATE.Play && get_video().paused) play();
+}
+
 function update_player_state(state) {
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
@@ -35,7 +44,20 @@ function update_player_state(state) {
 }
 
 function get_video() {
-    return document.getElementsByTagName('video')[0];
+    return window.netflix.cadmium.objects.videoPlayer();
+}
+
+function play(callback) {
+    var promise = get_video().play();
+    if (promise !== undefined) {
+        promise.then(callback).catch(function(err) {
+            console.log(err);
+        });
+    }
+}
+
+function pause() {
+    get_video().pause();
 }
 
 /** Returns the progress from NF player */
@@ -48,8 +70,8 @@ function get_progress() {
         };
     }
     return {
-        'elapsed': video.currentTime,
-        'max': video.duration,
+        'elapsed': video.getCurrentTime(),
+        'max': video.getDuration(),
     }
 }
 
@@ -126,9 +148,8 @@ function msg_listener(req, sender, send_response) {
                 if (is_loaded()) { 
                     // FIX THIS
                     clearInterval(load);
-                    video.currentTime = req.progress.elapsed + 5;
-                    if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
-                    video.autoplay = true;
+                    update_nf_player_time(req.progress);
+                    update_nf_player_state(req.player_state);
                     send_response({type: 'full_player_update_ack'});
                 }
             }, 500);
@@ -137,7 +158,7 @@ function msg_listener(req, sender, send_response) {
                 var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
-                   
+                    update_nf_player_state(req.player_state);
                     send_response({type: 'player_state_update_ack'});
                 }
             }, 500);
@@ -146,7 +167,7 @@ function msg_listener(req, sender, send_response) {
                 var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
-                    
+                    update_nf_player_time(req.progress);
                     send_response({type: 'player_time_update_ack'});
                 }
             }, 500);
@@ -156,9 +177,9 @@ function msg_listener(req, sender, send_response) {
                     progress: get_progress()
                 });
         } else if (req.type === 'timeout') {
-            get_video().pause();
+            pause();
             setTimeout(function() {
-                get_video().play();
+                play();
             }, 5000);
             send_response({
                 type: 'timeout_ack'
