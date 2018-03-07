@@ -140,7 +140,7 @@ function update_listener(event) {
                         });
             
                     } else {
-                        player_time_update(tabs[0].id), controller;
+                        player_time_update(tabs[0].id, controller);
                     }
                     c.player_state = controller.player_state;
                     player_state = controller.player_state;
@@ -202,7 +202,7 @@ function connect_lobby(lobby_id, done) {
                                 chrome.tabs.onUpdated.addListener(listener);
                                 });
                             } else {
-                                player_time_update(tabs[0].id), controller;
+                                player_time_update(tabs[0].id, controller);
                             }
                         });
                 }
