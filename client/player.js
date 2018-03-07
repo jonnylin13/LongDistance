@@ -139,13 +139,14 @@ function msg_listener(req, sender, send_response) {
             }, 500);
         } else if (req.type === 'player_update') {
             var load = setInterval(function() {
-                if (is_loaded()) {
-                    
+                var video = get_video();
+                if (video) {
                     clearInterval(load);
                     var video = get_video();
                     video.currentTime = req.progress.elapsed;
+                    console.log(video.currentTime);
                     if (req.player_state == PLAYER_STATE.Play) video.play();
-                    else video.pause();
+                    else if (req.player_state == PLAYER_STATE.Pause) video.pause();
                     send_response({type: 'player_update_ack'});
                 }
             }, 500);
@@ -155,13 +156,13 @@ function msg_listener(req, sender, send_response) {
                     progress: get_progress()
                 });
         } else if (req.type === 'timeout') {
-            get_video().pause();
+            /**get_video().pause();
             setTimeout(function() {
                 get_video().play();
             }, 5000);
             send_response({
                 type: 'timeout_ack'
-            });
+            });**/
         }
     } 
 }
