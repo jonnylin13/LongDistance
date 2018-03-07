@@ -124,6 +124,8 @@ function connect_lobby(lobby_id, done) {
                     'type': 'connect_lobby',
                     'lobby_id': lobby_id,
                     'client_id': client_id,
+                    'url_params': current_url_params,
+                    'player_state': player_state
                 })           
             );
         }
@@ -133,6 +135,8 @@ function connect_lobby(lobby_id, done) {
                 'type': 'connect_lobby',
                 'lobby_id': lobby_id,
                 'client_id': client_id,
+                'url_params': current_url_params,
+                'player_state': player_state
             })           
         );
     }

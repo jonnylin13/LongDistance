@@ -150,7 +150,11 @@ function listen() {
                 }
 
                 if (lobbies[lid]) {
-                    lobbies[lid].clients[cid] = {};
+                    lobbies[lid].clients[cid] = {
+                        'id': cid,
+                        'url_params': data.url_params,
+                        'player_state': data.player_state
+                    };
                     ws.send(JSON.stringify({
                         type: 'connect_lobby_ack',
                         lobby: lobbies[lid],
