@@ -158,8 +158,10 @@ function msg_listener(req, sender, send_response) {
                 }
             }, 500);
         } else if (req.type === 'player_state_update') {
+            console.log('test');
             var load = setInterval(function() {
                 var video = get_video();
+                console.log('test2');
                 if (is_loaded()) { 
                     // FIX THIS
                     update_nf_player_state(req.player_state);
