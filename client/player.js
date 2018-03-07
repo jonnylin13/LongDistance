@@ -121,11 +121,14 @@ function msg_listener(req, sender, send_response) {
         } else if (req.type === 'player_update') {
             var load = setInterval(function() {
                 var video = get_video();
-                if (is_loaded()) {
+                if (is_loaded()) { 
+                    // FIX THIS
                     clearInterval(load);
-                    video.currentTime = req.progress.elapsed;
-                    if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
-                    if (req.player_state == PLAYER_STATE.Play && video.paused) video.play();
+                    setTimeout(function() {
+                        video.currentTime = req.progress.elapsed + 5;
+                        if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
+                        if (req.player_state == PLAYER_STATE.Play && video.paused) video.play();
+                    }, 1000);
                     send_response({type: 'player_update_ack'});
                 }
             }, 500);
