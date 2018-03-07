@@ -308,17 +308,11 @@ function start_lobby(done) {
                                 current_lobby.clients[client_id].url_params = current_url_params;
                                 current_lobby.clients[client_id].player_state = player_state;
                                 lifecycle_ping(function() {});
-                                console.log(current_lobby);
-                                done();
                         });
                     });
-                } else {
-                    current_lobby.clients[client_id].url_params = current_url_params;
-                    current_lobby.clients[client_id].player_state = player_state;
-                    lifecycle_ping(function() {});
-                    console.log(current_lobby);
-                    done();
                 }
+                done();
+                console.log(current_lobby);
             } else if (!data.success) {
                 console.log(data.msg);
             }
@@ -354,6 +348,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             } else {
                 
                 player_state = PLAYER_STATE.Inactive;
+                // Send lifecycle_stop
             }
 
             if (current_lobby) {
@@ -381,13 +376,15 @@ function msg_listener(req, sender, send_response) {
         } else if (req.type === 'start_lobby') {
             start_lobby(function() {
                 // This makes assumption that only 1 Netflix tab is open...
-                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {
-                        type: 'check_lifecycle'
-                    }, function(response) {
-                        default_response(response);
+                if (is_watching(current_url_params)) {
+                    chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, {
+                            type: 'check_lifecycle'
+                        }, function(response) {
+                            default_response(response);
+                        });
                     });
-                });
+                }
                 send_response({type:'start_lobby_ack', success: true});
             });
 
@@ -446,7 +443,7 @@ function msg_listener(req, sender, send_response) {
                 success: true
             });
         } else if (req.type === 'lifecycle') {
-            if (!current_lobby) {
+            if (!current_lobby || player_state == PLAYER_STATE.Inactive) {
                 send_response({
                     'type': 'lifecycle_ack',
                     'stop': true
