@@ -22,12 +22,11 @@ var timeout = false;
 var lifecycle_interval;
 
 function update_nf_player_time(progress) {
-
 }
 
 function update_nf_player_state(state) {
-    if (req.player_state == PLAYER_STATE.Pause && !get_video().paused) pause();
-    else if (req.player_state == PLAYER_STATE.Play && get_video().paused) play();
+    if (req.player_state == PLAYER_STATE.Pause && !get_video().paused) get_video().paused = false;
+    else if (req.player_state == PLAYER_STATE.Play && get_video().paused) get_video().play = true;
 }
 
 function update_player_state(state) {
@@ -44,16 +43,7 @@ function update_player_state(state) {
 }
 
 function get_video() {
-    return $('video')[0];
-}
-
-function play(callback) {
-    var promise = get_video().play();
-    if (promise !== undefined) {
-        promise.then(callback).catch(function(err) {
-            console.log(err);
-        });
-    }
+    return document.getElementsByTagName('video')[0];
 }
 
 function pause() {
@@ -70,8 +60,8 @@ function get_progress() {
         };
     }
     return {
-        'elapsed': video.currentTime,
-        'max': video.elapsed,
+        'elapsed': video.getCurrentTime(),
+        'max': video.getDuration(),
     }
 }
 
@@ -81,10 +71,8 @@ function is_loaded() {
 }
 
 function destroy() {
-    /**get_pause_play().removeEventListener('click', pause_play_click_listener);
-    document.removeEventListener('keyup', pause_play_keyup_listener);**/
-    get_video().off('play', video_play_listener);
-    get_video().off('pause', video_pause_listener);
+    get_video().removeEventListener('play', video_play_listener);
+    get_video().removeEventListener('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -100,10 +88,8 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    /**get_pause_play().addEventListener('click', pause_play_click_listener);
-    document.addEventListener('keyup', pause_play_keyup_listener);**/
-    get_video().on('play', video_play_listener);
-    get_video().on('pause', video_pause_listener);
+    get_video().addEventListener('play', video_play_listener);
+    get_video().addEventListener('pause', video_pause_listener);
 }
 
 function lifecycle() {
