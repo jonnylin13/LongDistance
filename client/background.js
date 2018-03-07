@@ -153,11 +153,14 @@ function connect_lobby(lobby_id, done) {
                         // Assuming only one tab of Netflix
                         chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                             chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
+
                                 chrome.tabs.sendMessage(tabs[0].id, {
                                     type: 'player_update',
                                     player_state: controller.player_state,
                                     progress: controller.progress
+
                                 }, function(response) {
+
                                     default_response(response);
                                     player_state = controller.player_state;
                                     current_lobby.clients[client_id].player_state = controller.player_state;
@@ -165,6 +168,7 @@ function connect_lobby(lobby_id, done) {
                                     current_url_params = controller.url_params;
                                     current_lobby.clients[client_id].url_params = controller.url_params;
                                     lifecycle_ping(function() {});
+
                                 });
                             });
                         });
@@ -333,6 +337,7 @@ function start_lobby(done) {
 
 /** Called when a chrome tab is updated */
 function tab_update_listener(tab_id, change_info, tab) {
+    console.log('tab update');
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
         chrome.pageAction.show(tab_id);
 
