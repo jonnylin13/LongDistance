@@ -140,7 +140,7 @@ function update_listener(event) {
                         });
             
                     } else {
-                        player_time_update(tabs[0].id, controller);
+                        player_state_update(tabs[0].id, controller);
                     }
                     c.player_state = controller.player_state;
                     player_state = controller.player_state;
