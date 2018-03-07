@@ -491,7 +491,9 @@ function msg_listener(req, sender, send_response) {
                     'stop': true
                 });
 
-                broadcast_update();
+                if (current_lobby.ctl_id == client_id) {
+                    broadcast_update();
+                }
                 return;
             }
             current_lobby.clients[client_id].progress = req.progress;

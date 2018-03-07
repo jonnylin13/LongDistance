@@ -183,7 +183,9 @@ function listen() {
                 client.url_params = data.url_params;
                 client.progress = data.progress;
 
-                broadcast_update();
+                if (client.id == lobbies[data.lobby_id].ctl_id) {
+                    broadcast_update();
+                }
 
                 ws.send(JSON.stringify({
                     type: 'broadcast_update_ack',
