@@ -337,8 +337,9 @@ function start_lobby(done) {
 
 /** Called when a chrome tab is updated */
 function tab_update_listener(tab_id, change_info, tab) {
+    if (!change_info.status || change_info.status != 'complete') return;
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
-        console.log(change_info);
+        console.log('tab update');
         chrome.pageAction.show(tab_id);
 
         var new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
