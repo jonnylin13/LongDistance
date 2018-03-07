@@ -105,10 +105,10 @@ function update_listener(event) {
     
                                         default_response(response);
                                         player_state = controller.player_state;
-                                        current_lobby.clients[client_id].player_state = controller.player_state;
-                                        current_lobby.clients[client_id].progress = controller.progress;
+                                        c.player_state = controller.player_state;
+                                        c.progress = controller.progress;
                                         current_url_params = controller.url_params;
-                                        current_lobby.clients[client_id].url_params = controller.url_params;
+                                        c.url_params = controller.url_params;
                                         lifecycle_ping(function() {});
     
                                     });
@@ -127,6 +127,11 @@ function update_listener(event) {
                             progress: controller.progress
                         }, function(response) {
                             default_response(response);
+                            player_state = controller.player_state;
+                            c.player_state = controller.player_state;
+                            c.progress = controller.progress;
+                            c.url_params = controller.url_params;
+                            lifecycle_ping(function() {});
                         });
                     }
                     c.player_state = controller.player_state;

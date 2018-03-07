@@ -142,11 +142,9 @@ function msg_listener(req, sender, send_response) {
                 if (is_loaded()) {
                     clearInterval(load);
                     var video = get_video();
-                    if (video) {
-                        video.currentTime = req.progress.elapsed;
-                        if (req.player_state == PLAYER_STATE.Play) video.paused = false;
-                        else video.paused = true;
-                    }
+                    video.currentTime = req.progress.elapsed;
+                    if (req.player_state == PLAYER_STATE.Play) video.paused = false;
+                    else video.paused = true;
                     send_response({type: 'player_update_ack'});
                 }
             }, 500);
