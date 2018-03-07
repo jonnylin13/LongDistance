@@ -140,7 +140,7 @@ function msg_listener(req, sender, send_response) {
         } else if (req.type === 'player_update') {
             var load = setInterval(function() {
                 var video = get_video();
-                if (video) {
+                if (video && !video.paused) {
                     clearInterval(load);
                     var video = get_video();
                     video.currentTime = req.progress.elapsed;
