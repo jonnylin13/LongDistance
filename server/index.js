@@ -24,13 +24,13 @@ function error(msg, ws) {
     console.log(msg);
 }
 
-function avg_duration(lobby_id, client_id) {
+function avg_elapsed(lobby_id, client_id) {
     var sum = 0;
     var count = 0;
     if (!lobbies[lobby_id]) return sum;
     for (var cid in lobbies[lobby_id].clients) {
         if (cid != client_id) {
-            sum += lobbies[lobby_id].clients[cid].progress.duration;
+            sum += lobbies[lobby_id].clients[cid].progress.elapsed;
             count++;
         }
     }
@@ -46,7 +46,11 @@ function lobby(id, ctl_id, player_state, url_params) {
     lobby.clients[ctl_id] = {
         'id': ctl_id,
         'player_state': player_state,
-        'url_params': url_params
+        'url_params': url_params,
+        'progress': {
+            'elapsed': 0,
+            'max': 0
+        }
     };
     return lobby;
 }
@@ -146,7 +150,7 @@ function listen() {
                 client.url_params = data.url_params;
                 client.progress = data.progress;
 
-                if (client.progress.duration - avg_duration(data.lobby_id, client.id) > 5) {
+                if (client.progress.elapsed - avg_elapsed(data.lobby_id, client.id) > 5) {
                     ws.send(JSON.stringify({
                         type: 'lifecycle_ack',
                         stop: false,
