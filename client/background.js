@@ -105,7 +105,7 @@ function player_state_update(tab_id, controller) {
     generic_player_update(tab_id, controller, 'player_state_update');
 }
 
-function player_time_update() {
+function player_time_update(tab_id) {
     generic_player_update(tab_id, controller, 'player_time_update');
 }
 
