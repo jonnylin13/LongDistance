@@ -60,8 +60,8 @@ function get_progress() {
         };
     }
     return {
-        'elapsed': video.getCurrentTime(),
-        'max': video.getDuration(),
+        'elapsed': video.currentTime,
+        'max': video.elapsed,
     }
 }
 
