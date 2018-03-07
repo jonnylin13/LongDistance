@@ -32,6 +32,13 @@ var client_id;
 var current_lobby; 
 var ws;
 
+function start_player(tab_id, callback) {
+    chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
+        chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);  
+        callback();  
+    });
+}
+
 function default_response(response) {
     if (response && response.type) console.log(response.type);
 }
@@ -82,15 +89,32 @@ function update_listener(event) {
                 chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                     if (current_url_params != controller.url_params) {
                         chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
-                            chrome.tabs.sendMessage(tabs[0].id, {
-                                type: 'player_update',
-                                player_state: controller.player_state,
-                                progress: controller.progress
-                            }, function(response) {
-                                default_response(response);
-                                current_url_params = controller.url_params;
-                                c.url_params = controller.url_params;
-                            });
+
+                            var listener = function (tab_id, change_info, tab) {
+                                if (!change_info.status || change_info.status != 'complete') return;
+                                if (tab_id == tabs[0].id) {
+                                    chrome.tabs.sendMessage(tabs[0].id, {
+                                        type: 'player_update',
+                                        player_state: controller.player_state,
+                                        progress: controller.progress
+    
+                                    }, function(response) {
+    
+                                        default_response(response);
+                                        player_state = controller.player_state;
+                                        current_lobby.clients[client_id].player_state = controller.player_state;
+                                        current_lobby.clients[client_id].progress = controller.progress;
+                                        current_url_params = controller.url_params;
+                                        current_lobby.clients[client_id].url_params = controller.url_params;
+                                        lifecycle_ping(function() {});
+    
+                                    });
+                                }
+                                chrome.tabs.onUpdated.removeListener(listener);
+                            };
+
+                            chrome.tabs.onUpdated.addListener(listener);
+
                         });
             
                     } else {
@@ -154,22 +178,30 @@ function connect_lobby(lobby_id, done) {
                         chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                             chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                                chrome.tabs.sendMessage(tabs[0].id, {
-                                    type: 'player_update',
-                                    player_state: controller.player_state,
-                                    progress: controller.progress
+                                var listener = function (tab_id, change_info, tab) {
+                                    if (!change_info.status || change_info.status != 'complete') return;
+                                    if (tab_id == tabs[0].id) {
+                                        chrome.tabs.sendMessage(tabs[0].id, {
+                                            type: 'player_update',
+                                            player_state: controller.player_state,
+                                            progress: controller.progress
+        
+                                        }, function(response) {
+        
+                                            default_response(response);
+                                            player_state = controller.player_state;
+                                            current_lobby.clients[client_id].player_state = controller.player_state;
+                                            current_lobby.clients[client_id].progress = controller.progress;
+                                            current_url_params = controller.url_params;
+                                            current_lobby.clients[client_id].url_params = controller.url_params;
+                                            lifecycle_ping(function() {});
+        
+                                        });
+                                    }
+                                    chrome.tabs.onUpdated.removeListener(listener);
+                                };
 
-                                }, function(response) {
-
-                                    default_response(response);
-                                    player_state = controller.player_state;
-                                    current_lobby.clients[client_id].player_state = controller.player_state;
-                                    current_lobby.clients[client_id].progress = controller.progress;
-                                    current_url_params = controller.url_params;
-                                    current_lobby.clients[client_id].url_params = controller.url_params;
-                                    lifecycle_ping(function() {});
-
-                                });
+                                chrome.tabs.onUpdated.addListener(listener);
                             });
                         });
                 }
@@ -349,9 +381,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             }
             if (is_watching(new_url_params)) {
 
-                chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
-                    chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);    
-                });
+                start_player(tab_id, function() {});
 
             } else {
                 
