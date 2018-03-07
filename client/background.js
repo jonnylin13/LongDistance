@@ -403,7 +403,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             } else {
                 
                 player_state = PLAYER_STATE.Inactive;
-                if (current_lobby.ctl_id != client_id) disconnect(function() {});
+                if (current_lobby && current_lobby.ctl_id != client_id) disconnect(function() {});
             }
 
             if (current_lobby) {
