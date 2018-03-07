@@ -305,14 +305,20 @@ function start_lobby(done) {
                         }, function(response) {
                             if (response && response.type == 'get_progress_ack') 
                                 current_lobby.clients[client_id].progress = response.progress;
+                                current_lobby.clients[client_id].url_params = current_url_params;
+                                current_lobby.clients[client_id].player_state = player_state;
+                                lifecycle_ping(function() {});
+                                console.log(current_lobby);
+                                done();
                         });
                     });
+                } else {
+                    current_lobby.clients[client_id].url_params = current_url_params;
+                    current_lobby.clients[client_id].player_state = player_state;
+                    lifecycle_ping(function() {});
+                    console.log(current_lobby);
+                    done();
                 }
-                current_lobby.clients[client_id].url_params = current_url_params;
-                current_lobby.clients[client_id].player_state = player_state;
-                lifecycle_ping(function() {});
-                console.log(current_lobby);
-                done();
             } else if (!data.success) {
                 console.log(data.msg);
             }
