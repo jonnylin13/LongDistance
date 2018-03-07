@@ -339,7 +339,6 @@ function start_lobby(done) {
 function tab_update_listener(tab_id, change_info, tab) {
     if (!change_info.status || change_info.status != 'complete') return;
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
-        console.log('tab update');
         chrome.pageAction.show(tab_id);
 
         var new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
@@ -351,7 +350,6 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
 
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
-                    if (chrome.runtime.lastError || !results || !results.length) return;
                     chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);    
                 });
 
