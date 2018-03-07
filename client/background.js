@@ -216,7 +216,7 @@ function connect_lobby(lobby_id, done) {
     };
 }
 
-function ws_send_update_generic() {
+function ws_send_update_generic(type) {
     ws.send(
         JSON.stringify({
             'type': type,
@@ -233,10 +233,10 @@ function send_update_generic(type) {
     if (!ws) {
         ws = new WebSocket(ws_url);
         ws.onopen = function() {
-            ws_send_update_generic();
+            ws_send_update_generic(type);
         }
     } else {
-        ws_send_update_generic();
+        ws_send_update_generic(type);
     }
 }
 
