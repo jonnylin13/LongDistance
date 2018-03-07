@@ -35,8 +35,8 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    if (req.player_state == PLAYER_STATE.Pause && !get_video().paused) get_video().paused = false;
-    else if (req.player_state == PLAYER_STATE.Play && get_video().paused) get_video().play = true;
+    if (state == PLAYER_STATE.Pause && !get_video().paused) get_video().paused = false;
+    else if (state == PLAYER_STATE.Play && get_video().paused) get_video().play = true;
 }
 
 function update_player_state(state) {
