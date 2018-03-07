@@ -181,13 +181,13 @@ function msg_listener(req, sender, send_response) {
                     progress: get_progress()
                 });
         } else if (req.type === 'timeout') {
-            pause();
+            /**pause();
             setTimeout(function() {
                 play();
             }, 5000);
             send_response({
                 type: 'timeout_ack'
-            });
+            });**/
         }
     } 
 }
