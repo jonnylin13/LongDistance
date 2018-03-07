@@ -139,11 +139,16 @@ function msg_listener(req, sender, send_response) {
                 lifecycle_interval = setInterval(lifecycle, 5000);
             }
         } else if (req.type === 'player_update') {
-            var video = get_video();
-            video.currentTime = req.progress.elapsed;
-            if (req.player_state == PLAYER_STATE.Play) video.paused = false;
-            else video.paused = true;
-            send_response({type: 'player_update_ack'});
+            var load = setInterval(function() {
+                if (is_loaded()) {
+                    clearInterval(load);
+                    var video = get_video();
+                    video.currentTime = req.progress.elapsed;
+                    if (req.player_state == PLAYER_STATE.Play) video.paused = false;
+                    else video.paused = true;
+                    send_response({type: 'player_update_ack'});
+                }
+            }, 500);
         } else if (req.type === 'get_progress') {
             send_response({
                 type: 'get_progress_ack',

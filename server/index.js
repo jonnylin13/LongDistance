@@ -31,6 +31,7 @@ function lobby(id, ctl_id, player_state, url_params) {
         'clients': {}
     };
     lobby.clients[ctl_id] = {
+        'id': ctl_id,
         'player_state': player_state,
         'url_params': url_params
     };
