@@ -72,7 +72,7 @@ function update_listener(event) {
     var data = JSON.parse(event.data);
 
      if (data.type == 'update') {
-        if (current_id == current_lobby.ctl_id) return;
+        if (client_id == current_lobby.ctl_id) return;
         var lobbies = data.lobbies;
 
         for (var l in lobbies) {
