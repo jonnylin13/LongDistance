@@ -397,7 +397,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
 
             start_player(tab_id, function() {
-                if (current_lobby.ctl_id == client_id) broadcast = true;
+                if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
             });
 
             } else {
@@ -450,8 +450,8 @@ function msg_listener(req, sender, send_response) {
             var result = false;
             if (player_state != req.new_state)  { // Handle duplicate messages
                 player_state = req.new_state;
-                current_lobby.clients[client_id].progress = req.progress;
-                result = true;
+                if (current_lobby) current_lobby.clients[client_id].progress = req.progress;
+
                 // CHECK THIS TOMORROW
                 if (current_lobby && client_id) {
                     if (current_lobby.ctl_id == client_id) {
@@ -460,6 +460,7 @@ function msg_listener(req, sender, send_response) {
                         }
                     }
                 }
+                result = true;
             }
 
             send_response({
@@ -508,7 +509,7 @@ function msg_listener(req, sender, send_response) {
                     'stop': true
                 });
 
-                if (current_lobby.ctl_id == client_id) {
+                if (current_lobby && current_lobby.ctl_id == client_id) {
                     broadcast_update();
                 }
                 return;

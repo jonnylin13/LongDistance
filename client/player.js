@@ -37,11 +37,6 @@ function get_video() {
     return document.getElementsByTagName('video')[0];
 }
 
-/** Returns the button control element from NF by class name, undefined if NF player not loaded */
-function get_controls() {
-    return document.getElementsByClassName('PlayerControls--button-control-row')[0];
-}
-
 /** Returns the progress from NF player */
 function get_progress() {
     var video = get_video();
@@ -59,46 +54,32 @@ function get_progress() {
 
 /** Returns true if NF player is loaded */
 function is_loaded() {
-    return document.getElementsByClassName('PlayerControls--button-control-row').length > 0;
-}
-
-/** Returns the pause play button element */
-function get_pause_play() {
-    return get_controls().children[0];
-}
-
-/** Triggered when pause play button is clicked
- *  Will set the player state manually as a re-calibration (if keyup fails)
- *  Because the click event is called after the element is changed, Pause when the element is Play
- */ 
-function pause_play_click_listener($event) {
-    console.log("click");
-    if($event.target.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Play);
-    else if ($event.target.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Pause);
-}
-
-/** Triggered when NF detects a keyup  */
-function pause_play_keyup_listener($event) {
-    if ($event.keyCode == 32) {
-        console.log("space");
-        var el = get_pause_play();
-        // This will produce duplicate messages, handle this in background.js recv
-        if (el.classList.contains('button-nfplayerPause')) update_player_state(PLAYER_STATE.Play);
-        else if (el.classList.contains('button-nfplayerPlay')) update_player_state(PLAYER_STATE.Pause);
-    }
+    return (get_video() && get_video().readyState == 4);
 }
 
 function destroy() {
-    get_pause_play().removeEventListener('click', pause_play_click_listener);
-    document.removeEventListener('keyup', pause_play_keyup_listener);
+    /**get_pause_play().removeEventListener('click', pause_play_click_listener);
+    document.removeEventListener('keyup', pause_play_keyup_listener);**/
+    get_video().removeEventListener('play', video_play_listener);
+    get_video().removeEventListener('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
+}
+
+function video_play_listener($event) {
+    update_player_state(PLAYER_STATE.Play);
+}
+
+function video_pause_listener($event) {
+    update_player_state(PLAYER_STATE.Pause);
 }
 
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    get_pause_play().addEventListener('click', pause_play_click_listener);
-    document.addEventListener('keyup', pause_play_keyup_listener);
+    /**get_pause_play().addEventListener('click', pause_play_click_listener);
+    document.addEventListener('keyup', pause_play_keyup_listener);**/
+    get_video().addEventListener('play', video_play_listener);
+    get_video().addEventListener('pause', video_pause_listener);
 }
 
 function lifecycle() {
@@ -140,16 +121,12 @@ function msg_listener(req, sender, send_response) {
         } else if (req.type === 'player_update') {
             var load = setInterval(function() {
                 var video = get_video();
-                if (video && !video.paused) {
+                if (is_loaded()) {
                     clearInterval(load);
-                    var video = get_video();
-                    // FIX THIS
-                    var listener = video.addEventListener('onplaying', function() {
-                        video.currentTime = req.progress.elapsed;
-                        if (req.player_state == PLAYER_STATE.Pause) video.pause();
-                        send_response({type: 'player_update_ack'});
-                        video.removeEventListener(listener);
-                    });
+                    video.currentTime = req.progress.elapsed;
+                    if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
+                    if (req.player_state == PLAYER_STATE.Play && video.paused) video.play();
+                    send_response({type: 'player_update_ack'});
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
@@ -158,13 +135,13 @@ function msg_listener(req, sender, send_response) {
                     progress: get_progress()
                 });
         } else if (req.type === 'timeout') {
-            /**get_video().pause();
+            get_video().pause();
             setTimeout(function() {
                 get_video().play();
             }, 5000);
             send_response({
                 type: 'timeout_ack'
-            });**/
+            });
         }
     } 
 }
@@ -181,8 +158,8 @@ function register_listeners() {
 }
 
 function check_player_state() {
-    if (get_pause_play().classList.contains('button-nfPlayerPlay')) update_player_state(PLAYER_STATE.Pause);
-    else update_player_state(PLAYER_STATE.Play);
+    if (get_video().paused) update_player_state(PLAYER_STATE.Pause);
+    else if (!get_video().paused) update_player_state(PLAYER_STATE.Play);
 }
 
 /** Main function (entry point) */
