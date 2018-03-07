@@ -34,8 +34,10 @@ var ws;
 
 function start_player(tab_id, callback) {
     chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
-        chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, default_response);  
-        callback();  
+        chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
+            default_response(response);
+            callback();  
+        });  
     });
 }
 
@@ -376,12 +378,11 @@ function tab_update_listener(tab_id, change_info, tab) {
         var new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
-            if (current_lobby && current_lobby.ctl_id == client_id) {
-                broadcast_update();
-            }
             if (is_watching(new_url_params)) {
 
-                start_player(tab_id, function() {});
+            start_player(tab_id, function() {
+                if (current_lobby && current_lobby.ctl_id == client_id) broadcast_update();
+            });
 
             } else {
                 
