@@ -143,11 +143,13 @@ function msg_listener(req, sender, send_response) {
                 if (video && !video.paused) {
                     clearInterval(load);
                     var video = get_video();
-                    video.currentTime = req.progress.elapsed;
-                    console.log(video.currentTime);
-                    if (req.player_state == PLAYER_STATE.Play) video.play();
-                    else if (req.player_state == PLAYER_STATE.Pause) video.pause();
-                    send_response({type: 'player_update_ack'});
+                    // FIX THIS
+                    var listener = video.addEventListener('onplaying', function() {
+                        video.currentTime = req.progress.elapsed;
+                        if (req.player_state == PLAYER_STATE.Pause) video.pause();
+                        send_response({type: 'player_update_ack'});
+                        video.removeEventListener(listener);
+                    });
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
