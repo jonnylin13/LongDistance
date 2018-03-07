@@ -136,7 +136,7 @@ function listen() {
                     type: 'lifecycle_ack',
                     stop: false
                 }));
-
+                console.log('lifecycle:');
                 console.log(client);
 
             } else if (data.type == 'connect_lobby') {

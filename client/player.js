@@ -130,14 +130,23 @@ function msg_listener(req, sender, send_response) {
         console.log(req.type);
         if (req.type === 'register_listeners') {
 
-            register_DOM_listeners(false);
-            lifecycle_interval = setInterval(lifecycle, 5000);
-            send_response({type: 'register_listeners_ack'});
+            var load = setInterval(function() {
+                if (is_loaded()) {
+                    clearInterval(load);
+                    register_DOM_listeners(false);
+                    if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
+                    send_response({type: 'register_listeners_ack'});
+                }
+            }, 500);
 
         } else if (req.type === 'check_lifecycle') {
-            if (!lifecycle_interval) {
-                lifecycle_interval = setInterval(lifecycle, 5000);
-            }
+            var load = setInterval(function() {
+                if (is_loaded()) {
+                    clearInterval(load);
+                    if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
+                    send_response({type: 'check_lifecycle_ack'});
+                }
+            }, 500);
         } else if (req.type === 'player_update') {
             var load = setInterval(function() {
                 if (is_loaded()) {
@@ -150,10 +159,15 @@ function msg_listener(req, sender, send_response) {
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
-            send_response({
-                type: 'get_progress_ack',
-                progress: get_progress()
-            });
+            var load = setInterval(function() {
+                if (is_loaded()) {
+                    clearInterval(load);
+                    send_response({
+                        type: 'get_progress_ack',
+                        progress: get_progress()
+                    });
+                }
+            }, 500);
         }
     } 
 }
