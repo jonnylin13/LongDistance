@@ -273,6 +273,15 @@ function lifecycle_ping(done) {
         var data = JSON.parse(event.data);
         if (data.type == 'lifecycle_ack') {
             done(data.stop);
+            if (data.timeout) {
+                chrome.tabs.query({title:'Netflix'}, function(tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, {
+                        type: 'timeout'
+                    }, function(response) {
+                        default_response(response);
+                    });
+                });
+            }
         } else {
             update_listener(event);
         }
@@ -394,7 +403,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             } else {
                 
                 player_state = PLAYER_STATE.Inactive;
-                // Send lifecycle_stop
+                if (current_lobby.ctl_id != client_id) disconnect(function() {});
             }
 
             if (current_lobby) {

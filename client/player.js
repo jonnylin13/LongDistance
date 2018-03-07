@@ -149,16 +149,18 @@ function msg_listener(req, sender, send_response) {
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
-            console.log('get_progress');
-            var load = setInterval(function() {
-                if (is_loaded()) {
-                    clearInterval(load);
-                    send_response({
-                        type: 'get_progress_ack',
-                        progress: get_progress()
-                    });
-                }
-            }, 500);
+                send_response({
+                    type: 'get_progress_ack',
+                    progress: get_progress()
+                });
+        } else if (req.type === 'timeout') {
+            get_video().paused = true;
+            setTimeout(function() {
+                get_video().paused = false;
+            }, 5000);
+            send_response({
+                type: 'timeout_ack'
+            });
         }
     } 
 }

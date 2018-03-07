@@ -24,6 +24,19 @@ function error(msg, ws) {
     console.log(msg);
 }
 
+function avg_duration(lobby_id, client_id) {
+    var sum = 0;
+    var count = 0;
+    if (!lobbies[lobby_id]) return sum;
+    for (var cid in lobbies[lobby_id].clients) {
+        if (cid != client_id) {
+            sum += lobbies[lobby_id].clients[cid].progress.duration;
+            count++;
+        }
+    }
+    return sum / count;
+}
+
 function lobby(id, ctl_id, player_state, url_params) {
     var lobby = {
         'id': id,
@@ -133,10 +146,18 @@ function listen() {
                 client.url_params = data.url_params;
                 client.progress = data.progress;
 
-                ws.send(JSON.stringify({
-                    type: 'lifecycle_ack',
-                    stop: false
-                }));
+                if (client.progress.duration - avg_duration(data.lobby_id, client.id) > 5) {
+                    ws.send(JSON.stringify({
+                        type: 'lifecycle_ack',
+                        stop: false,
+                        timeout: true
+                    }));
+                } else {
+                    ws.send(JSON.stringify({
+                        type: 'lifecycle_ack',
+                        stop: false
+                    }));
+                }
                 console.log(client);
 
             } else if (data.type == 'connect_lobby') {
