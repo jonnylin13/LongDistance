@@ -144,6 +144,11 @@ function msg_listener(req, sender, send_response) {
             if (req.player_state == PLAYER_STATE.Play) video.paused = false;
             else video.paused = true;
             send_response({type: 'player_update_ack'});
+        } else if (req.type === 'get_progress') {
+            send_response({
+                type: 'get_progress_ack',
+                progress: get_progress()
+            });
         }
     } 
 }
