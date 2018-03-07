@@ -14,6 +14,8 @@ Be sure to run `npm install` in `server/`
 
 * Run the server on localhost using `node server/index`
 
+The client will not connect if you have not configured the WebSocket url string const `ws_url` in background.js
+
 # Structure
 * client/background.js
 
