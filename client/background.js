@@ -383,7 +383,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
 
             start_player(tab_id, function() {
-                broadcast = true;
+                if (current_lobby.ctl_id == client_id) broadcast = true;
             });
 
             } else {
