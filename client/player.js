@@ -18,6 +18,7 @@ const PLAYER_STATE = Object.freeze({
     "Pause": 0
 });
 
+var timeout = false;
 var lifecycle_interval;
 
 function update_player_state(state) {
@@ -65,6 +66,7 @@ function destroy() {
     clearInterval(lifecycle_interval);
 }
 
+// MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
 function video_play_listener($event) {
     update_player_state(PLAYER_STATE.Play);
 }
@@ -118,18 +120,34 @@ function msg_listener(req, sender, send_response) {
                     send_response({type: 'check_lifecycle_ack'});
                 }
             }, 500);
-        } else if (req.type === 'player_update') {
+        } else if (req.type === 'full_player_update') {
             var load = setInterval(function() {
                 var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
                     clearInterval(load);
-                    setTimeout(function() {
-                        video.currentTime = req.progress.elapsed + 5;
-                        if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
-                        if (req.player_state == PLAYER_STATE.Play && video.paused) video.play();
-                    }, 1000);
-                    send_response({type: 'player_update_ack'});
+                    video.currentTime = req.progress.elapsed + 5;
+                    if (req.player_state == PLAYER_STATE.Pause && !video.paused) video.pause();
+                    video.autoplay = true;
+                    send_response({type: 'full_player_update_ack'});
+                }
+            }, 500);
+        } else if (req.type === 'player_state_update') {
+            var load = setInterval(function() {
+                var video = get_video();
+                if (is_loaded()) { 
+                    // FIX THIS
+                   
+                    send_response({type: 'player_state_update_ack'});
+                }
+            }, 500);
+        } else if (req.type === 'player_time_update') {
+            var load = setInterval(function() {
+                var video = get_video();
+                if (is_loaded()) { 
+                    // FIX THIS
+                    
+                    send_response({type: 'player_time_update_ack'});
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
