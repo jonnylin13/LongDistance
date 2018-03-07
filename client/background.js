@@ -105,7 +105,7 @@ function player_state_update(tab_id, controller) {
     generic_player_update(tab_id, controller, 'player_state_update');
 }
 
-function player_time_update(tab_id) {
+function player_time_update(tab_id, controller) {
     generic_player_update(tab_id, controller, 'player_time_update');
 }
 
@@ -140,7 +140,7 @@ function update_listener(event) {
                         });
             
                     } else {
-                        player_time_update(tabs[0].id);
+                        player_time_update(tabs[0].id), controller;
                     }
                     c.player_state = controller.player_state;
                     player_state = controller.player_state;
@@ -202,7 +202,7 @@ function connect_lobby(lobby_id, done) {
                                 chrome.tabs.onUpdated.addListener(listener);
                                 });
                             } else {
-                                player_time_update(tabs[0].id);
+                                player_time_update(tabs[0].id), controller;
                             }
                         });
                 }
