@@ -30,6 +30,7 @@ function avg_elapsed(lobby_id, client_id) {
     if (!lobbies[lobby_id]) return sum;
     for (var cid in lobbies[lobby_id].clients) {
         if (cid != client_id) {
+            if (!lobbies[lobby_id].clients[cid].progress) continue;
             sum += lobbies[lobby_id].clients[cid].progress.elapsed;
             count++;
         }

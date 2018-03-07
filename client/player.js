@@ -61,7 +61,7 @@ function get_progress() {
     }
     return {
         'elapsed': video.currentTime,
-        'max': video.elapsed,
+        'max': video.duration,
     }
 }
 
