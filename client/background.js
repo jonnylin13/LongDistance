@@ -72,6 +72,7 @@ function update_listener(event) {
     var data = JSON.parse(event.data);
 
      if (data.type == 'update') {
+        if (current_id == current_lobby.ctl_id) return;
         var lobbies = data.lobbies;
 
         for (var l in lobbies) {
@@ -97,6 +98,14 @@ function update_listener(event) {
                             default_response(response);
                         });
                     }
+                    var c = current_lobby.clients[client_id];
+                    current_url_params = controller.url_params;
+                    c.url_params = controller.url_params;
+                    c.player_state = controller.player_state;
+                    c.progress = controller.progress;
+
+                    lifecycle_ping(function() {});
+                    
                 });
             }
         }
@@ -156,7 +165,7 @@ function connect_lobby(lobby_id, done) {
     };
 }
 
-function send_update(type, done) {
+function send_update(type) {
     if (!ws) {
         ws = new WebSocket(ws_url);
         ws.onopen = function() {
@@ -302,12 +311,10 @@ function tab_update_listener(tab_id, change_info, tab) {
         var new_url_params = tab.url.split('netflix.com/')[1];
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
-
+            if (current_lobby && current_lobby.ctl_id == client_id) {
+                broadcast_update();
+            }
             if (is_watching(new_url_params)) {
-
-                if (current_lobby && current_lobby.ctl_id == client_id) {
-                    broadcast_update();
-                }
 
                 chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
                     if (chrome.runtime.lastError || !results || !results.length) return;
@@ -315,6 +322,7 @@ function tab_update_listener(tab_id, change_info, tab) {
                 });
 
             } else {
+                
                 player_state = PLAYER_STATE.Inactive;
             }
 

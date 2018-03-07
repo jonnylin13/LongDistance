@@ -172,6 +172,7 @@ function listen() {
                     return;
                 }
                 
+                // We know the client is the controller here
                 var client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
