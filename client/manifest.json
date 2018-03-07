@@ -11,7 +11,7 @@
       "http://jlin.club:3000/start_lobby"
   ],
   "background": {
-      "scripts": ["background.js"]
+      "scripts": ["background.js", "scripts/jquery-3.3.1.js"]
   },
   "page_action": {
       "default_popup": "popup.html"

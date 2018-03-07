@@ -22,7 +22,7 @@ var timeout = false;
 var lifecycle_interval;
 
 function update_nf_player_time(progress) {
-    get_video().seek(progress.elapsed + 5);
+
 }
 
 function update_nf_player_state(state) {
@@ -44,7 +44,7 @@ function update_player_state(state) {
 }
 
 function get_video() {
-    return window.netflix.cadmium.objects.videoPlayer();
+    return $('video')[0];
 }
 
 function play(callback) {
@@ -70,8 +70,8 @@ function get_progress() {
         };
     }
     return {
-        'elapsed': video.getCurrentTime(),
-        'max': video.getDuration(),
+        'elapsed': video.currentTime,
+        'max': video.elapsed,
     }
 }
 
@@ -83,8 +83,8 @@ function is_loaded() {
 function destroy() {
     /**get_pause_play().removeEventListener('click', pause_play_click_listener);
     document.removeEventListener('keyup', pause_play_keyup_listener);**/
-    get_video().removeEventListener('play', video_play_listener);
-    get_video().removeEventListener('pause', video_pause_listener);
+    get_video().off('play', video_play_listener);
+    get_video().off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -102,8 +102,8 @@ function register_DOM_listeners(first_call) {
     if (!first_call) destroy();
     /**get_pause_play().addEventListener('click', pause_play_click_listener);
     document.addEventListener('keyup', pause_play_keyup_listener);**/
-    get_video().addEventListener('play', video_play_listener);
-    get_video().addEventListener('pause', video_pause_listener);
+    get_video().on('play', video_play_listener);
+    get_video().on('pause', video_pause_listener);
 }
 
 function lifecycle() {
