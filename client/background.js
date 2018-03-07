@@ -31,6 +31,7 @@ var popup_state = POPUP_STATE.OutLobby;
 var client_id;
 var current_lobby; 
 var ws;
+var broadcast = false;
 
 function start_player(tab_id, callback) {
     chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
@@ -345,11 +346,12 @@ function start_lobby(done) {
                         chrome.tabs.sendMessage(tabs[0].id, {
                             'type': 'get_progress'
                         }, function(response) {
-                            if (response && response.type == 'get_progress_ack') 
+                            if (response && response.type == 'get_progress_ack') {
                                 current_lobby.clients[client_id].progress = response.progress;
                                 current_lobby.clients[client_id].url_params = current_url_params;
                                 current_lobby.clients[client_id].player_state = player_state;
                                 lifecycle_ping(function() {});
+                            }
                         });
                     });
                 }
@@ -381,7 +383,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
 
             start_player(tab_id, function() {
-                if (current_lobby && current_lobby.ctl_id == client_id) broadcast_update();
+                broadcast = true;
             });
 
             } else {
@@ -431,6 +433,7 @@ function msg_listener(req, sender, send_response) {
             var result = false;
             if (player_state != req.new_state)  { // Handle duplicate messages
                 player_state = req.new_state;
+                current_lobby.clients[client_id].progress = req.progress;
                 result = true;
                 // CHECK THIS TOMORROW
                 if (current_lobby && client_id) {
@@ -487,15 +490,26 @@ function msg_listener(req, sender, send_response) {
                     'type': 'lifecycle_ack',
                     'stop': true
                 });
+
+                broadcast_update();
                 return;
             }
             current_lobby.clients[client_id].progress = req.progress;
-            lifecycle_ping(function(stop) {
+            if (broadcast) {
+                broadcast_update();
                 send_response({
                     'type': 'lifecycle_ack',
-                    'stop': stop
+                    'stop': false
                 });
-            });
+                broadcast = false;
+            } else {
+                lifecycle_ping(function(stop) {
+                    send_response({
+                        'type': 'lifecycle_ack',
+                        'stop': stop
+                    });
+                });
+            }
         } else if (req.type === 'connect_lobby') {
             connect_lobby(req.lobby_id, function(success) {
                 send_response({

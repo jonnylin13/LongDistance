@@ -74,6 +74,7 @@ function listen() {
 
             var data = JSON.parse(msg);
             if (!data) return;
+            console.log(data.type);
 
             // CLIENT MESSAGES
             if (data.type == 'start_lobby') {
@@ -136,7 +137,6 @@ function listen() {
                     type: 'lifecycle_ack',
                     stop: false
                 }));
-                console.log('lifecycle:');
                 console.log(client);
 
             } else if (data.type == 'connect_lobby') {
@@ -189,7 +189,6 @@ function listen() {
                     type: 'broadcast_update_ack',
                     success: true
                 }));
-
                 console.log(client);
             }
 

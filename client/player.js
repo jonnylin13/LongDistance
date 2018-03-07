@@ -23,7 +23,8 @@ var lifecycle_interval;
 function update_player_state(state) {
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
-        'new_state': state
+        'new_state': state,
+        'progress': get_progress()
     }, function(response) {
         if (response.success) {
             console.log(response.type);
@@ -44,17 +45,16 @@ function get_controls() {
 /** Returns the progress from NF player */
 function get_progress() {
     var video = get_video();
-    var progress = {
-        'elapsed': video.currentTime,
-        'max': video.duration,
-    }
     if (!video) {
-        progress = {
+        return {
             'elapsed': 0,
             'max': 0
         };
     }
-    return progress;
+    return {
+        'elapsed': video.currentTime,
+        'max': video.duration,
+    }
 }
 
 /** Returns true if NF player is loaded */
@@ -95,19 +95,8 @@ function destroy() {
 }
 
 function register_DOM_listeners(first_call) {
-    if (!first_call) {
-        var load = setInterval(function() {
-            if (is_loaded()) {
-                check_player_state();
-                clearInterval(load);
-                destroy();
-                get_pause_play().addEventListener('click', pause_play_click_listener);
-                document.addEventListener('keyup', pause_play_keyup_listener);
-            }
-        }, 500);
-        return;
-    }
     check_player_state();
+    if (!first_call) destroy();
     get_pause_play().addEventListener('click', pause_play_click_listener);
     document.addEventListener('keyup', pause_play_keyup_listener);
 }
@@ -117,6 +106,7 @@ function lifecycle() {
         'type': 'lifecycle',
         'progress': get_progress()
     }, function(response) {
+        console.log(response);
         if (response && response.stop) {
             clearInterval(lifecycle_interval);
             lifecycle_interval = null;
@@ -152,13 +142,16 @@ function msg_listener(req, sender, send_response) {
                 if (is_loaded()) {
                     clearInterval(load);
                     var video = get_video();
-                    video.currentTime = req.progress.elapsed;
-                    if (req.player_state == PLAYER_STATE.Play) video.paused = false;
-                    else video.paused = true;
+                    if (video) {
+                        video.currentTime = req.progress.elapsed;
+                        if (req.player_state == PLAYER_STATE.Play) video.paused = false;
+                        else video.paused = true;
+                    }
                     send_response({type: 'player_update_ack'});
                 }
             }, 500);
         } else if (req.type === 'get_progress') {
+            console.log('get_progress');
             var load = setInterval(function() {
                 if (is_loaded()) {
                     clearInterval(load);
