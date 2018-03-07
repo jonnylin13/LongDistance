@@ -142,10 +142,10 @@ function msg_listener(req, sender, send_response) {
                 if (is_loaded()) {
                     
                     clearInterval(load);
-                    /**var video = get_video();
+                    var video = get_video();
                     video.currentTime = req.progress.elapsed;
-                    if (req.player_state == PLAYER_STATE.Play) video.paused = false;
-                    else video.paused = true;**/
+                    if (req.player_state == PLAYER_STATE.Play) video.play();
+                    else video.pause();
                     send_response({type: 'player_update_ack'});
                 }
             }, 500);
@@ -155,13 +155,13 @@ function msg_listener(req, sender, send_response) {
                     progress: get_progress()
                 });
         } else if (req.type === 'timeout') {
-            /**get_video().paused = true;
+            get_video().pause();
             setTimeout(function() {
-                get_video().paused = false;
+                get_video().play();
             }, 5000);
             send_response({
                 type: 'timeout_ack'
-            });**/
+            });
         }
     } 
 }
