@@ -336,7 +336,7 @@ function tab_update_listener(tab_id, change_info, tab) {
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
         chrome.pageAction.show(tab_id);
 
-        var new_url_params = tab.url.split('netflix.com/')[1];
+        var new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
             if (current_lobby && current_lobby.ctl_id == client_id) {
