@@ -155,7 +155,7 @@ function update_listener(event) {
 
 }
 
-function ws_send_connect_lobby() {
+function ws_send_connect_lobby(lobby_id) {
     ws.send(
         JSON.stringify({
             'type': 'connect_lobby',
@@ -171,10 +171,10 @@ function connect_lobby(lobby_id, done) {
     if (!ws) {
         ws = new WebSocket(ws_url);
         ws.onopen = function() {
-            ws_send_connect_lobby();
+            ws_send_connect_lobby(lobby_id);
         }
     } else {
-        ws_send_connect_lobby();
+        ws_send_connect_lobby(lobby_id);
     }
 
     ws.onmessage = function(event) {
