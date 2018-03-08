@@ -90,21 +90,21 @@ function pause() {
 
 /** Returns the progress from NF player */
 function get_progress() {
-    if (!video) {
+    if (!$('video')[0]) {
         return {
             'elapsed': 0,
             'max': 0
         };
     }
     return {
-        'elapsed': $('video').currentTime,
-        'max': $('video').duration,
+        'elapsed': $('video')[0].currentTime,
+        'max': $('video')[0].duration,
     }
 }
 
 /** Returns true if NF player is loaded */
 function is_loaded() {
-    return ($('video') && $('video').readyState == 4);
+    return ($('video')[0] && $('video')[0] .readyState == 4);
 }
 
 function destroy() {
@@ -125,7 +125,6 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    console.log($().jquery);
     $('video').on('play', video_play_listener);
     $('video').on('pause', video_pause_listener);
 }
@@ -213,8 +212,7 @@ function msg_listener(req, sender, send_response) {
  *  Called after the main function determines NF player has been loaded
  */
 function register_listeners() {
-
-    console.log($().jquery);
+    
     register_DOM_listeners(true);
     lifecycle_interval = setInterval(lifecycle, 5000);
     chrome.runtime.onMessage.addListener(msg_listener);
@@ -222,19 +220,17 @@ function register_listeners() {
 }
 
 function check_player_state() {
-    if ($('video').paused) update_player_state(PLAYER_STATE.Pause);
-    else if ($('video').paused) update_player_state(PLAYER_STATE.Play);
+    if ($('video')[0].paused) update_player_state(PLAYER_STATE.Pause);
+    else if ($('video')[0].paused) update_player_state(PLAYER_STATE.Play);
 }
 
 /** Main function (entry point) */
 function main() {
-    console.log($().jquery);
     var load = setInterval(function() {
         if (is_loaded()) {
             clearInterval(load);
             register_listeners();
             console.log('LDN has been loaded!');
-            console.log($().jquery);
         }
     }, 500);
 }
