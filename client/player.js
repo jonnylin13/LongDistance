@@ -20,23 +20,14 @@ const PLAYER_STATE = Object.freeze({
 
 var timeout = false;
 var lifecycle_interval;
-
-function fire_event(element, event) {
-    if (element.fireEvent) {
-        element.fireEvent('on' + event);
-    } else {
-        var event_obj = document.createEvent('Events');
-        event_obj.initEvent(type, true, false);
-        element.dispatchEvent(event_obj);
-    }
-}
+var player_controller_active = false;
 
 function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    if (state == PLAYER_STATE.Pause && !get_video().paused) get_video().paused = false;
-    else if (state == PLAYER_STATE.Play && get_video().paused) get_video().play = true;
+    if (state == PLAYER_STATE.Pause && !get_video().paused) pause();
+    else if (state == PLAYER_STATE.Play && get_video().paused) play();
 }
 
 function update_player_state(state) {
@@ -53,19 +44,57 @@ function update_player_state(state) {
 }
 
 function get_video() {
-    return document.getElementsByTagName('video')[0];
+    return $('video')[0];
 }
 
 function get_play() {
-    return document.getElementsByClassName('button-nfPlayerPlay')[0].children[0];
+    return $('.button-nfPlayerPlay')[0];
+}
+
+function get_player() {
+    return $('.nf-player-container')[0];
+}
+
+function get_pause() {
+    return $('.button-nfPlayerPause')[];
+}
+
+function hide_controls() {
+    player_controller_active = true;
+    var offset = 100;
+    var event_options = {
+        'bubbles': true,
+        'button': 0,
+        'screenX': offset - $(window).scrollLeft(),
+        'screenY': offset - $(window).scrollTop(),
+        'clientX': offset - $(window).scrollLeft(),
+        'clientY': offset - $(window).scrollTop(),
+        'offsetX': offset - player.offset().left,
+        'offsetY': offset - player.offset().top,
+        'pageX': offset,
+        'pageY': offset,
+        'currentTarget': get_player()
+    };
+    get_player().dispatchEvent(new MouseEvent('mousemove', event_options));
+    return delay(1).then(function() {
+        player_controller_active = false;
+    });
 }
 
 function play() {
-    fire_event(get_play(), 'click');
+    player_controller_active = true;
+    get_play().click();
+    return delay(1).then(hide_controls).then(function() {
+        player_controller_active = false;
+    });
 }
 
 function pause() {
-    get_video().pause();
+    player_controller_active = true;
+    get_pause().click();
+    return delay(1).then(hide_controls).then(function () {
+        player_controller_active = false;
+    });
 }
 
 /** Returns the progress from NF player */
@@ -89,8 +118,8 @@ function is_loaded() {
 }
 
 function destroy() {
-    get_video().removeEventListener('play', video_play_listener);
-    get_video().removeEventListener('pause', video_pause_listener);
+    get_video().off('play', video_play_listener);
+    get_video().off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -106,8 +135,8 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    get_video().addEventListener('play', video_play_listener);
-    get_video().addEventListener('pause', video_pause_listener);
+    get_video().on('play', video_play_listener);
+    get_video().on('pause', video_pause_listener);
 }
 
 function lifecycle() {
@@ -158,10 +187,8 @@ function msg_listener(req, sender, send_response) {
                 }
             }, 500);
         } else if (req.type === 'player_state_update') {
-            console.log('test');
             var load = setInterval(function() {
                 var video = get_video();
-                console.log('test2');
                 if (is_loaded()) { 
                     // FIX THIS
                     update_nf_player_state(req.player_state);
