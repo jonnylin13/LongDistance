@@ -26,8 +26,8 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    if (state == PLAYER_STATE.Pause && !$('video')[0].paused) pause();
-    else if (state == PLAYER_STATE.Play && $('video')[0].paused) play();
+    if (state == PLAYER_STATE.Pause && !get_video()[0].paused) pause();
+    else if (state == PLAYER_STATE.Play && get_video()[0].paused) play();
 }
 
 function update_player_state(state) {
@@ -41,6 +41,10 @@ function update_player_state(state) {
             console.log("updated player state: " + state);
         }
     });
+}
+
+function get_video() {
+    return $('video');
 }
 
 function get_play() {
@@ -65,13 +69,13 @@ function hide_controls() {
         'screenY': offset - $(window).scrollTop(),
         'clientX': offset - $(window).scrollLeft(),
         'clientY': offset - $(window).scrollTop(),
-        'offsetX': offset - player.offset().left,
-        'offsetY': offset - player.offset().top,
+        'offsetX': offset - get_player()[0].offset().left,
+        'offsetY': offset - get_player()[0].offset().top,
         'pageX': offset,
         'pageY': offset,
-        'currentTarget': get_player()
+        'currentTarget': get_player()[0]
     };
-    get_player().dispatchEvent(new MouseEvent('mousemove', event_options));
+    $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options));
     player_controller_active = false;
 }
 
@@ -90,26 +94,26 @@ function pause() {
 
 /** Returns the progress from NF player */
 function get_progress() {
-    if (!$('video')[0]) {
+    if (!get_video()[0]) {
         return {
             'elapsed': 0,
             'max': 0
         };
     }
     return {
-        'elapsed': $('video')[0].currentTime,
-        'max': $('video')[0].duration,
+        'elapsed': get_video()[0].currentTime,
+        'max': get_video()[0].duration,
     }
 }
 
 /** Returns true if NF player is loaded */
 function is_loaded() {
-    return ($('video')[0] && $('video')[0] .readyState == 4);
+    return (get_video()[0] && get_video()[0] .readyState == 4);
 }
 
 function destroy() {
-    $('video').off('play', video_play_listener);
-    $('video').off('pause', video_pause_listener);
+    get_video().off('play', video_play_listener);
+    get_video().off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -125,8 +129,8 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    $('video').on('play', video_play_listener);
-    $('video').on('pause', video_pause_listener);
+    get_video().on('play', video_play_listener);
+    get_video().on('pause', video_pause_listener);
 }
 
 function lifecycle() {
@@ -220,8 +224,8 @@ function register_listeners() {
 }
 
 function check_player_state() {
-    if ($('video')[0].paused) update_player_state(PLAYER_STATE.Pause);
-    else if ($('video')[0].paused) update_player_state(PLAYER_STATE.Play);
+    if (get_video()[0].paused) update_player_state(PLAYER_STATE.Pause);
+    else if (get_video()[0].paused) update_player_state(PLAYER_STATE.Play);
 }
 
 /** Main function (entry point) */
