@@ -118,8 +118,8 @@ function is_loaded() {
 }
 
 function destroy() {
-    get_video().removeEventListener('play', video_play_listener);
-    get_video().removeEventListener('pause', video_pause_listener);
+    get_video().off('play', video_play_listener);
+    get_video().off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -135,8 +135,8 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    get_video().addEventListener('play', video_play_listener);
-    get_video().addEventListener('pause', video_pause_listener);
+    get_video().on('play', video_play_listener);
+    get_video().on('pause', video_pause_listener);
 }
 
 function lifecycle() {
