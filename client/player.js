@@ -43,20 +43,16 @@ function update_player_state(state) {
     });
 }
 
-function get_video() {
-    return $('video')[0];
-}
-
 function get_play() {
-    return $('.button-nfplayerPlay')[0];
+    return $('.button-nfplayerPlay');
 }
 
 function get_player() {
-    return $('.nf-player-container')[0];
+    return $('.nf-player-container');
 }
 
 function get_pause() {
-    return $('.button-nfplayerPause')[0];
+    return $('.button-nfplayerPause');
 }
 
 function hide_controls() {
@@ -94,7 +90,6 @@ function pause() {
 
 /** Returns the progress from NF player */
 function get_progress() {
-    var video = get_video();
     if (!video) {
         return {
             'elapsed': 0,
@@ -102,19 +97,19 @@ function get_progress() {
         };
     }
     return {
-        'elapsed': video.currentTime,
-        'max': video.duration,
+        'elapsed': $('video').currentTime,
+        'max': $('video').duration,
     }
 }
 
 /** Returns true if NF player is loaded */
 function is_loaded() {
-    return (get_video() && get_video().readyState == 4);
+    return ($('video') && $('video').readyState == 4);
 }
 
 function destroy() {
-    get_video().removeEventListener('play', video_play_listener);
-    get_video().removeEventListener('pause', video_pause_listener);
+    $('video').off('play', video_play_listener);
+    $('video').off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -130,8 +125,9 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    get_video().addEventListener('play', video_play_listener);
-    get_video().addEventListener('pause', video_pause_listener);
+    console.log($().jquery);
+    $('video').on('play', video_play_listener);
+    $('video').on('pause', video_pause_listener);
 }
 
 function lifecycle() {
@@ -172,7 +168,6 @@ function msg_listener(req, sender, send_response) {
             }, 500);
         } else if (req.type === 'full_player_update') {
             var load = setInterval(function() {
-                var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
                     clearInterval(load);
@@ -183,7 +178,6 @@ function msg_listener(req, sender, send_response) {
             }, 500);
         } else if (req.type === 'player_state_update') {
             var load = setInterval(function() {
-                var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
                     update_nf_player_state(req.player_state);
@@ -192,7 +186,6 @@ function msg_listener(req, sender, send_response) {
             }, 500);
         } else if (req.type === 'player_time_update') {
             var load = setInterval(function() {
-                var video = get_video();
                 if (is_loaded()) { 
                     // FIX THIS
                     update_nf_player_time(req.progress);
@@ -221,6 +214,7 @@ function msg_listener(req, sender, send_response) {
  */
 function register_listeners() {
 
+    console.log($().jquery);
     register_DOM_listeners(true);
     lifecycle_interval = setInterval(lifecycle, 5000);
     chrome.runtime.onMessage.addListener(msg_listener);
@@ -228,17 +222,19 @@ function register_listeners() {
 }
 
 function check_player_state() {
-    if (get_video().paused) update_player_state(PLAYER_STATE.Pause);
-    else if (!get_video().paused) update_player_state(PLAYER_STATE.Play);
+    if ($('video').paused) update_player_state(PLAYER_STATE.Pause);
+    else if ($('video').paused) update_player_state(PLAYER_STATE.Play);
 }
 
 /** Main function (entry point) */
 function main() {
+    console.log($().jquery);
     var load = setInterval(function() {
         if (is_loaded()) {
             clearInterval(load);
             register_listeners();
             console.log('LDN has been loaded!');
+            console.log($().jquery);
         }
     }, 500);
 }
