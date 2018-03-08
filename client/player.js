@@ -26,8 +26,8 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    if (state == PLAYER_STATE.Pause && !get_video().paused) pause();
-    else if (state == PLAYER_STATE.Play && get_video().paused) play();
+    if (state == PLAYER_STATE.Pause && !$('video')[0].paused) pause();
+    else if (state == PLAYER_STATE.Play && $('video')[0].paused) play();
 }
 
 function update_player_state(state) {
@@ -212,7 +212,7 @@ function msg_listener(req, sender, send_response) {
  *  Called after the main function determines NF player has been loaded
  */
 function register_listeners() {
-    
+
     register_DOM_listeners(true);
     lifecycle_interval = setInterval(lifecycle, 5000);
     chrome.runtime.onMessage.addListener(msg_listener);
