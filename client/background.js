@@ -35,7 +35,7 @@ var ws;
 var broadcast = false;
 
 function start_player(tab_id, callback) {
-    chrome.tabs.executeScript(tab_id, {file: 'node_modules/jquery/dist/jquery.js'}, function(results) {
+    chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery.js'}, function(results) {
         chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
             chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
                 default_response(response);
