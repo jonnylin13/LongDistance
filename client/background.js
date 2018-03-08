@@ -36,7 +36,7 @@ var broadcast = false;
 var jquery_loaded = false;
 
 function start_player(tab_id, callback) {
-    if (!jquery) {
+    if (!jquery_loaded) {
         chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery-3.3.1.slim.min.js'}, function(results) {
             jquery_loaded = true;
         });
