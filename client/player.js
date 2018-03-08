@@ -56,7 +56,7 @@ function get_player() {
 }
 
 function get_pause() {
-    return $('.button-nfPlayerPause')[];
+    return $('.button-nfPlayerPause')[0];
 }
 
 function hide_controls() {
