@@ -33,20 +33,16 @@ var client_id;
 var current_lobby; 
 var ws;
 var broadcast = false;
-var jquery_loaded = false;
 
 function start_player(tab_id, callback) {
-    if (!jquery_loaded) {
-        chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery-3.3.1.slim.min.js'}, function(results) {
-            jquery_loaded = true;
-            chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
-                chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
-                    default_response(response);
-                    callback();  
-                });  
-            });
+    chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery-3.3.1.slim.min.js'}, function(results) {
+        chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
+            chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
+                default_response(response);
+                callback();  
+            });  
         });
-    }
+    });
 }
 
 function default_response(response) {

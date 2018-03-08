@@ -48,7 +48,7 @@ function get_video() {
 }
 
 function get_play() {
-    return $('.button-nfPlayerPlay')[0];
+    return $('.button-nfplayerPlay')[0];
 }
 
 function get_player() {
@@ -56,7 +56,7 @@ function get_player() {
 }
 
 function get_pause() {
-    return $('.button-nfPlayerPause')[0];
+    return $('.button-nfplayerPause')[0];
 }
 
 function hide_controls() {
@@ -118,8 +118,8 @@ function is_loaded() {
 }
 
 function destroy() {
-    get_video().off('play', video_play_listener);
-    get_video().off('pause', video_pause_listener);
+    get_video().removeEventListener('play', video_play_listener);
+    get_video().removeEventListener('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
 }
 
@@ -135,8 +135,8 @@ function video_pause_listener($event) {
 function register_DOM_listeners(first_call) {
     check_player_state();
     if (!first_call) destroy();
-    get_video().on('play', video_play_listener);
-    get_video().on('pause', video_pause_listener);
+    get_video().addEventListener('play', video_play_listener);
+    get_video().addEventListener('pause', video_pause_listener);
 }
 
 function lifecycle() {
@@ -248,5 +248,5 @@ function main() {
     }, 500);
 }
 
-main();
+$(document).ready(main);
 })();
