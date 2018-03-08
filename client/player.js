@@ -69,8 +69,8 @@ function hide_controls() {
         'screenY': offset - $(window).scrollTop(),
         'clientX': offset - $(window).scrollLeft(),
         'clientY': offset - $(window).scrollTop(),
-        'offsetX': offset - get_player()[0].offset().left,
-        'offsetY': offset - get_player()[0].offset().top,
+        'offsetX': offset - get_player()[0].offsetLeft,
+        'offsetY': offset - get_player()[0].offsetTop,
         'pageX': offset,
         'pageY': offset,
         'currentTarget': get_player()[0]
