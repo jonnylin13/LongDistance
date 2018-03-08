@@ -76,25 +76,20 @@ function hide_controls() {
         'currentTarget': get_player()
     };
     get_player().dispatchEvent(new MouseEvent('mousemove', event_options));
-    return delay(1).then(function() {
-        player_controller_active = false;
-    });
+    player_controller_active = false;
 }
 
 function play() {
     player_controller_active = true;
     get_play().click();
-    return delay(1).then(hide_controls).then(function() {
-        player_controller_active = false;
-    });
+    player_controller_active = false;
 }
 
 function pause() {
     player_controller_active = true;
     get_pause().click();
-    return delay(1).then(hide_controls).then(function () {
-        player_controller_active = false;
-    });
+    hide_controls();
+    player_controller_active = false;
 }
 
 /** Returns the progress from NF player */
