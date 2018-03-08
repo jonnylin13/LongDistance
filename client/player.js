@@ -82,6 +82,7 @@ function hide_controls() {
 function play() {
     player_controller_active = true;
     get_play().click();
+    hide_controls();
     player_controller_active = false;
 }
 
@@ -119,11 +120,11 @@ function destroy() {
 
 // MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
 function video_play_listener($event) {
-    update_player_state(PLAYER_STATE.Play);
+    if (!player_controller_active) update_player_state(PLAYER_STATE.Play);
 }
 
 function video_pause_listener($event) {
-    update_player_state(PLAYER_STATE.Pause);
+    if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
 }
 
 function register_DOM_listeners(first_call) {
