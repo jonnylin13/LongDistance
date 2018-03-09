@@ -3,13 +3,14 @@
  *  @description Background JS script for LDN
  */
 
+ 
 const PLAYER_STATE = Object.freeze({
     "Inactive": -1, // Initialization state
-    "Play": 0,
-    "Pause": 1
+    "Play": 1,
+    "Pause": 0
 });
 
-const READY_STATE = Object.freeze({
+const READY_STATE= Object.freeze({
     "Unsent": 0,
     "Opened": 1,
     "Headers": 2,
@@ -17,13 +18,14 @@ const READY_STATE = Object.freeze({
     "Done": 4
 });
 
-const POPUP_STATE = Object.freeze({
+const POPUP_STATE= Object.freeze({
     "OutLobby": 0,
     "InLobby": 1,
     "ConnectLobby": 2,
 });
 
 const ws_url = 'ws://192.168.0.2:3000/ldn';
+
 
 var current_url_params;
 var player_port;
@@ -386,7 +388,8 @@ function tab_update_listener(tab_id, change_info, tab) {
             if (is_watching(new_url_params)) {
 
             start_player(tab_id, function() {
-                if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
+                // May not need this...
+                // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
             });
 
             } else {

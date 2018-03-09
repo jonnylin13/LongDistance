@@ -12,7 +12,7 @@
         return true;
     window.hasRun = true;
 
-const PLAYER_STATE = Object.freeze({
+ const PLAYER_STATE= Object.freeze({
     "Inactive": -1, // Initialization state
     "Play": 1,
     "Pause": 0
@@ -21,6 +21,8 @@ const PLAYER_STATE = Object.freeze({
 var timeout = false;
 var lifecycle_interval;
 var player_controller_active = false;
+
+// re-implement check_player_state, should go in register_DOM_listeners?
 
 function update_nf_player_time(progress) {
 }
@@ -41,6 +43,13 @@ function update_player_state(state) {
             console.log("updated player state: " + state);
         }
     });
+}
+
+function check_player_state() {
+    if (get_video()[0]) {
+        if (get_video()[0].paused == true) update_player_state(PLAYER_STATE.Paused);
+        else if (get_video()[0].paused == false) update_player_state(PLAYER_STATE.Play);
+    }
 }
 
 function get_video() {
@@ -76,21 +85,35 @@ function hide_controls() {
         'currentTarget': get_player()[0]
     };
     $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options));
-    player_controller_active = false;
+    delay(1).then(function() {
+        player_controller_active = false;
+    });
 }
 
+/** Tons of help
+ * https://www.stephanboyer.com/post/105/netflix-party-synchronize-netflix-video-playback <-
+ * https://github.com/avigoldman/netflix.js
+ * https://stackoverflow.com/questions/27927950/controlling-netflix-html5-playback-with-tampermonkey-javascript/39703888#39703888
+*/
 function play() {
-    player_controller_active = true;
-    get_play().click();
-    hide_controls();
-    player_controller_active = false;
+    if (!get_pause()[0] && get_play()[0]) {
+
+        player_controller_active = true;
+        get_play().click();
+        delay(1).then(hide_controls).then(function() {
+            player_controller_active = false;
+        });
+    }
 }
 
 function pause() {
-    player_controller_active = true;
-    get_pause().click();
-    hide_controls();
-    player_controller_active = false;
+    if (!get_play([0]) && get_pause()[0]) {
+        player_controller_active = true;
+        get_pause().click();
+        delay(1).then(hide_controls).then(function() {
+            player_controller_active = false;
+        });
+    }
 }
 
 /** Returns the progress from NF player */
@@ -107,9 +130,18 @@ function get_progress() {
     }
 }
 
-/** Returns true if NF player is loaded */
-function is_loaded() {
-    return (get_video()[0] && get_video()[0] .readyState == 4);
+function loaded() {
+    return (get_video()[0] && get_video()[0].readyState == 4);
+}
+
+/** Callback if NF player is loaded */
+function execute_safely(callback) {
+    var temp = setInterval(function() {
+        if (loaded()) {
+            clearInterval(temp);
+            callback();
+        }
+    }, 500);
 }
 
 function destroy() {
@@ -121,13 +153,16 @@ function destroy() {
 // MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
 function video_play_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Play);
+    console.log('play');
 }
 
 function video_pause_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
+    console.log('pause');
 }
 
 function register_DOM_listeners(first_call) {
+    // Initial update
     check_player_state();
     if (!first_call) destroy();
     get_video().on('play', video_play_listener);
@@ -153,49 +188,43 @@ function msg_listener(req, sender, send_response) {
         console.log(req.type);
         if (req.type === 'register_listeners') {
 
-            var load = setInterval(function() {
-                if (is_loaded()) {
-                    clearInterval(load);
-                    register_DOM_listeners(false);
-                    if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
-                    send_response({type: 'register_listeners_ack'});
-                }
-            }, 500);
+            execute_safely(function() {
+                register_DOM_listeners(false);
+                if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
+                send_response({type: 'register_listeners_ack'});
+            });
 
         } else if (req.type === 'check_lifecycle') {
-            var load = setInterval(function() {
-                if (is_loaded()) {
-                    clearInterval(load);
-                    if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
-                    send_response({type: 'check_lifecycle_ack'});
-                }
-            }, 500);
+
+            execute_safely(function() {
+                if (!lifecycle_interval) lifecycle_interval = setInterval(lifecycle, 5000);
+                send_response({type: 'check_lifecycle_ack'});
+            });
+
         } else if (req.type === 'full_player_update') {
-            var load = setInterval(function() {
-                if (is_loaded()) { 
-                    // FIX THIS
-                    clearInterval(load);
-                    update_nf_player_time(req.progress);
-                    update_nf_player_state(req.player_state);
-                    send_response({type: 'full_player_update_ack'});
-                }
-            }, 500);
+
+            execute_safely(function() {
+            
+                update_nf_player_time(req.progress);
+                update_nf_player_state(req.player_state);
+                send_response({type: 'full_player_update_ack'});
+            });
+
         } else if (req.type === 'player_state_update') {
-            var load = setInterval(function() {
-                if (is_loaded()) { 
-                    // FIX THIS
-                    update_nf_player_state(req.player_state);
-                    send_response({type: 'player_state_update_ack'});
-                }
-            }, 500);
+
+            execute_safely(function() {
+                update_nf_player_state(req.player_state);
+                send_response({type: 'player_state_update_ack'});
+
+            });
+
         } else if (req.type === 'player_time_update') {
-            var load = setInterval(function() {
-                if (is_loaded()) { 
-                    // FIX THIS
-                    update_nf_player_time(req.progress);
-                    send_response({type: 'player_time_update_ack'});
-                }
-            }, 500);
+
+            execute_safely(function() {
+                update_nf_player_time(req.progress);
+                send_response({type: 'player_time_update_ack'});
+                
+            });
         } else if (req.type === 'get_progress') {
                 send_response({
                     type: 'get_progress_ack',
@@ -217,27 +246,19 @@ function msg_listener(req, sender, send_response) {
  *  Called after the main function determines NF player has been loaded
  */
 function register_listeners() {
-
     register_DOM_listeners(true);
     lifecycle_interval = setInterval(lifecycle, 5000);
     chrome.runtime.onMessage.addListener(msg_listener);
 
 }
 
-function check_player_state() {
-    if (get_video()[0].paused) update_player_state(PLAYER_STATE.Pause);
-    else if (get_video()[0].paused) update_player_state(PLAYER_STATE.Play);
-}
-
 /** Main function (entry point) */
 function main() {
-    var load = setInterval(function() {
-        if (is_loaded()) {
-            clearInterval(load);
-            register_listeners();
-            console.log('LDN has been loaded!');
-        }
-    }, 500);
+
+    execute_safely(function() {
+        register_listeners();
+        console.log('LDN has been loaded!');
+    });
 }
 
 $(document).ready(main);
