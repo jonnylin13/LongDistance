@@ -113,6 +113,7 @@ function play() {
 function pause() {
     console.log(get_pause()[0]);
     console.log(get_play()[0]);
+    console.log(!get_play([0]) && get_pause()[0]);
     if (!get_play([0]) && get_pause()[0]) {
         console.log('pause update');
         player_controller_active = true;
