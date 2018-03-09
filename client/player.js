@@ -28,6 +28,7 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
+    console.log(state);
     if (state == PLAYER_STATE.Pause) pause();
     else if (state == PLAYER_STATE.Play) play();
 }
@@ -159,12 +160,10 @@ function destroy() {
 // MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
 function video_play_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Play);
-    console.log('play');
 }
 
 function video_pause_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
-    console.log('pause');
 }
 
 function register_DOM_listeners(first_call) {
