@@ -34,6 +34,7 @@ function update_nf_player_state(state) {
 }
 
 function update_player_state(state) {
+    console.log('update_player_state called from player.js');
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
         'new_state': state,
