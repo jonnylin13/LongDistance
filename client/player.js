@@ -28,6 +28,7 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
+    console.log('test');
     if (state == PLAYER_STATE.Pause) pause();
     else if (state == PLAYER_STATE.Play) play();
 }
