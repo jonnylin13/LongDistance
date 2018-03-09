@@ -34,7 +34,6 @@ function update_nf_player_state(state) {
 }
 
 function update_player_state(state) {
-    console.log('update_player_state called from player.js');
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
         'new_state': state,
@@ -98,9 +97,7 @@ function hide_controls() {
  * https://stackoverflow.com/questions/27927950/controlling-netflix-html5-playback-with-tampermonkey-javascript/39703888#39703888
 */
 function play() {
-    console.log(get_pause()[0]);
-    console.log(get_play()[0]);
-    if (!get_pause()[0] && get_play()[0]) {
+    if (typeof get_pause()[0] == 'undefined' && typeof get_play()[0] != 'undefined') {
         console.log('play update');
         player_controller_active = true;
         get_play().click();
@@ -111,10 +108,7 @@ function play() {
 }
 
 function pause() {
-    console.log(get_pause()[0]);
-    console.log(get_play()[0]);
-    console.log(!get_play([0]) && get_pause()[0]);
-    if (!get_play([0]) && get_pause()[0]) {
+    if (typeof get_play([0]) == 'undefined' && typeof get_pause()[0] != 'undefined') {
         console.log('pause update');
         player_controller_active = true;
         get_pause().click();
