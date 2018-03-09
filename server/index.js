@@ -155,7 +155,7 @@ function listen() {
                     ws.send(JSON.stringify({
                         type: 'lifecycle_ack',
                         stop: false,
-                        timeout: true
+                        timeout: false // Don't send timeouts for now
                     }));
                 } else {
                     ws.send(JSON.stringify({

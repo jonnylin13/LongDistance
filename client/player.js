@@ -97,25 +97,29 @@ function hide_controls() {
  * https://stackoverflow.com/questions/27927950/controlling-netflix-html5-playback-with-tampermonkey-javascript/39703888#39703888
 */
 function play() {
-    if (typeof get_pause()[0] == 'undefined' && typeof get_play()[0] != 'undefined') {
-        console.log('play update');
-        player_controller_active = true;
-        get_play().click();
-        delay(1).then(hide_controls).then(function() {
-            player_controller_active = false;
-        });
-    }
+    execute_safely(function() {
+        if (get_video()[0].paused) {
+            console.log('play update');
+            player_controller_active = true;
+            get_play().click();
+            delay(1).then(hide_controls).then(function() {
+                player_controller_active = false;
+            });
+        }
+    });
 }
 
 function pause() {
-    if (typeof get_play([0]) == 'undefined' && typeof get_pause()[0] != 'undefined') {
-        console.log('pause update');
-        player_controller_active = true;
-        get_pause().click();
-        delay(1).then(hide_controls).then(function() {
-            player_controller_active = false;
-        });
-    }
+    execute_safely(function() {
+        if (!get_video()[0].paused) {
+            console.log('pause update');
+            player_controller_active = true;
+            get_pause().click();
+            delay(1).then(hide_controls).then(function() {
+                player_controller_active = false;
+            });
+        }
+    });
 }
 
 /** Returns the progress from NF player */
