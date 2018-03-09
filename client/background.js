@@ -391,7 +391,7 @@ function tab_update_listener(tab_id, change_info, tab) {
                 // May not need this...
                 // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
             });
-
+ 
             } else {
                 
                 player_state = PLAYER_STATE.Inactive;

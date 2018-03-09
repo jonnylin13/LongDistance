@@ -28,8 +28,8 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    if (state == PLAYER_STATE.Pause && !get_video()[0].paused) pause();
-    else if (state == PLAYER_STATE.Play && get_video()[0].paused) play();
+    if (state == PLAYER_STATE.Pause) pause();
+    else if (state == PLAYER_STATE.Play) play();
 }
 
 function update_player_state(state) {
@@ -97,7 +97,7 @@ function hide_controls() {
 */
 function play() {
     if (!get_pause()[0] && get_play()[0]) {
-
+        console.log('play update');
         player_controller_active = true;
         get_play().click();
         delay(1).then(hide_controls).then(function() {
@@ -108,6 +108,7 @@ function play() {
 
 function pause() {
     if (!get_play([0]) && get_pause()[0]) {
+        console.log('pause update');
         player_controller_active = true;
         get_pause().click();
         delay(1).then(hide_controls).then(function() {
