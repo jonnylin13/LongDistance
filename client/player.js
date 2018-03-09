@@ -28,7 +28,6 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
-    console.log(state);
     if (state == PLAYER_STATE.Pause) pause();
     else if (state == PLAYER_STATE.Play) play();
 }
@@ -98,6 +97,8 @@ function hide_controls() {
  * https://stackoverflow.com/questions/27927950/controlling-netflix-html5-playback-with-tampermonkey-javascript/39703888#39703888
 */
 function play() {
+    console.log(get_pause()[0]);
+    console.log(get_play()[0]);
     if (!get_pause()[0] && get_play()[0]) {
         console.log('play update');
         player_controller_active = true;
@@ -109,6 +110,8 @@ function play() {
 }
 
 function pause() {
+    console.log(get_pause()[0]);
+    console.log(get_play()[0]);
     if (!get_play([0]) && get_pause()[0]) {
         console.log('pause update');
         player_controller_active = true;
