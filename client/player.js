@@ -85,8 +85,7 @@ function hide_controls() {
         'pageY': offset,
         'currentTarget': get_player()[0]
     };
-    $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options));
-    delay(1).then(function() {
+    $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options)).delay(1).then(function() {
         player_controller_active = false;
     });
 }
@@ -101,8 +100,7 @@ function play() {
         if (get_video()[0].paused) {
             console.log('play update');
             player_controller_active = true;
-            get_play().click();
-            delay(1).then(hide_controls).then(function() {
+            get_play().click().delay(1).then(hide_controls).then(function() {
                 player_controller_active = false;
             });
         }
@@ -114,8 +112,7 @@ function pause() {
         if (!get_video()[0].paused) {
             console.log('pause update');
             player_controller_active = true;
-            get_pause().click();
-            delay(1).then(hide_controls).then(function() {
+            get_pause().click().delay(1).then(hide_controls).then(function() {
                 player_controller_active = false;
             });
         }
