@@ -69,7 +69,7 @@ function get_pause() {
     return $('.button-nfplayerPause');
 }
 
-function hide_controls() {
+function hide_controls(callback) {
     player_controller_active = true;
     var offset = 100;
     var event_options = {
@@ -85,9 +85,11 @@ function hide_controls() {
         'pageY': offset,
         'currentTarget': get_player()[0]
     };
-    $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options)).delay(1).then(function() {
+    $('.nf-player-container')[0].dispatchEvent(new MouseEvent('mousemove', event_options));
+    setTimeout(function() {
         player_controller_active = false;
-    });
+        if (callback) callback();
+    }, 1000);
 }
 
 /** Tons of help
@@ -100,9 +102,10 @@ function play() {
         if (get_video()[0].paused) {
             console.log('play update');
             player_controller_active = true;
-            get_play().click().delay(1).then(hide_controls).then(function() {
-                player_controller_active = false;
-            });
+            get_play().click();
+            setTimeout(function() {
+                hide_controls();
+            }, 1000);
         }
     });
 }
@@ -112,9 +115,10 @@ function pause() {
         if (!get_video()[0].paused) {
             console.log('pause update');
             player_controller_active = true;
-            get_pause().click().delay(1).then(hide_controls).then(function() {
-                player_controller_active = false;
-            });
+            get_pause().click();
+            setTimeout(function() {
+                hide_controls();
+            }, 1000);
         }
     });
 }
