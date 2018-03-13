@@ -23,7 +23,7 @@ var lifecycle_interval;
 var player_controller_active = false;
 
 function update_nf_player_time(progress) {
-    seek(progress.elapsed);
+    seek(progress);
 }
 
 function update_nf_player_state(state) {
