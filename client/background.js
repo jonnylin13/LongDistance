@@ -102,6 +102,7 @@ function generic_player_update(tab_id, controller, type) {
 }
 
 function full_player_update(tab_id, controller) {
+    console.log('full player update');
     generic_player_update(tab_id, controller, 'full_player_update');
 }
 
@@ -132,13 +133,11 @@ function update_listener(event) {
                         chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
                             var listener = function (tab_id, change_info, tab) {
-                                console.log('test');
-                                console.log(change_info.status);
                                 if (!change_info.status || change_info.status != 'complete') return;
                                 if (tab_id == tabs[0].id) {
                                     full_player_update(tabs[0].id, controller);
+                                    chrome.tabs.onUpdated.removeListener(listener);
                                 }
-                                chrome.tabs.onUpdated.removeListener(listener);
                             };
 
                             chrome.tabs.onUpdated.addListener(listener);
