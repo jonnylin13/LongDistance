@@ -102,7 +102,6 @@ function generic_player_update(tab_id, controller, type) {
 }
 
 function full_player_update(tab_id, controller) {
-    console.log('full player update');
     generic_player_update(tab_id, controller, 'full_player_update');
 }
 

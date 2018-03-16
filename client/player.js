@@ -74,55 +74,49 @@ function get_scrubber() {
 
 function seek(progress) {
     player_controller_active = true;
-    var event_options, scrubber;
     show_controls(function() {
-        scrubber = get_scrubber();
-        console.log(scrubber);
         var factor = progress.elapsed / progress.max;
-        var mouse_x = scrubber.offset().left + Math.round(scrubber.width() * factor);
-        var mouse_y = scrubber.offset().top + scrubber.height() / 2;
-        event_options = {
+        var mouse_x = $('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor;
+        var mouse_y = get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2;
+        var event_options = {
             'bubbles': true,
             'button': 0,
             'screenX': mouse_x - $(window).scrollLeft(),
             'screenY': mouse_y - $(window).scrollTop(),
             'clientX':  mouse_x - $(window).scrollLeft(),
             'clientY': mouse_y - $(window).scrollTop(),
-            'offsetX': mouse_x - scrubber.offset().left,
-            'offsetY': mouse_y - scrubber.offset().top,
+            'offsetX': mouse_x - get_scrubber()[0].offsetLeft,
+            'offsetY': mouse_y - get_scrubber()[0].offsetTop,
             'pageX': mouse_x,
             'pageY': mouse_y,
-            'currentTarget': scrubber[0]
+            'currentTarget': get_scrubber()[0]
         };
-        scrubber[0].dispatchEvent(new MouseEvent('mouseover', event_options));
+        get_scrubber()[0].dispatchEvent(new MouseEvent('mouseover', event_options));
         setTimeout(function() {
-            scrubber[0].dispatchEvent(new MouseEvent('mousedown', event_options));
-            scrubber[0].dispatchEvent(new MouseEvent('mouseup', event_options));
-            scrubber[0].dispatchEvent(new MouseEvent('mouseout', event_options));
+            get_scrubber()[0].dispatchEvent(new MouseEvent('mousedown', event_options));
+            get_scrubber()[0].dispatchEvent(new MouseEvent('mouseup', event_options));
+            get_scrubber()[0].dispatchEvent(new MouseEvent('mouseout', event_options));
             setTimeout(function() {
-                player_controller_active = false;
+                hide_controls(); // This will set player_controller_active
             }, 1);
         }, 10);
     });
 
 }
 
-function show_controls() {
+function show_controls(callback) {
     player_controller_active = true;
-    var scrubber = get_scrubber();
-    if (scrubber) {
-        var event_options = {
-            'bubbles': true,
-            'button': 0,
-            'currentTarget': scrubber[0]
-        };
-        scrubber[0].dispatchEvent(new MouseEvent('mousemove', event_options));
-        setTimeout(
-            function() {
-                player_controller_active = false;
-                if (callback) callback;
-            }, 10);
-    }
+    var event_options = {
+        'bubbles': true,
+        'button': 0,
+        'currentTarget': get_scrubber()[0]
+    };
+    get_scrubber()[0].dispatchEvent(new MouseEvent('mousemove', event_options));
+    setTimeout(
+        function() {
+            player_controller_active = false;
+            if (callback) callback();
+        }, 10);
 
 }
 
