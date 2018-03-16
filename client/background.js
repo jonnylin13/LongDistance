@@ -132,6 +132,7 @@ function update_listener(event) {
                         chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
                             var listener = function (tab_id, change_info, tab) {
+                                console.log('test');
                                 if (!change_info.status || change_info.status != 'complete') return;
                                 if (tab_id == tabs[0].id) {
                                     full_player_update(tabs[0].id, controller);
@@ -205,10 +206,8 @@ function connect_lobby(lobby_id, done) {
                                 };
 
                                 chrome.tabs.onUpdated.addListener(listener);
+
                                 });
-                            } else {
-                                console.log('player.js should be receiving a time update');
-                                player_time_update(tabs[0].id, controller);
                             }
                         });
                 }
@@ -223,6 +222,7 @@ function connect_lobby(lobby_id, done) {
 }
 
 function ws_send_update_generic(type) {
+    if (!current_lobby) return; // Disconnected from lobby
     ws.send(
         JSON.stringify({
             'type': type,
