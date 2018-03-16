@@ -77,6 +77,7 @@ function seek(progress) {
     var event_options, scrubber;
     show_controls(function() {
         scrubber = get_scrubber();
+        console.log(scrubber);
         var factor = progress.elapsed / progress.max;
         var mouse_x = scrubber.offset().left + Math.round(scrubber.width() * factor);
         var mouse_y = scrubber.offset().top + scrubber.height() / 2;
