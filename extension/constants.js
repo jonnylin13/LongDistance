@@ -17,3 +17,7 @@ export const READY_STATE= Object.freeze({
     "Loaded": 3,
     "Done": 4
 });
+
+export const Constants = Object.freeze({
+    ws_url: 'ws://192.168.0.2:3000/ldn'
+});

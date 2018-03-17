@@ -12,10 +12,12 @@ Create lobbies to synchronize Netflix viewing among multiple clients through thi
 * Select the extension folder
 
 Be sure to run `npm install`
+
 To build the extension run `npm run build`
+
 To build the extension and run the server `npm run dev`
 
-The client will not connect if you have not configured the WebSocket url string const `ws_url` in background.js
+The client will not connect if you have not configured the WebSocket url `ws_url` in constants.js
 
 # Structure
 * extension/background/background.js

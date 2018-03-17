@@ -3,10 +3,8 @@
  *  @description Background JS script for LDN
  */
 
-import { PLAYER_STATE, READY_STATE, POPUP_STATE } from '../constants';
+import { PLAYER_STATE, READY_STATE, POPUP_STATE, Constants } from '../constants';
 import { Utility } from './utility';
-
-const ws_url = 'ws://192.168.0.2:3000/ldn';
 
 var current_url_params;
 var player_port;
@@ -143,7 +141,7 @@ function ws_send_connect_lobby(lobby_id) {
 
 function connect_lobby(lobby_id, done) {
     if (!ws) {
-        ws = new WebSocket(ws_url);
+        ws = new WebSocket(Constants.ws_url);
         ws.onopen = function() {
             ws_send_connect_lobby(lobby_id);
         }
@@ -207,7 +205,7 @@ function ws_send_update_generic(type) {
 
 function send_update_generic(type) {
     if (!ws) {
-        ws = new WebSocket(ws_url);
+        ws = new WebSocket(Constants.ws_url);
         ws.onopen = function() {
             ws_send_update_generic(type);
         }
@@ -264,7 +262,7 @@ function ws_send_disconnect() {
 
 function disconnect(done) {
     if (!ws) {
-        ws = new WebSocket(ws_url);
+        ws = new WebSocket(Constants.ws_url);
         ws.onopen = function() {
             ws_send_disconnect();
         };
@@ -302,7 +300,7 @@ function ws_send_start_lobby() {
 function start_lobby(done) {
 
     if (!ws) {
-        ws = new WebSocket(ws_url);
+        ws = new WebSocket(Constants.ws_url);
 
         // When the socket is initially opened
         ws.onopen = function() {
