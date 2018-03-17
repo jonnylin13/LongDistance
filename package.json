@@ -1,0 +1,32 @@
+{
+  "name": "long-distance-netflix",
+  "version": "1.0.0",
+  "description": "Long distance netflix",
+  "main": "server/build/server.js",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "shortid": "^2.2.8",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12",
+    "ws": "^5.0.0"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1"
+  },
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack --mode development --hot true && node server/server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonnylin13/LDN.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jonnylin13/LDN/issues"
+  },
+  "homepage": "https://github.com/jonnylin13/LDN#readme"
+}

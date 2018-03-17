@@ -3,29 +3,10 @@
  *  @description Background JS script for LDN
  */
 
- 
-const PLAYER_STATE = Object.freeze({
-    "Inactive": -1, // Initialization state
-    "Play": 1,
-    "Pause": 0
-});
-
-const READY_STATE= Object.freeze({
-    "Unsent": 0,
-    "Opened": 1,
-    "Headers": 2,
-    "Loaded": 3,
-    "Done": 4
-});
-
-const POPUP_STATE= Object.freeze({
-    "OutLobby": 0,
-    "InLobby": 1,
-    "ConnectLobby": 2,
-});
+import { PLAYER_STATE, READY_STATE, POPUP_STATE } from '../constants';
+import { Utility } from './utility';
 
 const ws_url = 'ws://192.168.0.2:3000/ldn';
-
 
 var current_url_params;
 var player_port;
@@ -35,10 +16,11 @@ var client_id;
 var current_lobby; 
 var ws;
 var broadcast = false;
+let utility = new Utility();
 
 function start_player(tab_id, callback) {
     chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery.js'}, function(results) {
-        chrome.tabs.executeScript(tab_id, {file: 'player.js', runAt: 'document_idle'}, function(results) {
+        chrome.tabs.executeScript(tab_id, {file: 'build/player.bundle.js', runAt: 'document_idle'}, function(results) {
             chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
                 default_response(response);
                 callback();  
@@ -56,18 +38,6 @@ function is_watching(params) {
     return false;
 }
 
-/** Generates UUIDv4 token character 
- * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-*/
-function v4() {
-    return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-}
-
-/** Generates a UUIDv4 compliant random UUID */
-function uuidv4() {
-    return v4()+v4()+'-'+v4()+'-'+v4()+'-'+v4()+'-'+v4()+v4()+v4();
-}
-
 /** Generates a client id if one is not found in chrome sync storage */
 function update_id() {
     chrome.storage.sync.get('client_id', function(items) {
@@ -75,7 +45,7 @@ function update_id() {
         if (id) {
             client_id = id;
         } else {
-            client_id = uuidv4();
+            client_id = utility.uuidv4();
             chrome.storage.sync.set({'client_id': client_id});
         }
     });
@@ -127,11 +97,11 @@ function update_listener(event) {
             if (l == current_lobby.id) { 
                 var controller = lobbies[l].clients[lobbies[l].ctl_id];
                 var c = current_lobby.clients[client_id];
-                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                chrome.tabs.query({title: 'Netflix'}, function(tabs)  {
                     if (current_url_params != controller.url_params) {
                         chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                            var listener = function (tab_id, change_info, tab) {
+                            /** var listener = function (tab_id, change_info, tab) {
                                 if (!change_info.status || change_info.status != 'complete') return;
                                 if (tab_id == tabs[0].id) {
                                     full_player_update(tabs[0].id, controller);
@@ -139,7 +109,7 @@ function update_listener(event) {
                                 }
                             };
 
-                            chrome.tabs.onUpdated.addListener(listener);
+                            chrome.tabs.onUpdated.addListener(listener); */
 
                         });
             
@@ -195,18 +165,19 @@ function connect_lobby(lobby_id, done) {
                             if (current_url_params != controller.url_params) {
                                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                                var listener = function (tab_id, change_info, tab) {
+                                /** var listener = function (tab_id, change_info, tab) {
                                     if (!change_info.status || change_info.status != 'complete') return;
                                     if (tab_id == tabs[0].id) {
-                                        console.log('player.js should be receiving a full player update');
                                         full_player_update(tabs[0].id, controller);
                                     }
                                     chrome.tabs.onUpdated.removeListener(listener);
                                 };
 
-                                chrome.tabs.onUpdated.addListener(listener);
+                                chrome.tabs.onUpdated.addListener(listener);**/
 
-                                });
+                                }); 
+                            } else {
+                                full_player_update(tabs[0].id, controller);
                             }
                         });
                 }
@@ -529,6 +500,13 @@ function msg_listener(req, sender, send_response) {
                     'success': success
                 });
             });
+        } else if (req.type === 'full_update_request') {
+            if (current_lobby && current_lobby.ctl_id != client_id) {
+                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
+                    full_player_update(tabs[0].id, current_lobby.clients[current_lobby.ctl_id]);
+                });
+            }
+            send_response({'type': 'full_update_request_ack'});
         }
     }
     return true;

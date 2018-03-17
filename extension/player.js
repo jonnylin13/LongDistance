@@ -7,16 +7,13 @@
 /** Wrapped in a function so executeScript knows the script has been run 
  *  https://stackoverflow.com/questions/34528785/chrome-extension-checking-if-content-script-has-been-injected-or-not
 */
+
+import { PLAYER_STATE } from './constants';
+
 (function() {
     if (window.hasRun === true)
         return true;
-    window.hasRun = true;
-
- const PLAYER_STATE= Object.freeze({
-    "Inactive": -1, // Initialization state
-    "Play": 1,
-    "Pause": 0
-});
+    window.hasRun = true
 
 var timeout = false;
 var lifecycle_interval;
@@ -217,12 +214,21 @@ function video_pause_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
 }
 
+function request_full_update() {
+    chrome.runtime.sendMessage({
+        'type': 'full_update_request'
+    }, function(response) {
+        console.log(response);
+    });
+}
+
 function register_DOM_listeners(first_call) {
     // Initial update
     check_player_state();
     if (!first_call) destroy();
     get_video().on('play', video_play_listener);
     get_video().on('pause', video_pause_listener);
+    request_full_update();
 }
 
 function lifecycle() {
@@ -260,7 +266,6 @@ function msg_listener(req, sender, send_response) {
         } else if (req.type === 'full_player_update') {
 
             execute_safely(function() {
-            
                 update_nf_player_time(req.progress);
                 update_nf_player_state(req.player_state);
                 send_response({type: 'full_player_update_ack'});

@@ -4,11 +4,7 @@
 * Initialized in popup.html
 */
 
-const POPUP_STATE = Object.freeze({
-    "OutLobby": 0,
-    "InLobby": 1,
-    "ConnectLobby": 2
-});
+import { POPUP_STATE } from './constants';
 
 var views = {};
 
