@@ -3,32 +3,27 @@
  *  @description Background JS script for LDN
  */
 
-import { PLAYER_STATE, READY_STATE, POPUP_STATE, Constants } from '../constants';
+import { PLAYER_STATE, READY_STATE, POPUP_STATE, Constants } from './constants';
 import { Utility } from './utility';
 
-var current_url_params;
-var player_port;
-var player_state = PLAYER_STATE.Inactive;
-var popup_state = POPUP_STATE.OutLobby;
-var client_id;
-var current_lobby; 
-var ws;
-var broadcast = false;
-let utility = new Utility();
+let current_url_params;
+let player_port;
+let player_state = PLAYER_STATE.Inactive;
+let popup_state = POPUP_STATE.OutLobby;
+let client_id;
+let current_lobby; 
+let ws;
+let broadcast = false;
 
 function start_player(tab_id, callback) {
     chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery.js'}, function(results) {
         chrome.tabs.executeScript(tab_id, {file: 'build/player.bundle.js', runAt: 'document_idle'}, function(results) {
             chrome.tabs.sendMessage(tab_id, {type: 'register_listeners'}, function(response) {
-                default_response(response);
+                Utility.default_response(response);
                 callback();  
             });  
         });
     });
-}
-
-function default_response(response) {
-    if (response && response.type) console.log(response.type);
 }
 
 function is_watching(params) {
@@ -39,18 +34,18 @@ function is_watching(params) {
 /** Generates a client id if one is not found in chrome sync storage */
 function update_id() {
     chrome.storage.sync.get('client_id', function(items) {
-        var id = items.client_id;
+        let id = items.client_id;
         if (id) {
             client_id = id;
         } else {
-            client_id = utility.uuidv4();
+            client_id = Utility.uuidv4();
             chrome.storage.sync.set({'client_id': client_id});
         }
     });
 }
 
 function generic_player_update(tab_id, controller, type) {
-    var c = current_lobby.clients[client_id];
+    let c = current_lobby.clients[client_id];
     chrome.tabs.sendMessage(tab_id, {
         type: type,
         player_state: controller.player_state,
@@ -58,7 +53,7 @@ function generic_player_update(tab_id, controller, type) {
 
     }, function(response) {
 
-        default_response(response);
+        Utility.default_response(response);
         player_state = controller.player_state;
         c.player_state = controller.player_state;
         c.progress = controller.progress;
@@ -85,21 +80,21 @@ function player_time_update(tab_id, controller) {
 function update_listener(event) {
     
     if (!current_lobby) return;
-    var data = JSON.parse(event.data);
+    let data = JSON.parse(event.data);
 
      if (data.type == 'update') {
         if (client_id == current_lobby.ctl_id) return; // Never want to update the client controller from server
-        var lobbies = data.lobbies;
+        let lobbies = data.lobbies;
 
-        for (var l in lobbies) {
+        for (let l in lobbies) {
             if (l == current_lobby.id) { 
-                var controller = lobbies[l].clients[lobbies[l].ctl_id];
-                var c = current_lobby.clients[client_id];
+                let controller = lobbies[l].clients[lobbies[l].ctl_id];
+                let c = current_lobby.clients[client_id];
                 chrome.tabs.query({title: 'Netflix'}, function(tabs)  {
                     if (current_url_params != controller.url_params) {
                         chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                            /** var listener = function (tab_id, change_info, tab) {
+                            /** let listener = function (tab_id, change_info, tab) {
                                 if (!change_info.status || change_info.status != 'complete') return;
                                 if (tab_id == tabs[0].id) {
                                     full_player_update(tabs[0].id, controller);
@@ -150,12 +145,12 @@ function connect_lobby(lobby_id, done) {
     }
 
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+        let data = JSON.parse(event.data);
         console.log(data);
         if (data.type == 'connect_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby; 
-                var controller = current_lobby.clients[current_lobby.ctl_id];
+                let controller = current_lobby.clients[current_lobby.ctl_id];
                 if (controller.player_state == PLAYER_STATE.Pause 
                     || controller.player_state == PLAYER_STATE.Play) {
                         // Assuming only one tab of Netflix
@@ -163,7 +158,7 @@ function connect_lobby(lobby_id, done) {
                             if (current_url_params != controller.url_params) {
                                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                                /** var listener = function (tab_id, change_info, tab) {
+                                /** let listener = function (tab_id, change_info, tab) {
                                     if (!change_info.status || change_info.status != 'complete') return;
                                     if (tab_id == tabs[0].id) {
                                         full_player_update(tabs[0].id, controller);
@@ -219,7 +214,7 @@ function broadcast_update() {
     send_update_generic('broadcast_update');
 
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+        let data = JSON.parse(event.data);
         if (data.type == 'broadcast_update_ack') {
             console.log(data.type);
         }  else {
@@ -233,16 +228,14 @@ function lifecycle_ping(done) {
     send_update_generic('lifecycle');
     
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+        let data = JSON.parse(event.data);
         if (data.type == 'lifecycle_ack') {
             done(data.stop);
             if (data.timeout) {
                 chrome.tabs.query({title:'Netflix'}, function(tabs) {
                     chrome.tabs.sendMessage(tabs[0].id, {
                         type: 'timeout'
-                    }, function(response) {
-                        default_response(response);
-                    });
+                    }, Utility.default_response);
                 });
             }
         } else {
@@ -271,7 +264,7 @@ function disconnect(done) {
     }
 
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+        let data = JSON.parse(event.data);
         if (data.type == 'disconnect_ack') {
             if (data.success) {
                 current_lobby = null;
@@ -311,11 +304,11 @@ function start_lobby(done) {
     }
 
     ws.onmessage = function(event) {
-        var data = JSON.parse(event.data);
+        let data = JSON.parse(event.data);
         if (data.type == 'start_lobby_ack') {
             if (data.success) {
                 current_lobby = data.lobby;
-                var c = current_lobby.clients[client_id];
+                let c = current_lobby.clients[client_id];
                 if (is_watching(current_url_params)) {
                     chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                         chrome.tabs.sendMessage(tabs[0].id, {
@@ -352,7 +345,7 @@ function tab_update_listener(tab_id, change_info, tab) {
     if (tab.url.indexOf('https://www.netflix.com/') == 0) {
         chrome.pageAction.show(tab_id);
 
-        var new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
+        let new_url_params = tab.url.split('netflix.com/')[1].split('?')[0];
         if (current_url_params != new_url_params) {
             current_url_params = new_url_params;
             if (is_watching(new_url_params)) {
@@ -400,9 +393,7 @@ function msg_listener(req, sender, send_response) {
                     chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                         chrome.tabs.sendMessage(tabs[0].id, {
                             type: 'check_lifecycle'
-                        }, function(response) {
-                            default_response(response);
-                        });
+                        }, Utility.default_response);
                     });
                 }
                 send_response({type:'start_lobby_ack', success: true});

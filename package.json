@@ -21,12 +21,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jonnylin13/LDN.git"
+    "url": "git+https://github.com/jonnylin13/Long-Distance-Netflix.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jonnylin13/LDN/issues"
+    "url": "https://github.com/jonnylin13/Long-Distance-Netflix/issues"
   },
-  "homepage": "https://github.com/jonnylin13/LDN#readme"
+  "homepage": "https://github.com/jonnylin13/Long-Distance-Netflix#readme"
 }

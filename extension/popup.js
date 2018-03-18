@@ -5,14 +5,11 @@
 */
 
 import { POPUP_STATE } from './constants';
+import { Utility } from './utility';
 
-var views = {};
+let views = {};
 
-function default_response(response) {
-    if (response && response.type) console.log(response.type);
-}
-
-function init_views() {
+function init_views() {     
 
     // Re-update reference 
     views[POPUP_STATE.InLobby] = document.getElementById('in-lobby-container');
@@ -29,11 +26,9 @@ function update_state(new_state) {
     chrome.runtime.sendMessage({
         'type': 'update_popup_state', 
         'new_state': new_state
-    }, function(response) {
-        default_response(response);
-    });
+    }, Utility.default_response);
 
-    for (var state in views) {
+    for (let state in views) {
         if (state == new_state) views[state].style.display = 'block';
         else views[state].style.display = 'none';
     }
@@ -43,7 +38,7 @@ function update_state(new_state) {
             'type': 'get_lobby_id'
         }, function(response) {
             if (response && response.success) get_lobby_id_text().innerHTML = response.lobby_id;
-            default_response(response);
+            Utility.default_response(response);
         });
     } else {
         get_lobby_id_text().innerHTML = '';
@@ -62,7 +57,7 @@ function start_lobby_click_listener($event) {
                 update_state(POPUP_STATE.InLobby);
             }
         }
-        default_response(response);
+        Utility.default_response(response);
     });
 }
 
@@ -74,7 +69,7 @@ function disconnect_lobby_click_listener($event) {
                 update_state(POPUP_STATE.OutLobby);
             }
         }
-        default_response(response);
+        Utility.default_response(response);
     });
 }
 
@@ -110,9 +105,7 @@ function register_listeners() {
         document.getElementById('connect-btn').addEventListener('click', connect_click_listener);
         document.getElementById('connect-btn-back').addEventListener('click', connect_back_click_listener);
         document.getElementById('connect-confirm-btn').addEventListener('click', connect_confirm_click_listener);
-        chrome.runtime.sendMessage({type: 'ldn_loaded'}, function(response) {
-            default_response(response);
-        });
+        chrome.runtime.sendMessage({type: 'ldn_loaded'}, Utility.default_response);
     });
 }
 

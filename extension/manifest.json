@@ -7,8 +7,7 @@
       "tabs",
       "storage",
       "*://*.netflix.com/watch/*",
-      "*://netflix.com/watch/*",
-      "http://jlin.club:3000/start_lobby"
+      "*://netflix.com/watch/*"
   ],
   "background": {
       "scripts": ["build/background.bundle.js"]

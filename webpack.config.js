@@ -22,7 +22,7 @@ module.exports = [
                
            ]
        },
-       entry: './extension/background/background.js'
+       entry: './extension/background.js'
     },
     {
         output: {

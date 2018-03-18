@@ -9,15 +9,16 @@
 */
 
 import { PLAYER_STATE } from './constants';
+import { Utility } from './utility';
 
 (function() {
     if (window.hasRun === true)
         return true;
     window.hasRun = true
 
-var timeout = false;
-var lifecycle_interval;
-var player_controller_active = false;
+let timeout = false;
+let lifecycle_interval;
+let player_controller_active = false;
 
 function update_nf_player_time(progress) {
     seek(progress);
@@ -36,7 +37,7 @@ function update_player_state(state) {
         'progress': get_progress()
     }, function(response) {
         if (response.success) {
-            console.log(response.type);
+            Utility.default_response(response);
             console.log("updated player state: " + state);
         }
     });
@@ -72,10 +73,10 @@ function get_scrubber() {
 function seek(progress) {
     player_controller_active = true;
     show_controls(function() {
-        var factor = progress.elapsed / progress.max;
-        var mouse_x = $('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor;
-        var mouse_y = get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2;
-        var event_options = {
+        let factor = progress.elapsed / progress.max;
+        let mouse_x = $('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor;
+        let mouse_y = get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2;
+        let event_options = {
             'bubbles': true,
             'button': 0,
             'screenX': mouse_x - $(window).scrollLeft(),
@@ -103,7 +104,7 @@ function seek(progress) {
 
 function show_controls(callback) {
     player_controller_active = true;
-    var event_options = {
+    let event_options = {
         'bubbles': true,
         'button': 0,
         'currentTarget': get_scrubber()[0]
@@ -119,8 +120,8 @@ function show_controls(callback) {
 
 function hide_controls(callback) {
     player_controller_active = true;
-    var offset = 100;
-    var event_options = {
+    let offset = 100;
+    let event_options = {
         'bubbles': true,
         'button': 0,
         'screenX': offset - $(window).scrollLeft(),
@@ -191,7 +192,7 @@ function loaded() {
 
 /** Callback if NF player is loaded */
 function execute_safely(callback) {
-    var temp = setInterval(function() {
+    let temp = setInterval(function() {
         if (loaded()) {
             clearInterval(temp);
             callback();
@@ -217,9 +218,7 @@ function video_pause_listener($event) {
 function request_full_update() {
     chrome.runtime.sendMessage({
         'type': 'full_update_request'
-    }, function(response) {
-        console.log(response);
-    });
+    }, Utility.default_response);
 }
 
 function register_DOM_listeners(first_call) {
@@ -236,7 +235,7 @@ function lifecycle() {
         'type': 'lifecycle',
         'progress': get_progress()
     }, function(response) {
-        console.log(response);
+        Utility.default_response(response);
         if (response && response.stop) {
             clearInterval(lifecycle_interval);
             lifecycle_interval = null;
