@@ -19,5 +19,5 @@ export const READY_STATE= Object.freeze({
 });
 
 export const Constants = Object.freeze({
-    ws_url: 'ws://192.168.0.2:3000/ldn'
+    ws_url: 'ws://192.168.0.6:3000/ldn'
 });
