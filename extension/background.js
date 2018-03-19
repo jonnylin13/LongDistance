@@ -13,6 +13,7 @@ let client_id;
 let current_lobby; 
 let ws;
 let broadcast = false;
+let new_page = false;
 
 function start_player(tab_id, callback) {
     chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery.js'}, function(results) {
@@ -349,6 +350,7 @@ function tab_update_listener(tab_id, change_info, tab) {
             current_url_params = new_url_params;
             if (is_watching(new_url_params)) {
 
+                new_page = true;
                 start_player(tab_id, function() {
                     // May not need this...
                     // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
@@ -356,6 +358,7 @@ function tab_update_listener(tab_id, change_info, tab) {
  
             } else {
                 
+                new_page = false;
                 player_state = PLAYER_STATE.Inactive;
                 if (current_lobby && current_lobby.ctl_id != client_id) {
                     popup_state = POPUP_STATE.OutLobby;
@@ -462,7 +465,6 @@ function msg_listener(req, sender, send_response) {
 
                 if (current_lobby && current_lobby.ctl_id == client_id) {
                     broadcast_update();
-                } // Add something here to handle seeking for player.js time update?
                 return;
             }
             current_lobby.clients[client_id].progress = req.progress;
@@ -474,6 +476,12 @@ function msg_listener(req, sender, send_response) {
                 });
                 broadcast = false;
             } else {
+
+                if (new_page && current_lobby && current_lobby.ctl_id == client_id) {
+                    broadcast_update();
+                    new_page = false;
+                }
+
                 lifecycle_ping(function(stop) {
                     send_response({
                         'type': 'lifecycle_ack',

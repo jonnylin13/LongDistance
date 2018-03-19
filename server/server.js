@@ -202,6 +202,15 @@ function listen() {
                     }));
                     return;
                 }
+
+                // Validate controller
+                if (lobbies[data.lobby_id].ctl_id != data.client_id) {
+                    ws.send(JSON.stringify({
+                        type: 'broadcast_update_ack',
+                        success: false
+                    }));
+                    return;
+                }
                 
                 // We know the client is the controller here
                 var client = lobbies[data.lobby_id].clients[data.client_id];
