@@ -4,13 +4,12 @@
 * Initialized when NF Player is created
 */
 
-/** Wrapped in a function so executeScript knows the script has been run 
- *  https://stackoverflow.com/questions/34528785/chrome-extension-checking-if-content-script-has-been-injected-or-not
-*/
-
 import { PLAYER_STATE } from './constants';
 import { Utility } from './utility';
 
+/** IIFE so executeScript knows the script has been run 
+ *  https://stackoverflow.com/questions/34528785/chrome-extension-checking-if-content-script-has-been-injected-or-not
+*/
 (function() {
     if (window.hasRun === true)
         return true;
@@ -215,19 +214,12 @@ function video_pause_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
 }
 
-function request_full_update() {
-    chrome.runtime.sendMessage({
-        'type': 'full_update_request'
-    }, Utility.default_response);
-}
-
 function register_DOM_listeners(first_call) {
     // Initial update
-    check_player_state();
     if (!first_call) destroy();
     get_video().on('play', video_play_listener);
     get_video().on('pause', video_pause_listener);
-    request_full_update();
+    check_player_state();
 }
 
 function lifecycle() {

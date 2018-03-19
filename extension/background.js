@@ -7,7 +7,6 @@ import { PLAYER_STATE, READY_STATE, POPUP_STATE, Constants } from './constants';
 import { Utility } from './utility';
 
 let current_url_params;
-let player_port;
 let player_state = PLAYER_STATE.Inactive;
 let popup_state = POPUP_STATE.OutLobby;
 let client_id;
@@ -76,7 +75,7 @@ function player_time_update(tab_id, controller) {
     generic_player_update(tab_id, controller, 'player_time_update');
 }
 
-
+/** Listens for updates from the server */
 function update_listener(event) {
     
     if (!current_lobby) return;
@@ -350,10 +349,10 @@ function tab_update_listener(tab_id, change_info, tab) {
             current_url_params = new_url_params;
             if (is_watching(new_url_params)) {
 
-            start_player(tab_id, function() {
-                // May not need this...
-                // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
-            });
+                start_player(tab_id, function() {
+                    // May not need this...
+                    // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
+                });
  
             } else {
                 
@@ -463,7 +462,7 @@ function msg_listener(req, sender, send_response) {
 
                 if (current_lobby && current_lobby.ctl_id == client_id) {
                     broadcast_update();
-                }
+                } // Add something here to handle seeking for player.js time update?
                 return;
             }
             current_lobby.clients[client_id].progress = req.progress;
@@ -489,13 +488,6 @@ function msg_listener(req, sender, send_response) {
                     'success': success
                 });
             });
-        } else if (req.type === 'full_update_request') {
-            if (current_lobby && current_lobby.ctl_id != client_id) {
-                chrome.tabs.query({title: 'Netflix'}, function(tabs) {
-                    full_player_update(tabs[0].id, current_lobby.clients[current_lobby.ctl_id]);
-                });
-            }
-            send_response({'type': 'full_update_request_ack'});
         }
     }
     return true;
