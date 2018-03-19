@@ -50,39 +50,51 @@ function update_state(new_state) {
  *  Called when user clicks the 'Start Lobby' button
  */
 function start_lobby_click_listener($event) {
+
     chrome.runtime.sendMessage({type: 'start_lobby'}, function(response) {
+
         if (response && response.type) {
             if (response.type === 'start_lobby_ack' && response.success) {
                 // Update the view
                 update_state(POPUP_STATE.InLobby);
             }
         }
+
         Utility.default_response(response);
+
     });
+
 }
 
 function disconnect_lobby_click_listener($event) {
+
     chrome.runtime.sendMessage({type: 'disconnect'}, function(response) {
+
         if (response && response.type) {
             if (response.type === 'disconnect_ack' && response.success) {
                 // Update the view
                 update_state(POPUP_STATE.OutLobby);
             }
         }
+
         Utility.default_response(response);
+
     });
 }
 
 function connect_confirm_click_listener($event) {
+
     chrome.runtime.sendMessage({
         type: 'connect_lobby',
         lobby_id: document.getElementById('lobby-id').value,
     }, function(response) {
+
         if (response) {
             if (response.type === 'connect_lobby_ack' && response.success) {
                 update_state(POPUP_STATE.InLobby);
             }
         }
+
     });
 }
 
@@ -95,18 +107,24 @@ function connect_back_click_listener($event) {
 }
 
 function register_listeners() {
+
     document.addEventListener('DOMContentLoaded', function() {
+        
         init_views();
+
         chrome.runtime.sendMessage({type: 'get_popup_state'}, function(response) {
             if (response && response.type == 'get_popup_state_ack') update_state(response.state);
         });
+
         document.getElementById('start-lobby-btn').addEventListener('click', start_lobby_click_listener);
         document.getElementById('disconnect-btn').addEventListener('click', disconnect_lobby_click_listener);
         document.getElementById('connect-btn').addEventListener('click', connect_click_listener);
         document.getElementById('connect-btn-back').addEventListener('click', connect_back_click_listener);
         document.getElementById('connect-confirm-btn').addEventListener('click', connect_confirm_click_listener);
         chrome.runtime.sendMessage({type: 'ldn_loaded'}, Utility.default_response);
+
     });
+
 }
 
 /** Main function (entry point) */

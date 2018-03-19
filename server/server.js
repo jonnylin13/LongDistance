@@ -15,19 +15,25 @@ var lobbies = {};
 var wss;
 
 function error(msg, ws) {
+
     if (ws) {
         ws.send(JSON.stringify({
             'msg': 'Error: ' + msg,
             'success': false
         }));
     }
+
     console.log(msg);
+
 }
 
 function avg_elapsed(lobby_id, client_id) {
+
     var sum = 0;
     var count = 0;
+
     if (!lobbies[lobby_id]) return sum;
+
     for (var cid in lobbies[lobby_id].clients) {
         if (cid != client_id) {
             if (!lobbies[lobby_id].clients[cid].progress) continue;
@@ -35,15 +41,18 @@ function avg_elapsed(lobby_id, client_id) {
             count++;
         }
     }
+
     return sum / count;
 }
 
 function lobby(id, ctl_id, player_state, url_params) {
+
     var lobby = {
         'id': id,
         'ctl_id': ctl_id,   
         'clients': {}
     };
+
     lobby.clients[ctl_id] = {
         'id': ctl_id,
         'player_state': player_state,
@@ -53,17 +62,22 @@ function lobby(id, ctl_id, player_state, url_params) {
             'max': 0
         }
     };
+
     return lobby;
+
 }
 
 /** Returns true if client_id is in a lobby 
  * Uses linear search for now, can be optimized in the future
 */
 function has_lobby(client_id) {
+
     for (var lobby_id in lobbies)
         for (var cid in lobbies[lobby_id].clients)
             if (cid == client_id) return true;
+
     return false;
+
 }
 
 /** Returns true if client_id has control */
@@ -72,18 +86,25 @@ function has_ctl_token(lobby, client_id) {
 }
 
 function broadcast_update() {
+
     wss.clients.forEach(function each(client) {
+
         if (client.readyState == WebSocket.OPEN) {
+
             client.send(JSON.stringify({
                 type: 'update',
                 lobbies: lobbies
             }));
+
         }
+        
     });
+
 }
 
 /** Listen function */
 function listen() {
+
     wss.on('connection', function(ws, req) {
 
         console.log("Received a connection from: ", req.connection.remoteAddress);
@@ -216,7 +237,7 @@ function listen() {
                 var client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
-                client.progress = data.progress;
+                // client.progress = data.progress;
 
                 if (client.id == lobbies[data.lobby_id].ctl_id) {
                     broadcast_update();

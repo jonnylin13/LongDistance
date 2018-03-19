@@ -24,29 +24,37 @@ function update_nf_player_time(progress) {
 }
 
 function update_nf_player_state(state) {
+
     console.log(state);
     if (state == PLAYER_STATE.Pause) pause();
     else if (state == PLAYER_STATE.Play) play();
+
 }
 
 function update_player_state(state) {
+
     chrome.runtime.sendMessage({
         'type': 'update_player_state',
         'new_state': state,
         'progress': get_progress()
     }, function(response) {
+
         if (response.success) {
             Utility.default_response(response);
             console.log("updated player state: " + state);
         }
+
     });
+
 }
 
 function check_player_state() {
+
     if (get_video()[0]) {
         if (get_video()[0].paused == true) update_player_state(PLAYER_STATE.Paused);
         else if (get_video()[0].paused == false) update_player_state(PLAYER_STATE.Play);
     }
+
 }
 
 function get_video() {
@@ -70,11 +78,15 @@ function get_scrubber() {
 }
 
 function seek(progress) {
+    
     player_controller_active = true;
+
     show_controls(function() {
+
         let factor = progress.elapsed / progress.max;
         let mouse_x = $('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor;
         let mouse_y = get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2;
+
         let event_options = {
             'bubbles': true,
             'button': 0,
@@ -88,27 +100,37 @@ function seek(progress) {
             'pageY': mouse_y,
             'currentTarget': get_scrubber()[0]
         };
+
         get_scrubber()[0].dispatchEvent(new MouseEvent('mouseover', event_options));
+
         setTimeout(function() {
+
             get_scrubber()[0].dispatchEvent(new MouseEvent('mousedown', event_options));
             get_scrubber()[0].dispatchEvent(new MouseEvent('mouseup', event_options));
             get_scrubber()[0].dispatchEvent(new MouseEvent('mouseout', event_options));
+
             setTimeout(function() {
                 hide_controls(); // This will set player_controller_active
             }, 1);
+
         }, 10);
+
     });
 
 }
 
 function show_controls(callback) {
+
     player_controller_active = true;
+
     let event_options = {
         'bubbles': true,
         'button': 0,
         'currentTarget': get_scrubber()[0]
     };
+
     get_scrubber()[0].dispatchEvent(new MouseEvent('mousemove', event_options));
+
     setTimeout(
         function() {
             player_controller_active = false;
@@ -118,8 +140,10 @@ function show_controls(callback) {
 }
 
 function hide_controls(callback) {
+
     player_controller_active = true;
     let offset = 100;
+
     let event_options = {
         'bubbles': true,
         'button': 0,
@@ -133,11 +157,14 @@ function hide_controls(callback) {
         'pageY': offset,
         'currentTarget': get_player()[0]
     };
+
     get_player()[0].dispatchEvent(new MouseEvent('mousemove', event_options));
+
     setTimeout(function() {
         player_controller_active = false;
         if (callback) callback();
     }, 1);
+
 }
 
 /** Tons of help
@@ -146,43 +173,59 @@ function hide_controls(callback) {
  * https://stackoverflow.com/questions/27927950/controlling-netflix-html5-playback-with-tampermonkey-javascript/39703888#39703888
 */
 function play() {
+
     execute_safely(function() {
         if (get_video()[0].paused) {
+
             console.log('play update');
             player_controller_active = true;
             get_play().click();
+
             setTimeout(function() {
                 hide_controls();
             }, 1);
+
         }
+
     });
+
 }
 
 function pause() {
+
     execute_safely(function() {
         if (!get_video()[0].paused) {
+
             console.log('pause update');
             player_controller_active = true;
             get_pause().click();
+
             setTimeout(function() {
                 hide_controls();
             }, 1);
+
         }
     });
+    
 }
 
 /** Returns the progress from NF player */
 function get_progress() {
+
     if (!get_video()[0]) {
+
         return {
             'elapsed': 0,
             'max': 0
         };
+
     }
+
     return {
         'elapsed': get_video()[0].currentTime,
         'max': get_video()[0].duration,
     }
+
 }
 
 function loaded() {
@@ -191,12 +234,16 @@ function loaded() {
 
 /** Callback if NF player is loaded */
 function execute_safely(callback) {
+
     let temp = setInterval(function() {
+
         if (loaded()) {
             clearInterval(temp);
             callback();
         }
+
     }, 500);
+
 }
 
 function destroy() {
@@ -223,22 +270,30 @@ function register_DOM_listeners(first_call) {
 }
 
 function lifecycle() {
+
     chrome.runtime.sendMessage({
         'type': 'lifecycle',
         'progress': get_progress()
     }, function(response) {
+
         Utility.default_response(response);
+
         if (response && response.stop) {
             clearInterval(lifecycle_interval);
             lifecycle_interval = null;
         }
+
     });
+
 }
 
 /** Triggered by messages from background.js */
 function msg_listener(req, sender, send_response) {
+
     if (req.type) {
+
         console.log(req.type);
+        
         if (req.type === 'register_listeners') {
 
             execute_safely(function() {
