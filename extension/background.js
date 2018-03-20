@@ -63,7 +63,6 @@ function update_id() {
 /** Sends a generic update to player.js */
 function generic_player_update(tab_id, controller, type) {
 
-    recv_player_update_ack = false;
     chrome.tabs.sendMessage(tab_id, {
         type: type,
         player_state: controller.player_state,
@@ -74,7 +73,6 @@ function generic_player_update(tab_id, controller, type) {
         Utility.default_response(response);
         player_state = controller.player_state;
         current_url_params = controller.url_params;
-        recv_player_update_ack = true;
     
         lifecycle_ping(function() {});
 
@@ -179,7 +177,7 @@ function connect_lobby(lobby_id, done) {
                         // Assuming only one tab of Netflix
                         chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                             if (current_url_params != controller.url_params) {
-                                
+
                                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
                                     let listener = function (tab_id, change_info, tab) {
