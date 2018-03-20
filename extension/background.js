@@ -20,6 +20,13 @@ let current_lobby; // Reference from server
 // Logic state variables
 let broadcast = false;
 
+function delayed_player_update(func, tab_id, controller, delay) {
+    
+    setTimeout(function() {
+        func(tab_id, controller);
+    }, delay);
+}
+
 function start_player(tab_id, callback) {
 
     chrome.tabs.executeScript(tab_id, {file: 'scripts/jquery.js'}, function(results) {
@@ -56,6 +63,7 @@ function update_id() {
 /** Sends a generic update to player.js */
 function generic_player_update(tab_id, controller, type) {
 
+    recv_player_update_ack = false;
     chrome.tabs.sendMessage(tab_id, {
         type: type,
         player_state: controller.player_state,
@@ -66,6 +74,7 @@ function generic_player_update(tab_id, controller, type) {
         Utility.default_response(response);
         player_state = controller.player_state;
         current_url_params = controller.url_params;
+        recv_player_update_ack = true;
     
         lifecycle_ping(function() {});
 
@@ -104,12 +113,9 @@ function update_listener(event) {
                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
                     let listener = function (tab_id, change_info, tab) {
-                        if (change_info.status && change_info.status == 'complete') {
-                            if (tab_id == tabs[0].id) {
-                                full_player_update(tabs[0].id, controller);
-                                console.log('Sent full player update');
-                                chrome.tabs.onUpdated.removeListener(listener);
-                            }
+                        if (change_info.status && change_info.status == 'complete' && tab_id == tabs[0].id) {
+                            delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
+                            chrome.tabs.onUpdated.removeListener(listener);
                         }
                     };
 
@@ -173,17 +179,17 @@ function connect_lobby(lobby_id, done) {
                         // Assuming only one tab of Netflix
                         chrome.tabs.query({title: 'Netflix'}, function(tabs) {
                             if (current_url_params != controller.url_params) {
+                                
                                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                                /** let listener = function (tab_id, change_info, tab) {
-                                    if (!change_info.status || change_info.status != 'complete') return;
-                                    if (tab_id == tabs[0].id) {
-                                        full_player_update(tabs[0].id, controller);
-                                    }
-                                    chrome.tabs.onUpdated.removeListener(listener);
-                                };
-
-                                chrome.tabs.onUpdated.addListener(listener);**/
+                                    let listener = function (tab_id, change_info, tab) {
+                                        if (change_info.status && change_info.status == 'complete' && tab_id == tabs[0].id) {
+                                            delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
+                                            chrome.tabs.onUpdated.removeListener(listener);
+                                        }
+                                    };
+                
+                                    chrome.tabs.onUpdated.addListener(listener); 
 
                                 }); 
                             } else {
