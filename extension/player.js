@@ -340,6 +340,7 @@ function register_DOM_listeners(first_call) {
     get_video().on('play', video_play_listener);
     get_video().on('pause', video_pause_listener);
     check_player_state();
+    request_player_update();
 }
 
 function lifecycle() {
