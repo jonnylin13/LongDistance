@@ -104,11 +104,12 @@ function update_listener(event) {
                 chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
                     let listener = function (tab_id, change_info, tab) {
-                        if (!change_info.status || change_info.status != 'complete') return;
-                        if (tab_id == tabs[0].id) {
-                            full_player_update(tabs[0].id, controller);
-                            console.log('Sent full player update');
-                            chrome.tabs.onUpdated.removeListener(listener);
+                        if (change_info.status && change_info.status == 'complete') {
+                            if (tab_id == tabs[0].id) {
+                                full_player_update(tabs[0].id, controller);
+                                console.log('Sent full player update');
+                                chrome.tabs.onUpdated.removeListener(listener);
+                            }
                         }
                     };
 
