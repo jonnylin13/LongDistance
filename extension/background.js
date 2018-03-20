@@ -112,7 +112,7 @@ function update_listener(event) {
 
                     let listener = function (tab_id, change_info, tab) {
                         if (change_info.status && change_info.status == 'complete' && tab_id == tabs[0].id) {
-                            delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
+                            // delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
                             chrome.tabs.onUpdated.removeListener(listener);
                         }
                     };
@@ -182,7 +182,7 @@ function connect_lobby(lobby_id, done) {
 
                                     let listener = function (tab_id, change_info, tab) {
                                         if (change_info.status && change_info.status == 'complete' && tab_id == tabs[0].id) {
-                                            delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
+                                            // delayed_player_update(full_player_update, tabs[0].id, controller, 5 * 1000);
                                             chrome.tabs.onUpdated.removeListener(listener);
                                         }
                                     };
@@ -570,6 +570,12 @@ function msg_listener(req, sender, send_response) {
                 });
             });
 
+        } else if (req.type === 'request_player_update') {
+            send_response({
+                'type': 'request_player_update_ack',
+                'progress': current_lobby.clients[current_lobby.ctl_id].progress,
+                'player_state': current_lobby.clients[current_lobby.ctl_id].player_state
+            });
         }
     }
     return true;

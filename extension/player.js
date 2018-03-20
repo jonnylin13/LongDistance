@@ -48,6 +48,17 @@ function update_player_state(state) {
 
 }
 
+function request_player_update() {
+    chrome.runtime.sendMessage({
+        type: 'request_player_update'
+    }, function(response) {
+        if (response && response.type == 'request_player_update_ack') {
+            update_nf_player_time(response.progress);
+            update_nf_player_state(response.player_state);
+        }
+    });
+}
+
 function check_player_state() {
 
     if (get_video()[0]) {
