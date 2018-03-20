@@ -93,40 +93,37 @@ function update_listener(event) {
      if (data.type == 'update') {
 
         if (client_id == current_lobby.ctl_id) return; // Never want to update the controller's player from its own broadcast_update!
-        let lobbies = data.lobbies;
+        let lobby = data.data;
 
-        for (let l in lobbies) { // This is really bad :/
-            if (l == current_lobby.id) { 
+        let controller = lobby.clients[lobby.ctl_id];
+        current_lobby = lobby;
 
-                let controller = lobbies[l].clients[lobbies[l].ctl_id];
-                current_lobby = lobbies[l];
+        chrome.tabs.query({title: 'Netflix'}, function(tabs)  {
 
-                chrome.tabs.query({title: 'Netflix'}, function(tabs)  {
+            if (current_url_params != controller.url_params) {
+                chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
 
-                    if (current_url_params != controller.url_params) {
-                        chrome.tabs.update(tabs[0].id, {url: 'https://netflix.com/' + controller.url_params}, function() {
+                    let listener = function (tab_id, change_info, tab) {
+                        if (!change_info.status || change_info.status != 'complete') return;
+                        if (tab_id == tabs[0].id) {
+                            full_player_update(tabs[0].id, controller);
+                            console.log('Sent full player update');
+                            chrome.tabs.onUpdated.removeListener(listener);
+                        }
+                    };
 
-                            /** let listener = function (tab_id, change_info, tab) {
-                                if (!change_info.status || change_info.status != 'complete') return;
-                                if (tab_id == tabs[0].id) {
-                                    full_player_update(tabs[0].id, controller);
-                                    chrome.tabs.onUpdated.removeListener(listener);
-                                }
-                            };
+                    chrome.tabs.onUpdated.addListener(listener); 
 
-                            chrome.tabs.onUpdated.addListener(listener); */
-
-                        });
-            
-                    } else {
-                        player_state_update(tabs[0].id, controller);
-                    }
-
-                    lifecycle_ping(function() {});
-                    
                 });
+    
+            } else {
+                player_state_update(tabs[0].id, controller);
             }
-        }
+
+            lifecycle_ping(function() {});
+            
+        });
+
     }
 
 }

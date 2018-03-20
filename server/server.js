@@ -7,12 +7,13 @@
 const PORT = 3000;
 
 // Imports
-var WebSocket = require('ws');
-var short_id = require('shortid');
+const WebSocket = require('ws');
+const short_id = require('shortid');
 
 // Variables
-var lobbies = {};
-var wss;
+let lobbies = {};
+let lobby_lut = {};
+let wss;
 
 function error(msg, ws) {
 
@@ -29,8 +30,8 @@ function error(msg, ws) {
 
 function avg_elapsed(lobby_id, client_id) {
 
-    var sum = 0;
-    var count = 0;
+    let sum = 0;
+    let count = 0;
 
     if (!lobbies[lobby_id]) return sum;
 
@@ -47,7 +48,7 @@ function avg_elapsed(lobby_id, client_id) {
 
 function lobby(id, ctl_id, player_state, url_params) {
 
-    var lobby = {
+    let lobby = {
         'id': id,
         'ctl_id': ctl_id,   
         'clients': {}
@@ -72,8 +73,8 @@ function lobby(id, ctl_id, player_state, url_params) {
 */
 function has_lobby(client_id) {
 
-    for (var lobby_id in lobbies)
-        for (var cid in lobbies[lobby_id].clients)
+    for (let lobby_id in lobbies)
+        for (let cid in lobbies[lobby_id].clients)
             if (cid == client_id) return true;
 
     return false;
@@ -91,10 +92,12 @@ function broadcast_update() {
 
         if (client.readyState == WebSocket.OPEN) {
 
-            client.send(JSON.stringify({
-                type: 'update',
-                lobbies: lobbies
-            }));
+            if (lobby_lut[client.url]) {
+                client.send(JSON.stringify({
+                    type: 'update',
+                    data: lobbies[lobby_lut[client.url]]
+                }));
+            }
 
         }
 
@@ -111,14 +114,14 @@ function listen() {
 
         ws.on('message', function(msg) {
 
-            var data = JSON.parse(msg);
+            let data = JSON.parse(msg);
             if (!data) return;
             console.log(data.type);
 
             // CLIENT MESSAGES
             if (data.type == 'start_lobby') {
 
-                var client_id = data.client_id;
+                let client_id = data.client_id;
 
                 if (has_lobby(client_id)) {
                     error('Error: client is already in a lobby', ws);
@@ -126,8 +129,11 @@ function listen() {
                 }
     
                 // Generate and store
-                var lid = short_id.generate();
+                let lid = short_id.generate();
                 lobbies[lid] = lobby(lid, client_id, data.player_state, data.url_params);
+
+                lobby_lut[ws.url] = lid;
+
                 ws.send(JSON.stringify({
                     type: 'start_lobby_ack', 
                     success: true, 
@@ -137,13 +143,14 @@ function listen() {
 
             } else if (data.type == 'disconnect') {
 
-                var client_id = data.client_id;
+                let client_id = data.client_id;
 
-                for (var lobby_id in lobbies)  {
-                    for (var cid in lobbies[lobby_id].clients) {
+                for (let lobby_id in lobbies)  {
+                    for (let cid in lobbies[lobby_id].clients) {
 
                         if (cid == client_id) {
                             delete lobbies[lobby_id].clients[cid];
+                            delete lobby_lut[ws.url];
                             if (Object.keys(lobbies[lobby_id].clients).length == 0) delete lobbies[lobby_id];
                             if (lobbies[lobby_id] && client_id == lobbies[lobby_id].ctl_id) 
                                 lobbies[lobby_id].ctl_id = Object.keys(lobbies[lobby_id].clients)[0];
@@ -167,7 +174,7 @@ function listen() {
                     return;
                 }
                 
-                var client = lobbies[data.lobby_id].clients[data.client_id];
+                let client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
                 client.progress = data.progress;
@@ -188,8 +195,8 @@ function listen() {
 
             } else if (data.type == 'connect_lobby') {
 
-                var cid = data.client_id;
-                var lid = data.lobby_id;
+                let cid = data.client_id;
+                let lid = data.lobby_id;
 
                 if (has_lobby(cid)) {
                     error('client is already in a lobby', ws);
@@ -197,11 +204,14 @@ function listen() {
                 }
 
                 if (lobbies[lid]) {
+
                     lobbies[lid].clients[cid] = {
                         'id': cid,
                         'url_params': data.url_params,
                         'player_state': data.player_state
                     };
+                    lobby_lut[ws.url] = lid;
+
                     ws.send(JSON.stringify({
                         type: 'connect_lobby_ack',
                         lobby: lobbies[lid],
@@ -234,7 +244,7 @@ function listen() {
                 }
                 
                 // We know the client is the controller here
-                var client = lobbies[data.lobby_id].clients[data.client_id];
+                let client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
                 client.progress = data.progress;
