@@ -32,13 +32,14 @@ function avg_elapsed(lobby_id, client_id) {
 
     let sum = 0;
     let count = 0;
+    let lobby = lobbies[lobby_id];
 
-    if (!lobbies[lobby_id]) return sum;
+    if (!lobby) return sum;
 
-    for (var cid in lobbies[lobby_id].clients) {
+    for (let cid in lobby.clients) {
         if (cid != client_id) {
-            if (!lobbies[lobby_id].clients[cid].progress) continue;
-            sum += lobbies[lobby_id].clients[cid].progress.elapsed;
+            if (!lobby.clients[cid].progress) continue;
+            sum += lobby.clients[cid].progress.elapsed;
             count++;
         }
     }
@@ -144,24 +145,21 @@ function listen() {
             } else if (data.type == 'disconnect') {
 
                 let client_id = data.client_id;
+                let lobby_id = data.lobby_id;
+                let client = lobbies[lobby_id].clients[client_id];
 
-                for (let lobby_id in lobbies)  {
-                    for (let cid in lobbies[lobby_id].clients) {
-
-                        if (cid == client_id) {
-                            delete lobbies[lobby_id].clients[cid];
-                            delete lobby_lut[ws.url];
-                            if (Object.keys(lobbies[lobby_id].clients).length == 0) delete lobbies[lobby_id];
-                            if (lobbies[lobby_id] && client_id == lobbies[lobby_id].ctl_id) 
-                                lobbies[lobby_id].ctl_id = Object.keys(lobbies[lobby_id].clients)[0];
-                            ws.send(JSON.stringify({
-                                type: 'disconnect_ack',
-                                success: true
-                            }));
-                        }
-
-                    }
+                if (typeof client != 'undefined') {
+                    delete client;
+                    delete lobby_lut[ws.url];
+                    if (Object.keys(lobbies[lobby_id].clients).length == 0) delete lobbies[lobby_id];
+                        if (lobbies[lobby_id] && client_id == lobbies[lobby_id].ctl_id) 
+                            lobbies[lobby_id].ctl_id = Object.keys(lobbies[lobby_id].clients)[0];
+                        ws.send(JSON.stringify({
+                            type: 'disconnect_ack',
+                            success: true
+                        }));
                 }
+
                 console.log(lobbies);
 
             } else if (data.type == 'lifecycle') {

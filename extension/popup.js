@@ -9,10 +9,10 @@ import { Utility } from './utility';
 
 let views = {};
 
-function init_views() {     
+function init_views() {
 
     // Re-update reference 
-    views[POPUP_STATE.InLobby] =$('#in-lobby-container');
+    views[POPUP_STATE.InLobby] = $('#in-lobby-container');
     views[POPUP_STATE.OutLobby] = $('#out-lobby-container');
     views[POPUP_STATE.ConnectLobby] = $('#connect-lobby-container');
 }
@@ -24,7 +24,7 @@ function get_lobby_id_text() {
 function update_state(new_state) {
 
     chrome.runtime.sendMessage({
-        'type': 'update_popup_state', 
+        'type': 'update_popup_state',
         'new_state': new_state
     }, Utility.default_response);
 
@@ -36,7 +36,7 @@ function update_state(new_state) {
     if (new_state == POPUP_STATE.InLobby) {
         chrome.runtime.sendMessage({
             'type': 'get_lobby_id'
-        }, function(response) {
+        }, function (response) {
             if (response && response.success && get_lobby_id_text()) get_lobby_id_text().innerHTML = response.lobby_id;
             Utility.default_response(response);
         });
@@ -51,7 +51,7 @@ function update_state(new_state) {
  */
 function start_lobby_click_listener($event) {
 
-    chrome.runtime.sendMessage({type: 'start_lobby'}, function(response) {
+    chrome.runtime.sendMessage({ type: 'start_lobby' }, function (response) {
 
         if (response && response.type) {
             if (response.type === 'start_lobby_ack' && response.success) {
@@ -68,7 +68,7 @@ function start_lobby_click_listener($event) {
 
 function disconnect_lobby_click_listener($event) {
 
-    chrome.runtime.sendMessage({type: 'disconnect'}, function(response) {
+    chrome.runtime.sendMessage({ type: 'disconnect' }, function (response) {
 
         if (response && response.type) {
             if (response.type === 'disconnect_ack' && response.success) {
@@ -87,7 +87,7 @@ function connect_confirm_click_listener($event) {
     chrome.runtime.sendMessage({
         type: 'connect_lobby',
         lobby_id: document.getElementById('lobby-id').value,
-    }, function(response) {
+    }, function (response) {
 
         if (response) {
             if (response.type === 'connect_lobby_ack' && response.success) {
@@ -108,11 +108,11 @@ function connect_back_click_listener($event) {
 
 function register_listeners() {
 
-    document.addEventListener('DOMContentLoaded', function() {
-        
+    document.addEventListener('DOMContentLoaded', function () {
+
         init_views();
 
-        chrome.runtime.sendMessage({type: 'get_popup_state'}, function(response) {
+        chrome.runtime.sendMessage({ type: 'get_popup_state' }, function (response) {
             if (response && response.type == 'get_popup_state_ack') update_state(response.state);
         });
 
@@ -121,7 +121,7 @@ function register_listeners() {
         document.getElementById('connect-btn').addEventListener('click', connect_click_listener);
         document.getElementById('connect-btn-back').addEventListener('click', connect_back_click_listener);
         document.getElementById('connect-confirm-btn').addEventListener('click', connect_confirm_click_listener);
-        chrome.runtime.sendMessage({type: 'ldn_loaded'}, Utility.default_response);
+        chrome.runtime.sendMessage({ type: 'ldn_loaded' }, Utility.default_response);
 
     });
 

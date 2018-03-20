@@ -10,7 +10,7 @@ export class Utility {
 
     /** Generates a UUIDv4 compliant random UUID */
     static uuidv4() {
-        return this.v4()+this.v4()+'-'+this.v4()+'-'+this.v4()+'-'+this.v4()+'-'+this.v4()+this.v4()+this.v4();
+        return this.v4() + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + this.v4() + this.v4();
     }
 
     static default_response(response) {

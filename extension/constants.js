@@ -10,7 +10,7 @@ export const POPUP_STATE = Object.freeze({
     "ConnectLobby": 2
 });
 
-export const READY_STATE= Object.freeze({
+export const READY_STATE = Object.freeze({
     "Unsent": 0,
     "Opened": 1,
     "Headers": 2,
