@@ -14,3 +14,20 @@ button:last-child {
 .hidden {
     display: none;
 }
+/* very hacky */
+
+body {
+    height: 100px !important;
+}
+
+html {
+    height: 100px !important;
+}
+
+input {
+    margin-bottom: 10px;
+}
+
+div {
+    animation-duration: 650ms !important;
+}

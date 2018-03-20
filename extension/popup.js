@@ -12,9 +12,9 @@ let views = {};
 function init_views() {     
 
     // Re-update reference 
-    views[POPUP_STATE.InLobby] = document.getElementById('in-lobby-container');
-    views[POPUP_STATE.OutLobby] = document.getElementById('out-lobby-container');
-    views[POPUP_STATE.ConnectLobby] = document.getElementById('connect-lobby-container');
+    views[POPUP_STATE.InLobby] =$('#in-lobby-container');
+    views[POPUP_STATE.OutLobby] = $('#out-lobby-container');
+    views[POPUP_STATE.ConnectLobby] = $('#connect-lobby-container');
 }
 
 function get_lobby_id_text() {
@@ -29,19 +29,19 @@ function update_state(new_state) {
     }, Utility.default_response);
 
     for (let state in views) {
-        if (state == new_state) views[state].style.display = 'block';
-        else views[state].style.display = 'none';
+        if (state == new_state) views[state].appendTo('body');
+        else views[state].detach();
     }
 
     if (new_state == POPUP_STATE.InLobby) {
         chrome.runtime.sendMessage({
             'type': 'get_lobby_id'
         }, function(response) {
-            if (response && response.success) get_lobby_id_text().innerHTML = response.lobby_id;
+            if (response && response.success && get_lobby_id_text()) get_lobby_id_text().innerHTML = response.lobby_id;
             Utility.default_response(response);
         });
     } else {
-        get_lobby_id_text().innerHTML = '';
+        if (get_lobby_id_text()) get_lobby_id_text().innerHTML = '';
     }
 
 }
