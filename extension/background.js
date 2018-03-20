@@ -462,17 +462,24 @@ function msg_listener(req, sender, send_response) {
 
             if (player_state != req.new_state)  { // Handle duplicate messages
 
-                player_state = req.new_state;
                 if (current_lobby) progress = req.progress;
 
                 if (current_lobby && client_id) {   
+
                     if (current_lobby.ctl_id == client_id) {
                         if (req.new_state == PLAYER_STATE.Pause || req.new_state == PLAYER_STATE.Play) {
+                            player_state = req.new_state;
                             broadcast_update();
+                            result = true;
                         }
+                    } else {
+                        result = false; // Will make player.js revert the player state change and will not update local player_state
                     }
+
+                } else { 
+                    player_state = req.new_state;
+                    result = true;
                 }
-                result = true;
 
             }
 

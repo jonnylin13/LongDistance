@@ -39,9 +39,13 @@ function update_player_state(state) {
         'progress': get_progress()
     }, function(response) {
 
-        if (response.success) {
+        if (response.success == true) {
             Utility.default_response(response);
-            console.log("updated player state: " + state);
+            console.log('updated player state: ' + state);
+        } else if (response.success == false) {
+            if (state == PLAYER_STATE.Pause) play();
+            if (state == PLAYER_STATE.Play) pause();
+            console.log('exit the lobby if you want to pause and play at your leisure');
         }
 
     });
@@ -331,6 +335,7 @@ function destroy() {
     get_video().off('play', video_play_listener);
     get_video().off('pause', video_pause_listener);
     clearInterval(lifecycle_interval);
+    lifecycle_interval = null;
 }
 
 function register_DOM_listeners(first_call) {
