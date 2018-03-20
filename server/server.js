@@ -97,7 +97,7 @@ function broadcast_update() {
             }));
 
         }
-        
+
     });
 
 }
@@ -237,7 +237,7 @@ function listen() {
                 var client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
-                // client.progress = data.progress;
+                client.progress = data.progress;
 
                 if (client.id == lobbies[data.lobby_id].ctl_id) {
                     broadcast_update();

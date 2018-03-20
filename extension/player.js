@@ -246,12 +246,6 @@ function execute_safely(callback) {
 
 }
 
-function destroy() {
-    get_video().off('play', video_play_listener);
-    get_video().off('pause', video_pause_listener);
-    clearInterval(lifecycle_interval);
-}
-
 // MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
 function video_play_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Play);
@@ -261,39 +255,13 @@ function video_pause_listener($event) {
     if (!player_controller_active) update_player_state(PLAYER_STATE.Pause);
 }
 
-function register_DOM_listeners(first_call) {
-    // Initial update
-    if (!first_call) destroy();
-    get_video().on('play', video_play_listener);
-    get_video().on('pause', video_pause_listener);
-    check_player_state();
-}
-
-function lifecycle() {
-
-    chrome.runtime.sendMessage({
-        'type': 'lifecycle',
-        'progress': get_progress()
-    }, function(response) {
-
-        Utility.default_response(response);
-
-        if (response && response.stop) {
-            clearInterval(lifecycle_interval);
-            lifecycle_interval = null;
-        }
-
-    });
-
-}
-
 /** Triggered by messages from background.js */
 function msg_listener(req, sender, send_response) {
 
     if (req.type) {
 
         console.log(req.type);
-        
+
         if (req.type === 'register_listeners') {
 
             execute_safely(function() {
@@ -347,6 +315,38 @@ function msg_listener(req, sender, send_response) {
             });**/
         }
     } 
+}
+
+function destroy() {
+    get_video().off('play', video_play_listener);
+    get_video().off('pause', video_pause_listener);
+    clearInterval(lifecycle_interval);
+}
+
+function register_DOM_listeners(first_call) {
+    // Initial update
+    if (!first_call) destroy();
+    get_video().on('play', video_play_listener);
+    get_video().on('pause', video_pause_listener);
+    check_player_state();
+}
+
+function lifecycle() {
+
+    chrome.runtime.sendMessage({
+        'type': 'lifecycle',
+        'progress': get_progress()
+    }, function(response) {
+
+        Utility.default_response(response);
+
+        if (response && response.stop) {
+            clearInterval(lifecycle_interval);
+            lifecycle_interval = null;
+        }
+
+    });
+
 }
 
 /** Register listeners  

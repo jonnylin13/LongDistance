@@ -6,15 +6,19 @@
 import { PLAYER_STATE, READY_STATE, POPUP_STATE, Constants } from './constants';
 import { Utility } from './utility';
 
+// Data from player.js
 let current_url_params;
+let progress = {elapsed: 0, max: 0};
 let player_state = PLAYER_STATE.Inactive;
+
 let popup_state = POPUP_STATE.OutLobby;
 let client_id;
-let current_lobby; 
 let ws;
+
+let current_lobby; // Reference from server
+
+// Logic state variables
 let broadcast = false;
-let new_page = false;
-// Fix how data is being handled before doing anything else
 
 function start_player(tab_id, callback) {
 
@@ -49,9 +53,8 @@ function update_id() {
 
 }
 
+/** Sends a generic update to player.js */
 function generic_player_update(tab_id, controller, type) {
-
-    let c = current_lobby.clients[client_id];
 
     chrome.tabs.sendMessage(tab_id, {
         type: type,
@@ -62,10 +65,8 @@ function generic_player_update(tab_id, controller, type) {
 
         Utility.default_response(response);
         player_state = controller.player_state;
-        c.player_state = controller.player_state;
-        c.progress = controller.progress; // ?
         current_url_params = controller.url_params;
-        c.url_params = controller.url_params;
+    
         lifecycle_ping(function() {});
 
     });
@@ -83,21 +84,22 @@ function player_time_update(tab_id, controller) {
     generic_player_update(tab_id, controller, 'player_time_update');
 }
 
-/** Listens for updates from the server */
+/** Listens for controller broadcasted updates from the server */
 function update_listener(event) {
     
     if (!current_lobby) return;
     let data = JSON.parse(event.data);
 
      if (data.type == 'update') {
-        if (client_id == current_lobby.ctl_id) return; // Never want to update the client controller from server
+
+        if (client_id == current_lobby.ctl_id) return; // Never want to update the controller's player from its own broadcast_update!
         let lobbies = data.lobbies;
 
-        for (let l in lobbies) {
+        for (let l in lobbies) { // This is really bad :/
             if (l == current_lobby.id) { 
 
                 let controller = lobbies[l].clients[lobbies[l].ctl_id];
-                let c = current_lobby.clients[client_id];
+                current_lobby = lobbies[l];
 
                 chrome.tabs.query({title: 'Netflix'}, function(tabs)  {
 
@@ -119,10 +121,6 @@ function update_listener(event) {
                     } else {
                         player_state_update(tabs[0].id, controller);
                     }
-
-                    c.player_state = controller.player_state;
-                    player_state = controller.player_state;
-                    c.progress = controller.progress; // ?
 
                     lifecycle_ping(function() {});
                     
@@ -216,7 +214,7 @@ function ws_send_update_generic(type) {
             'client_id': client_id,
             'player_state': player_state,
             'url_params': current_url_params,
-            'progress': current_lobby.clients[client_id].progress
+            'progress': progress
         })
     );
     
@@ -399,7 +397,6 @@ function tab_update_listener(tab_id, change_info, tab) {
 
             if (is_watching(new_url_params)) {
 
-                new_page = true;
                 start_player(tab_id, function() {
                     // May not need this...
                     // if (current_lobby && current_lobby.ctl_id == client_id) broadcast = true;
@@ -407,7 +404,6 @@ function tab_update_listener(tab_id, change_info, tab) {
  
             } else {
                 
-                new_page = false;
                 player_state = PLAYER_STATE.Inactive;
 
                 if (current_lobby && current_lobby.ctl_id != client_id) {
@@ -465,9 +461,9 @@ function msg_listener(req, sender, send_response) {
             if (player_state != req.new_state)  { // Handle duplicate messages
 
                 player_state = req.new_state;
-                if (current_lobby) current_lobby.clients[client_id].progress = req.progress;
+                if (current_lobby) progress = req.progress;
 
-                if (current_lobby && client_id) {
+                if (current_lobby && client_id) {   
                     if (current_lobby.ctl_id == client_id) {
                         if (req.new_state == PLAYER_STATE.Pause || req.new_state == PLAYER_STATE.Play) {
                             broadcast_update();
@@ -537,11 +533,12 @@ function msg_listener(req, sender, send_response) {
 
                 if (current_lobby && current_lobby.ctl_id == client_id) {
                     broadcast_update();
-                return;
+                    return;
                 }
 
             }
-            current_lobby.clients[client_id].progress = req.progress;
+
+            progress = req.progress;
 
             if (broadcast) {
 
@@ -553,12 +550,6 @@ function msg_listener(req, sender, send_response) {
                 broadcast = false;
 
             } else {
-
-                // Ehh
-                if (new_page && current_lobby && current_lobby.ctl_id == client_id) {
-                    broadcast_update();
-                    new_page = false;
-                }
 
                 lifecycle_ping(function(stop) {
                     send_response({
