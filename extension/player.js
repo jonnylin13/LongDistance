@@ -42,7 +42,7 @@ import { Utility } from './utility';
             if (response.success == true) {
                 Utility.default_response(response);
                 console.log('updated player state: ' + state);
-            } else if (response.success == false) {
+            } else if (response.success == false && !player_controller_active) {
                 if (state == PLAYER_STATE.Pause) play();
                 if (state == PLAYER_STATE.Play) pause();
                 console.log('exit the lobby if you want to pause and play at your leisure');
