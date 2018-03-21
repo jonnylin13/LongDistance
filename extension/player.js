@@ -42,10 +42,6 @@ import { Utility } from './utility';
             if (response.success == true) {
                 Utility.default_response(response);
                 console.log('updated player state: ' + state);
-            } else if (response.success == false && !player_controller_active) {
-                if (state == PLAYER_STATE.Pause) play();
-                if (state == PLAYER_STATE.Play) pause();
-                console.log('exit the lobby if you want to pause and play at your leisure');
             }
 
         });
@@ -263,6 +259,7 @@ import { Utility } from './utility';
     // MAKE THESE LISTENERS IGNORE TIMEOUT PAUSES
     function video_play_listener($event) {
         if (!player_controller_active) update_player_state(PLAYER_STATE.Play);
+        
     }
 
     function video_pause_listener($event) {
@@ -354,11 +351,17 @@ import { Utility } from './utility';
             'progress': get_progress()
         }, function (response) {
 
+            if (!response) return;
+
             Utility.default_response(response);
 
-            if (response && response.stop) {
+            if (response.stop) {
                 clearInterval(lifecycle_interval);
                 lifecycle_interval = null;
+            }
+
+            if (response.new_state) {
+                update_nf_player_state(response.new_state);
             }
 
         });

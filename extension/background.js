@@ -563,10 +563,21 @@ function msg_listener(req, sender, send_response) {
             } else {
 
                 lifecycle_ping(function (stop) {
-                    send_response({
-                        'type': 'lifecycle_ack',
-                        'stop': stop
-                    });
+                    
+                    let controller = current_lobby.clients[current_lobby.ctl_id];
+                    if (current_lobby && current_lobby.ctl_id != client_id && controller.player_state != player_state) {
+                        send_response({
+                            'type': 'lifecycle_ack',
+                            'stop': stop,
+                            'new_state': controller.player_state
+                        });
+                    } else {
+                        send_response({
+                            'type': 'lifecycle_ack',
+                            'stop': stop
+                        });
+                    }
+                
                 });
 
             }
