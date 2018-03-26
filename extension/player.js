@@ -94,8 +94,8 @@ import { Utility } from './utility';
         show_controls(function () {
 
             let factor = progress.elapsed / progress.max;
-            let mouse_x = $('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor;
-            let mouse_y = get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2;
+            let mouse_x = Math.round($('.progress-control')[0].offsetLeft + get_scrubber()[0].offsetWidth * factor);
+            let mouse_y = Math.round(get_scrubber()[0].offsetTop + get_scrubber()[0].offsetHeight / 2);
 
             let event_options = {
                 'bubbles': true,
@@ -342,6 +342,7 @@ import { Utility } from './utility';
         get_video().on('pause', video_pause_listener);
         check_player_state();
         request_player_update();
+        get_player().append('<div id="notification"><h1>Notification test</h1></div>');
     }
 
     function lifecycle() {
@@ -358,10 +359,6 @@ import { Utility } from './utility';
             if (response.stop) {
                 clearInterval(lifecycle_interval);
                 lifecycle_interval = null;
-            }
-
-            if (response.new_state) {
-                update_nf_player_state(response.new_state);
             }
 
         });

@@ -1,5 +1,5 @@
 # LDN
-Create lobbies to synchronize Netflix viewing among multiple clients through this Chrome extension
+> Create lobbies to synchronize Netflix viewing among multiple clients through this Chrome extension
 * This project uses Webpack and Babel
 
 # How to contribute
