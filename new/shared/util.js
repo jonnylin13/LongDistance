@@ -13,8 +13,4 @@ class Util {
         return this.v4() + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + this.v4() + this.v4();
     }
 
-    static default_response(response) {
-        if (response && response.type) console.log(response.type);
-    }
-
 }
