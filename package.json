@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node build/server.js",
-    "build": "babel extension -d build/extension && babel shared -d build/shared && babel server.js -d build/"
+    "start": "node build/server.js"
   },
   "repository": {
     "type": "git",
@@ -15,26 +14,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/cli": "^7.1.5",
     "shortid": "^2.2.14",
     "socket.io": "^2.1.1"
   },
-  "devDependencies": {
-    "@babel/core": "^7.1.5",
-    "@babel/preset-env": "^7.1.5"
-  },
-  "babel": {
-    "presets": [
-      ["@babel/preset-env",
-      {
-        "targets": {
-          "chrome": "58"
-        }
-      }]
-    ],
-    "plugins": [],
-    "ignore": [
-      "**/scripts"
-    ]
-  }
+  "devDependencies": {}
 }
