@@ -15,8 +15,8 @@ class ServerProtocol {
 
 class BackgroundProtocol {
 
-    static ldnOpenedAck() {
-        return {type: 'ldn_opened_ack'};
+    static ldnLoadedAck() {
+        return {type: 'ldn_loaded_ack'};
     }
     
 }

@@ -8,8 +8,14 @@ const PATH = '/ldn';
 
 class LDNServer {
 
-    constructor() {
+    constructor(start=true) {
         this.lobbies = {}
+        if (start) {
+            this.start();
+        }
+    }
+
+    start() {
         this.wss = new WebSocket.Server({port: PORT, path: PATH});
         this.wss.on('connection', this.onConnection);
     }
@@ -79,3 +85,5 @@ class LDNServer {
     }
 
 }
+
+const ldnServer = LDNServer(start=true);

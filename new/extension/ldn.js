@@ -1,12 +1,12 @@
 
-import { NetflixListener } from './netflix.js';
-import { BackgroundMessageListener } from './messaging.js';
+import { BackgroundProtocol } from '../shared/protocol';
+import { TabListener, BackgroundMessageListener } from './listeners';
 
-class LDNBackground {
+class LDNClient {
 
     constructor() {
         this.urlParams = '';
-        this.netflixListener = new NetflixListener();
+        this.tabListener = new TabListener();
         this.backgroundMessageListener = BackgroundMessageListener();
     }
     
