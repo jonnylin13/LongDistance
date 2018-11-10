@@ -11,9 +11,9 @@ const WebSocket = require('ws');
 const short_id = require('shortid');
 
 // Variables
-let lobbies = {};
-let lobby_lut = {};
-let wss;
+const lobbies = {};
+const lobby_lut = {};
+const wss;
 
 function error(msg, ws) {
 
@@ -32,7 +32,7 @@ function avg_elapsed(lobby_id, client_id) {
 
     let sum = 0;
     let count = 0;
-    let lobby = lobbies[lobby_id];
+    const lobby = lobbies[lobby_id];
 
     if (!lobby) return sum;
 
@@ -49,7 +49,7 @@ function avg_elapsed(lobby_id, client_id) {
 
 function lobby(id, ctl_id, player_state, url_params) {
 
-    let lobby = {
+    const lobby = {
         'id': id,
         'ctl_id': ctl_id,   
         'clients': {}
@@ -74,8 +74,8 @@ function lobby(id, ctl_id, player_state, url_params) {
 */
 function has_lobby(client_id) {
 
-    for (let lobby_id in lobbies)
-        for (let cid in lobbies[lobby_id].clients)
+    for (const lobby_id in lobbies)
+        for (const cid in lobbies[lobby_id].clients)
             if (cid == client_id) return true;
 
     return false;
@@ -115,14 +115,14 @@ function listen() {
 
         ws.on('message', function(msg) {
 
-            let data = JSON.parse(msg);
+            const data = JSON.parse(msg);
             if (!data) return;
             console.log(data.type);
 
             // CLIENT MESSAGES
             if (data.type == 'start_lobby') {
 
-                let client_id = data.client_id;
+                const client_id = data.client_id;
 
                 if (has_lobby(client_id)) {
                     error('Error: client is already in a lobby', ws);
@@ -130,7 +130,7 @@ function listen() {
                 }
     
                 // Generate and store
-                let lid = short_id.generate();
+                const lid = short_id.generate();
                 lobbies[lid] = lobby(lid, client_id, data.player_state, data.url_params);
 
                 lobby_lut[ws.url] = lid;
@@ -144,9 +144,9 @@ function listen() {
 
             } else if (data.type == 'disconnect') {
 
-                let client_id = data.client_id;
-                let lobby_id = data.lobby_id;
-                let client = lobbies[lobby_id].clients[client_id];
+                const client_id = data.client_id;
+                const lobby_id = data.lobby_id;
+                const client = lobbies[lobby_id].clients[client_id];
 
                 if (typeof client != 'undefined') {
                     delete client;
@@ -172,7 +172,7 @@ function listen() {
                     return;
                 }
                 
-                let client = lobbies[data.lobby_id].clients[data.client_id];
+                const client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
                 client.progress = data.progress;
@@ -193,8 +193,8 @@ function listen() {
 
             } else if (data.type == 'connect_lobby') {
 
-                let cid = data.client_id;
-                let lid = data.lobby_id;
+                const cid = data.client_id;
+                const lid = data.lobby_id;
 
                 if (has_lobby(cid)) {
                     error('client is already in a lobby', ws);
@@ -242,7 +242,7 @@ function listen() {
                 }
                 
                 // We know the client is the controller here
-                let client = lobbies[data.lobby_id].clients[data.client_id];
+                const client = lobbies[data.lobby_id].clients[data.client_id];
                 client.player_state = data.player_state;
                 client.url_params = data.url_params;
                 client.progress = data.progress;
