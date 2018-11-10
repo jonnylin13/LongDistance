@@ -4,8 +4,8 @@ var webpack = require('webpack');
 module.exports = [
     {
        output: {
-           path: path.resolve(__dirname, 'extension/build'),
-           filename: 'background.bundle.js'
+           path: path.resolve(__dirname, 'new/extension/build'),
+           filename: 'ldn.bundle.js'
        },
        module: {
            rules: [
@@ -22,11 +22,11 @@ module.exports = [
                
            ]
        },
-       entry: './extension/background.js'
+       entry: './new/extension/ldn.js'
     },
     {
         output: {
-            path: path.resolve(__dirname, 'extension/build'),
+            path: path.resolve(__dirname, 'new/extension/build'),
             filename: 'popup.bundle.js'
         },
         module: {
@@ -44,12 +44,12 @@ module.exports = [
                 
             ]
         },
-        entry: './extension/popup.js'
+        entry: './new/extension/popup.js'
      },
      {
         output: {
-            path: path.resolve(__dirname, 'extension/build'),
-            filename: 'player.bundle.js'
+            path: path.resolve(__dirname, 'new/extension/build'),
+            filename: 'controller.bundle.js'
         },
         module: {
             rules: [
@@ -66,7 +66,7 @@ module.exports = [
                 
             ]
         },
-        entry: './extension/player.js'
+        entry: './new/extension/player.js'
      },
      {
         output: {
@@ -88,6 +88,6 @@ module.exports = [
                 
             ]
         },
-        entry: './server/server.js'
+        entry: './new/server.js'
      }
 ]
