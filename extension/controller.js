@@ -48,4 +48,4 @@ class NetflixController {
     }
 }
 
-const controller = NetflixController();
+const controller = new NetflixController();

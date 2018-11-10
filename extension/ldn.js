@@ -1,5 +1,5 @@
 
-import { BackgroundProtocol } from '../shared/protocol';
+
 import { TabListener, BackgroundMessageListener } from './listeners';
 
 class LDNClient {

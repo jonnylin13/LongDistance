@@ -1,6 +1,6 @@
 
 
-class ServerProtocol {
+export class ServerProtocol {
 
     startLobbyAck(lobbyId, success=true) {
         return JSON.stringify({
@@ -13,7 +13,7 @@ class ServerProtocol {
     
 }
 
-class BackgroundProtocol {
+export class BackgroundProtocol {
 
     static ldnLoadedAck() {
         return {type: 'ldn_loaded_ack'};

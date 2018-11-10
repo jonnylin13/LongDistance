@@ -1,4 +1,4 @@
-class ProgressState {
+export class ProgressState {
     constructor(elapsed, total) {
         this.elapsed = elapsed;
         this.total = total;
@@ -13,7 +13,7 @@ class ProgressState {
     }
 } 
 
-class Lobby {
+export class Lobby {
     constructor(id, controller) {
         this.id = id;
         this.controller = controller;
@@ -34,7 +34,7 @@ class Lobby {
     }
 }
 
-class User {
+export class User {
     constructor(lobbyId, id, state, urlParams, progressState) {
         this.lobbyId = lobbyId;
         this.id = id;

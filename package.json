@@ -5,12 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node build/server.bundle.js",
-    "build": "npm run build-extension && npm run build-popup && npm run build-controller && npm run build-server",
-    "build-extension": "babel extension/ldn.js -d extension/build",
-    "build-popup": "babel extension/popup.js -d extension/build",
-    "build-controller": "babel extension/controller.js -d extension/build",
-    "build-server": "babel server.js -d build"
+    "start": "node build/server.js",
+    "build": "babel extension -d build/extension && babel shared -d build/shared && babel server.js -d build/"
   },
   "repository": {
     "type": "git",
@@ -29,7 +25,16 @@
   },
   "babel": {
     "presets": [
-      "@babel/preset-env"
+      ["@babel/preset-env",
+      {
+        "targets": {
+          "chrome": "58"
+        }
+      }]
+    ],
+    "plugins": [],
+    "ignore": [
+      "**/scripts"
     ]
   }
 }

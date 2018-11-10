@@ -1,7 +1,7 @@
 import { Lobby, User, ProgressState } from './shared/model';
 import { ServerProtocol } from './shared/protocol';
 import { short_id } from 'shortid';
-import { io } from 'socket.io';
+const Server = require('socket.io');
 
 const PORT = 3000;
 const PATH = '/ldn';
@@ -16,7 +16,8 @@ class LDNServer {
     }
 
     start() {
-        this.server = new io(PORT, {path: PATH});
+        this.server = new Server(PORT, {path: PATH});
+        console.log('Listening on port: ', PORT);
         this.server.on('connection', this.onConnection);
     }
 
@@ -83,4 +84,4 @@ class LDNServer {
 
 }
 
-const ldnServer = LDNServer(start=true);
+const ldnServer = new LDNServer(true);
