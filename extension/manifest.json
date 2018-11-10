@@ -10,7 +10,7 @@
     ],
     "background": {
         "scripts": [
-            "build/background.bundle.js"
+            "build/ldn.js"
         ]
     },
     "page_action": {
