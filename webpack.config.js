@@ -21,8 +21,7 @@ module.exports = {
         new copy([
             {from: 'extension/popup.html', to: 'popup.html'},
             {from: 'extension/manifest.json', to: 'manifest.json'},
-            {from: 'extension/styles', to: 'styles'},
-            {from: 'extension/scripts', to: 'scripts'}
+            {from: 'extension/styles', to: 'styles'}
         ])
     ]
 };
