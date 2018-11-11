@@ -1,5 +1,5 @@
 
-export class Util {
+module.exports = class Util {
 
     /** Generates UUIDv4 token character 
      * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript

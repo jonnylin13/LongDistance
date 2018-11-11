@@ -1,7 +1,9 @@
-import { Lobby, User, ProgressState } from './shared/model';
-import { ServerProtocol } from './shared/protocol';
-import { short_id } from 'shortid';
-const Server = require('socket.io');
+const Lobby = require('./shared/model/lobby');
+const User = require('./shared/model/user');
+const ProgressState = require('./shared/model/progress_state');
+const ServerProtocol = require('./shared/protocol/server_protocol');
+const short_id = require('shortid');
+const WebSocket = require('ws');
 
 const PORT = 3000;
 const PATH = '/ldn';
@@ -16,7 +18,7 @@ class LDNServer {
     }
 
     start() {
-        this.server = new Server(PORT, {path: PATH});
+        this.server = new WebSocket.Server({port: PORT});
         console.log('Listening on port: ', PORT);
         this.server.on('connection', this.onConnection);
     }
@@ -37,8 +39,8 @@ class LDNServer {
     onConnection(socket) {
 
         console.log('Connection received from: ', req.connection.remoteAddress);
-        socket.on('message', (from, msg) => {
-            this.onMessage(socket, from, msg);
+        socket.on('message', (msg) => {
+            this.onMessage(socket, msg);
         });
 
     }

@@ -1,6 +1,4 @@
-
-
-export class ServerProtocol {
+module.exports = class ServerProtocol {
 
     startLobbyAck(lobbyId, success=true) {
         return JSON.stringify({
@@ -10,13 +8,5 @@ export class ServerProtocol {
         });
     }
 
-    
-}
-
-export class BackgroundProtocol {
-
-    static ldnLoadedAck() {
-        return {type: 'ldn_loaded_ack'};
-    }
     
 }

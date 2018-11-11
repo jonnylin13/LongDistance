@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node build/server.js"
+    "start": "node server.js",
+    "build": "webpack --prod",
+    "dev": "npm run build && npm run start"
   },
   "repository": {
     "type": "git",
@@ -15,7 +17,19 @@
   "license": "ISC",
   "dependencies": {
     "shortid": "^2.2.14",
-    "socket.io": "^2.1.1"
+    "ws": "^6.1.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "webpack": "^4.25.1",
+    "babel-loader": "^8.0.4",
+    "@babel/preset-env": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "babel-cli": "^6.26.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "webpack-cli": "^3.1.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.0",
+    "utf-8-validate": "^5.0.1"
+  }
 }

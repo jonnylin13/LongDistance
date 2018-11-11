@@ -1,4 +1,4 @@
-import { BackgroundProtocol } from './shared/protocol';
+import { BackgroundProtocol } from '../shared/protocol/bg_protocol';
 
 export class TabListener {
 
