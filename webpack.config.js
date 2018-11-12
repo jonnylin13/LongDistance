@@ -14,14 +14,20 @@ module.exports = {
     },
     module: {
         rules: [
-            {test: /\.js$/, use: 'babel-loader'}
+            {test: /\.js$/, use: {
+                loader: 'babel-loader',
+                options: {
+                    presets: ['@babel/preset-env']
+                }
+            }}
         ]
     },
     plugins: [
         new copy([
             {from: 'extension/popup.html', to: 'popup.html'},
             {from: 'extension/manifest.json', to: 'manifest.json'},
-            {from: 'extension/styles', to: 'styles'}
+            {from: 'extension/styles', to: 'styles'},
+            {from: 'extension/scripts', to: 'scripts'}
         ])
     ]
 };

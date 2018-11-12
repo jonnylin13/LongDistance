@@ -10,8 +10,9 @@
     ],
     "background": {
         "scripts": [
-            "build/ldn.js"
-        ]
+            "ldn.bundle.js"
+        ],
+        "persistent": true
     },
     "page_action": {
         "default_popup": "popup.html"

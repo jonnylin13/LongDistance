@@ -1,4 +1,3 @@
 node_modules/
-old_extension/build/
-new/build/
 build/
+.vscode/

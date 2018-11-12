@@ -2,19 +2,26 @@ import { BackgroundProtocol } from '../shared/protocol/bg_protocol';
 
 export class TabListener {
 
+
     constructor() {
         this.search();
-        chrome.tabs.onCreated.addListener(this.create);
-        chrome.tabs.onUpdated.addListener(this.update);
-        chrome.tabs.onRemoved.addListener(this.remove);
+        chrome.tabs.onCreated.addListener((tab) => {
+            this.create(tab);
+        });
+        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+            this.update(tabId, changeInfo, tab);
+        });
+        chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+            this.remove(tabId, removeInfo);
+        });
         this.tabId = -1; // not found
-        
+        console.log('Tab listener started!');
     }
 
     search() {
         chrome.tabs.query({
             title: 'Netflix'
-        }, function(tabs) {
+        }, (tabs) => {
             if (tabs.length === 0) this.tabId = -1;
             else {
                 if (!this.netflixOpen()) {
@@ -28,14 +35,21 @@ export class TabListener {
     startController(tabId) {
         this.tabId = tabId;
         chrome.tabs.executeScript(tabId, {
-            file: 'scripts/jquery.js'
-        }, function(results) {
-            chrome.tabs.executeScript(tabId, {
-                file: 'build/controller.js',
-                runAt: 'document_idle'
-            }, function(results) {
-
-            })
+            file: 'scripts/jquery.min.js'
+        }, (results) => {
+            if (results[0]) {
+                chrome.tabs.executeScript(tabId, {
+                    file: 'controller.bundle.js',
+                    runAt: 'document_idle'
+                }, (results) => {
+                    if (results[0]) {
+                        console.log('Failed to start controller!');
+                    }
+                })
+            } else {
+                console.log('Failed to start jQuery!');
+            }
+            
         });
     }
 
@@ -48,23 +62,25 @@ export class TabListener {
     }
 
     isNetflix(tab) {
-        return tab.url.includes('https://netflix.com/');
+        return tab.url.includes('https://www.netflix.com/');
     }
 
     create(tab) {
+        console.log('Created: ', tab.url);
         if (this.isNetflix(tab) && !this.netflixOpen()) {
-            this.startController(tab.id);
+            startController(tab.id);
         }
     } 
 
     update(tabId, changeInfo, tab) {
+        console.log('Updated: ', tab.url);
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         chrome.tabs.query({
             currentWindow: true, active: true
-        }, function(tabs) {
+        }, (tabs) => {
             const activeTab = tabs[0];
-            if (this.isNetflix(activeTab)) {
-
+            if (this.isNetflix(activeTab) && !this.netflixOpen()) {
+                this.startController(activeTab.id);
             }
         });
     }

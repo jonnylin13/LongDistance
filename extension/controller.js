@@ -6,6 +6,7 @@ class NetflixController {
         this._get_video().on('pause', this.pause);
         this.state = 0;
         this.sync();
+        console.log('Controller has been started!');
     }
 
     _start() {
