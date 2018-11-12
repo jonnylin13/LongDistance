@@ -1,24 +1,36 @@
-import { Constants } from '../shared/constants';
-import { BackgroundProtocol } from '../shared/protocol/bg_protocol';
+import Constants from '../shared/constants';
+import BackgroundProtocol from '../shared/protocol/bg_protocol';
 
 
 class Popup {
 
     constructor() {
-        this.views = {};
-        this.views[Constants.InLobby] = $('#in-lobby-container');
-        this.views[Constants.OutLobby] = $('#out-lobby-container');
-        this.views[Constants.ConnectLobby] = $('#connect-lobby-container');
 
-        $('#start-lobby-btn').on('click', this.startLobbyClicked);
-        $('#disconnect-btn').on('click', this.disconnectLobbyClicked);
-        $('#connect-btn').on('click', this.connectClicked);
-        $('#connect-btn-back').on('click', this.connectBackClicked);
-        $('#connect-confirm-btn').on('click', this.connectConfirmClicked);
+        this.views = {};
+
+        $().ready(() => {
+            this.views[Constants.IN_LOBBY] = $('#in-lobby-container');
+            this.views[Constants.OUT_LOBBY] = $('#out-lobby-container');
+            this.views[Constants.CONNECT_LOBBY] = $('#connect-lobby-container');
+
+            $('#start-lobby-btn').on('click', this.startLobbyClicked);
+            $('#disconnect-btn').on('click', this.disconnectLobbyClicked);
+            $('#connect-btn').on('click', this.connectClicked);
+            $('#connect-btn-back').on('click', this.connectBackClicked);
+            $('#connect-confirm-btn').on('click', this.connectConfirmClicked);
+            chrome.runtime.sendMessage(BackgroundProtocol.POPUP_LOADED, (response) => {
+
+            });
+        });
+        
+    }
+
+    getLobbyIdText() {
+        return $('#lobby-id-text');
     }
 
     startLobbyClicked($event) {
-        chrome.runtime.sendMessage(BackgroundProtocol.startLobby(), (response) => {
+        chrome.runtime.sendMessage(BackgroundProtocol.START_LOBBY, (response) => {
 
         });
     }
@@ -39,27 +51,29 @@ class Popup {
 
     }
 
-    updateState(newState) {
-        /** chrome.runtime.sendMessage({
-            'type': 'update_popup_state',
-            'new_state': newState
-        }, Utility.default_response);*/
+    updatePopupState(newState) {
+
+        chrome.runtime.sendMessage(BackgroundProtocol.UPDATE_POPUP_STATE(newState), (response) => {
+
+        });
     
         for (const state in this.views) {
-            if (state == newState) views[state].appendTo('body');
-            else views[state].detach();
+            if (state == newState) this.views[state].appendTo('body');
+            else this.views[state].detach();
         }
     
-        if (newState == Constants.InLobby) {
-            chrome.runtime.sendMessage({
-                'type': 'get_lobby_id'
-            }, (response) => {
-                // if (response && response.success && get_lobby_id_text()) get_lobby_id_text().innerHTML = response.lobby_id;
+        if (newState == Constants.IN_LOBBY) {
+            chrome.runtime.sendMessage(BackgroundProtocol.GET_LOBBY_ID, (response) => {
+                if (response && response.lobbyId && this.getLobbyIdText()) this.getLobbyIdText().innerHTML = response.lobbyId;
                 // Utility.default_response(response);
             });
         } else {
-            // if (get_lobby_id_text()) get_lobby_id_text().innerHTML = '';
+            if (this.getLobbyIdText()) this.getLobbyIdText().innerHTML = '';
         }
+    }
+
+    getLobbyId() {
+
     }
 }
 

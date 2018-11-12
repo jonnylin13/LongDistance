@@ -1,9 +1,9 @@
-import { BackgroundProtocol } from '../shared/protocol/bg_protocol';
+import BackgroundProtocol from '../shared/protocol/bg_protocol';
 
 export class TabListener {
 
 
-    constructor() {
+    constructor () {
         this.search();
         chrome.tabs.onCreated.addListener((tab) => {
             this.create(tab);
@@ -18,7 +18,7 @@ export class TabListener {
         console.log('Tab listener started!');
     }
 
-    search() {
+    search () {
         chrome.tabs.query({
             title: 'Netflix'
         }, (tabs) => {
@@ -32,17 +32,20 @@ export class TabListener {
         });
     }
 
-    startController(tabId) {
+    startController (tabId) {
         this.tabId = tabId;
         chrome.tabs.executeScript(tabId, {
             file: 'scripts/jquery.min.js'
         }, (results) => {
-            if (results[0]) {
+            if (!results || results[0]) {
                 chrome.tabs.executeScript(tabId, {
                     file: 'controller.bundle.js',
                     runAt: 'document_idle'
                 }, (results) => {
-                    if (results[0]) {
+                    if (!results || results[0]) {
+                        console.log('Controller started!');
+                        chrome.pageAction.show(tabId, undefined);
+                    } else {
                         console.log('Failed to start controller!');
                     }
                 })
@@ -53,26 +56,27 @@ export class TabListener {
         });
     }
 
-    stopController() {
+    stopController () {
         this.tabId = -1;
     }
 
-    netflixOpen() {
+    netflixOpen () {
         return this.tabId !== -1;
     }
 
-    isNetflix(tab) {
+    isNetflix (tab) {
+        if (!tab) return false;
         return tab.url.includes('https://www.netflix.com/');
     }
 
-    create(tab) {
+    create (tab) {
         console.log('Created: ', tab.url);
         if (this.isNetflix(tab) && !this.netflixOpen()) {
             startController(tab.id);
         }
     } 
 
-    update(tabId, changeInfo, tab) {
+    update (tabId, changeInfo, tab) {
         console.log('Updated: ', tab.url);
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         chrome.tabs.query({
@@ -91,19 +95,32 @@ export class TabListener {
 }
 
 export class BackgroundMessageListener {
-    constructor () {
-        chrome.runtime.onMessage.addListener(this.message);
+    constructor (ldn) {
+        this.ldn = ldn;
+        chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+            this.message(req, sender, sendResponse);
+        });
     }
 
-    message(req, sender, sendResponse) {
+    message (req, sender, sendResponse) {
         if (!req.type) {
-            console.log('LDN background received a strange message from content script.');
+            console.log('LDN background received a broken message from a content script.');
             return;
         }
 
-        console.log('LDN background received message type: ', str(req.type));
-        if (req.type === 'ldn_loaded') {
-            sendResponse(BackgroundProtocol.ldnLoadedAck());
+        console.log('LDN background received message type: ', req.type);
+        if (req.type === 'POPUP_LOADED') {
+            this.wrappedSendResponse(sendResponse, BackgroundProtocol.POPUP_LOADED_ACK);
+        } else if (req.type === 'UPDATE_POPUP_STATE') {
+            this.wrappedSendResponse(sendResponse, BackgroundProtocol.UPDATE_POPUP_STATE_ACK(this.ldn.updatePopupState(req)));
+        } else if (req.type === 'GET_LOBBY_ID') {
+            this.wrappedSendResponse(sendResponse, BackgroundProtocol.GET_LOBBY_ID_ACK(this.ldn.currentLobby));
         }
+    }
+
+    wrappedSendResponse (sendResponse, data) {
+        console.log('Sending the following response: ');
+        console.log(data);
+        sendResponse(data);
     }
 }

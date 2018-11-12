@@ -1,19 +1,19 @@
-const InLobby = 0;
-const OutLobby = 1;
-const ConnectLobby = 2;
-
 module.exports = class Constants {
 
-    static get InLobby() {
-        return InLobby;
+    static get IN_LOBBY () {
+        return 1;
     }
 
-    static get OutLobby() {
-        return OutLobby;
+    static get OUT_LOBBY () {
+        return 0;
     }
 
-    static get ConnectLobby() {
-        return ConnectLobby;
+    static get CONNECT_LOBBY () {
+        return 2;
+    }
+
+    static get WS_URL () {
+        return '';
     }
 
 }

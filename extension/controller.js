@@ -1,6 +1,6 @@
 class NetflixController {
 
-    constructor() {
+    constructor () {
         this._start();
         this._get_video().on('play', this.play);
         this._get_video().on('pause', this.pause);
@@ -9,39 +9,39 @@ class NetflixController {
         console.log('Controller has been started!');
     }
 
-    _start() {
+    _start () {
         
     }
 
-    _get_video() {
+    _get_video () {
         return $('video');
     }
 
-    _get_play() {
+    _get_play () {
         return $('.button-nfplayerPlay');
     }
 
-    _get_player() {
+    _get_player () {
         return $('.nf-player-container');
     }
 
-    _get_pause() {
+    _get_pause () {
         return $('.button-nfplayerPause');
     }
 
-    _get_scrubber() {
+    _get_scrubber () {
         return $('.scrubber-bar');
     }
 
-    play() {
+    play () {
 
     }
 
-    pause() {
+    pause () {
 
     }
 
-    sync() {
+    sync () {
         if (this._get_video()[0]) {
             if (this._get_video()[0].paused == true) this.state = 0;
             else this.state = 1;

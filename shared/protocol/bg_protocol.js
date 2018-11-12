@@ -1,17 +1,45 @@
 module.exports = class BackgroundProtocol {
 
     // Out
-    ldnLoadedAck() {
-        return {type: 'ldn_loaded_ack'};
+    static get POPUP_LOADED_ACK () {
+        return {type: 'POPUP_LOADED_ACK'};
     }
 
-    startLobbyAck() {
-        return {type: 'start_lobby_ack'};
+    static get START_LOBBY_ACK () {
+        return {type: 'START_LOBBY_ACK'};
+    }
+
+    static UPDATE_POPUP_STATE_ACK (success=true) {
+        return {
+            type: 'UPDATE_POPUP_STATE_ACK',
+            success: success
+        };
+    }
+
+    static GET_LOBBY_ID_ACK(lobbyId) {
+        return {
+            type: 'GET_LOBBY_ID_ACK',
+            lobbyId: lobbyId
+        }
     }
 
     // In
-    startLobby() {
-        return {type: 'start_lobby'};
+    static get POPUP_LOADED() {
+        return {type: 'POPUP_LOADED'};
+    }
+    static get START_LOBBY() {
+        return {type: 'START_LOBBY'};
+    }
+
+    static UPDATE_POPUP_STATE(popupState) {
+        return {
+            type: 'UPDATE_POPUP_STATE',
+            'popupState': popupState
+        };
+    }
+
+    static get GET_LOBBY_ID () {
+        return {type: 'GET_LOBBY_ID'};
     }
 
     
