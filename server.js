@@ -32,7 +32,7 @@ class LDNServer {
     }
 
     isConnected(userId) {
-        for (lobbyId of this.lobbies) {
+        for (lobbyId in this.lobbies) {
             const lobby = this.lobbies[lobbyId];
             if (lobby.contains(userId)) {
                 return true;
