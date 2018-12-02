@@ -8,8 +8,8 @@ module.exports = class Lobby extends JsonObject {
         this.add(this.controller);
     }
 
-    contains(userId) {
-        return (userId in this.users);
+    contains(user) {
+        return (user.id in this.users);
     }
 
     add(user) {

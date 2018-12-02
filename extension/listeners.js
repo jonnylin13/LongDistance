@@ -95,8 +95,8 @@ export class TabListener {
                     this.startController(activeTab.id);
                 }
                 const urlParams = this.getUrlParams(activeTab);
-                if (this.ldn.urlParams !== urlParams) {
-                    this.ldn.urlParams = urlParams;
+                if (this.ldn.user.urlParams !== urlParams) {
+                    this.ldn.user.urlParams = urlParams;
                 }
             }
         });

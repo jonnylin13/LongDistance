@@ -11,17 +11,19 @@ class LDNClient {
     constructor () {
         console.log('<Info> Starting LDN...');
         this.user = new User(this._provisionClientId(), Constants.INACTIVE, '', new ProgressState());
-        this.urlParams = '';
         this.tabListener = new TabListener(this);
         this.backgroundMessageListener = new BackgroundMessageListener(this);
-        this.popupState = Constants.OUT_LOBBY;
+        this.popupState = Constants.OUT_LOBBY; // Probably not necessary?
         this.currentLobby = null;
         this.ws = null;
 
         console.log('<Info> LDN has been started!');
     }
 
-    // Private API
+    // ===============
+    // Private Methods
+    // ===============
+
     _provisionClientId () {
 
         // TODO: local memory storage
@@ -56,7 +58,10 @@ class LDNClient {
         }
     }
 
-    // Public API
+    // ==============
+    // Public Methods
+    // ==============
+
     connected () {
         return this.currentLobby && this.user.id;
     }

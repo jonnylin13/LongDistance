@@ -31,10 +31,10 @@ class LDNServer {
         if (!this.contains(lobby.id)) this.lobbies[lobby.id] = lobby;
     }
 
-    isConnected(userId) {
+    isConnected(user) {
         for (lobbyId in this.lobbies) {
             const lobby = this.lobbies[lobbyId];
-            if (lobby.contains(userId)) {
+            if (lobby.contains(user)) {
                 return true;
             }
         }
@@ -66,18 +66,19 @@ class LDNServer {
     }
 
     startLobby(socket) {
-        if (!data.user_id) {
-            console.log('<Error> Tried to start a lobby without a user id!');
+        if (!data.user) {
+            console.log('<Error> Tried to start a lobby without a user!');
             return;
         }
-        const userId = data.user_id;
-        if (this.isConnected(userId)) {
-            console.log('<Error> User is already connected. ID: ', str(userId));
-            return;
-        }
+        
 
         const lobbyId = short_id.generate();
+        // TODO: fromJson() instantiation of user
         const user = User(lobbyId, userId, -1, '', ProgressState());
+        if (this.isConnected(user)) {
+            console.log('<Error> User is already connected. ID: ', str(user.id));
+            return;
+        }
         const lobby = Lobby(lobbyId, user);
         this.addLobby(lobby);
         this.socket.send(ServerProtocol.startLobbyAck(lobby.toJson(), success=true));
