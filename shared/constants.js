@@ -20,12 +20,16 @@ module.exports = class Constants {
         return -1;
     }
 
-    static get PAUSE () {
+    static get IDLE () {
         return 0;
     }
 
-    static get PLAY () {
+    static get PAUSE () {
         return 1;
+    }
+
+    static get PLAY () {
+        return 2;
     }
 
 }

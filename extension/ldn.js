@@ -3,20 +3,19 @@
 import { TabListener, BackgroundMessageListener } from './listeners';
 import Constants from  '../shared/constants';
 import ProgressState from '../shared/model/progressState';
+import User from '../shared/model/user';
 import Util from '../shared/util';
 
 class LDNClient {
 
     constructor () {
         console.log('<Info> Starting LDN...');
+        this.user = new User(this._provisionClientId(), Constants.INACTIVE, '', new ProgressState());
         this.urlParams = '';
         this.tabListener = new TabListener(this);
         this.backgroundMessageListener = new BackgroundMessageListener(this);
         this.popupState = Constants.OUT_LOBBY;
-        this.controllerState = Constants.INACTIVE;
-        this.progress = new ProgressState();
         this.currentLobby = null;
-        this.clientId = this._provisionClientId();
         this.ws = null;
 
         console.log('<Info> LDN has been started!');
@@ -24,6 +23,9 @@ class LDNClient {
 
     // Private API
     _provisionClientId () {
+
+        // TODO: local memory storage
+        return Util.uuidv4();
 
         chrome.storage.sync.get('ldnClientId', function (items) {
             const id = items.clientId;
@@ -42,7 +44,7 @@ class LDNClient {
             console.log();
             return false;
         }
-        return data.controlId == this.clientId;
+        return data.controlId == this.user.id;
     }
 
     _connect () {
@@ -56,7 +58,7 @@ class LDNClient {
 
     // Public API
     connected () {
-        return this.currentLobby && this.clientId;
+        return this.currentLobby && this.user.id;
     }
 
     startLobby () {

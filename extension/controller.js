@@ -1,3 +1,5 @@
+import Constants from '../shared/constants';
+
 class NetflixController {
 
     constructor () {
@@ -5,7 +7,7 @@ class NetflixController {
         this._start();
         this._get_video().on('play', this.play);
         this._get_video().on('pause', this.pause);
-        this.state = 0;
+        this.state = Constants.IDLE;
         this.sync();
         console.log('<Info> Controller has been started!');
     }
@@ -44,9 +46,9 @@ class NetflixController {
 
     sync () {
         if (this._get_video()) {
-            if (this._get_video().paused == true) this.state = 0;
-            else this.state = 1;
-        } else this.state = -1;
+            if (this._get_video().paused == true) this.state = Constants.PAUSE;
+            else this.state = Constants.PLAY;
+        } else this.state = Constants.IDLE;
     }
 }
 
