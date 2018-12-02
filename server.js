@@ -13,13 +13,13 @@ class LDNServer {
     constructor(start=true) {
         this.lobbies = {}
         if (start) {
-            this.start();
+            this._start();
         }
     }
 
     start() {
         this.server = new WebSocket.Server({port: PORT});
-        console.log('Listening on port: ', PORT);
+        console.log('<Info> Listening on port: ', PORT);
         this.server.on('connection', this.onConnection);
     }
 
@@ -27,18 +27,23 @@ class LDNServer {
         return (lobbyId in this.lobbies);
     }
 
-    add(lobby) {
+    addLobby(lobby) {
         if (!this.contains(lobby.id)) this.lobbies[lobby.id] = lobby;
     }
 
     isConnected(userId) {
-        for (user of this.users)
-            if (user.id === userId) return true;
+        for (lobbyId of this.lobbies) {
+            const lobby = this.lobbies[lobbyId];
+            if (lobby.contains(userId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     onConnection(socket) {
 
-        console.log('Connection received from: ', req.connection.remoteAddress);
+        console.log('<Info> Connection received from: ', req.connection.remoteAddress);
         socket.on('message', (msg) => {
             this.onMessage(socket, msg);
         });
@@ -49,11 +54,11 @@ class LDNServer {
 
         const data = JSON.parse(msg);
         if (!data) {
-            console.log('Server received janky JSON data!');
+            console.log('<Error> Server received janky JSON data!');
             return;
         }
 
-        console.log('Received message with type: ', data.type);
+        console.log('<Info> received message with type: ', data.type);
         if (data.type == 'start_lobby') {
             this.startLobby(socket);
         }
@@ -62,25 +67,25 @@ class LDNServer {
 
     startLobby(socket) {
         if (!data.user_id) {
-            console.log('Tried to start a lobby without a user id!');
+            console.log('<Error> Tried to start a lobby without a user id!');
             return;
         }
         const userId = data.user_id;
         if (this.isConnected(userId)) {
-            console.log('Error: user is already connected. ID: ', str(userId));
+            console.log('<Error> User is already connected. ID: ', str(userId));
             return;
         }
 
         const lobbyId = short_id.generate();
         const user = User(lobbyId, userId, -1, '', ProgressState());
         const lobby = Lobby(lobbyId, user);
-        this.add(lobby);
+        this.addLobby(lobby);
         this.socket.send(ServerProtocol.startLobbyAck(lobbyId, success=true));
         this.printLobbies();
     }
 
     printLobbies() {
-        console.log('New lobby started!');
+        console.log('<Info> New lobby information:');
         console.log(this.lobbies)
     }
 

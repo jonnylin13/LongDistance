@@ -1,5 +1,6 @@
 import Constants from '../shared/constants';
 import BackgroundProtocol from '../shared/protocol/bg_protocol';
+import Util from '../shared/util';
 
 
 class Popup {
@@ -31,7 +32,13 @@ class Popup {
 
     startLobbyClicked($event) {
         chrome.runtime.sendMessage(BackgroundProtocol.START_LOBBY, (response) => {
-
+            if (!Util.validateMessage(response)) {
+                console.log('<Error> Popup received invalid response.');
+                return false;
+            }
+            if (response.type === 'START_LOBBY_ACK' && response.success) {
+                
+            }
         });
     }
 
@@ -52,7 +59,8 @@ class Popup {
     }
 
     updatePopupState(newState) {
-
+        
+        // Do we need this?
         chrome.runtime.sendMessage(BackgroundProtocol.UPDATE_POPUP_STATE(newState), (response) => {
 
         });

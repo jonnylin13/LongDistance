@@ -16,4 +16,16 @@ module.exports = class Constants {
         return '';
     }
 
+    static get INACTIVE () {
+        return -1;
+    }
+
+    static get PAUSE () {
+        return 0;
+    }
+
+    static get PLAY () {
+        return 1;
+    }
+
 }

@@ -7,6 +7,7 @@
         "tabs",
         "declarativeContent",
         "activeTab",
+        "storage",
         "*://*.netflix.com/watch/*",
         "*://netflix.com/watch/*"
     ],

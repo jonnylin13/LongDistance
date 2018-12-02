@@ -13,4 +13,8 @@ module.exports = class Util {
         return this.v4() + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + '-' + this.v4() + this.v4() + this.v4();
     }
 
+    static validateMessage (response) {
+        return (response && response.type);
+    }
+
 }

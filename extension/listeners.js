@@ -1,9 +1,11 @@
-import BackgroundProtocol from '../shared/protocol/bg_protocol';
+import BackgroundProtocol from '../shared/protocol/bg';
 
+// Background script listeners
 export class TabListener {
 
 
-    constructor () {
+    constructor (ldn) {
+        this.ldn = ldn;
         this.search();
         chrome.tabs.onCreated.addListener((tab) => {
             this.create(tab);
@@ -15,7 +17,7 @@ export class TabListener {
             this.remove(tabId, removeInfo);
         });
         this.tabId = -1; // not found
-        console.log('Tab listener started!');
+        console.log('<Info> Tab listener started!');
     }
 
     search () {
@@ -43,14 +45,14 @@ export class TabListener {
                     runAt: 'document_idle'
                 }, (results) => {
                     if (!results || results[0]) {
-                        console.log('Controller started!');
+                        console.log('<Info> Controller started!');
                         chrome.pageAction.show(tabId, undefined);
                     } else {
-                        console.log('Failed to start controller!');
+                        console.log('<Error> Failed to start controller!');
                     }
                 })
             } else {
-                console.log('Failed to start jQuery!');
+                console.log('<Error> Failed to start jQuery!');
             }
             
         });
@@ -70,21 +72,32 @@ export class TabListener {
     }
 
     create (tab) {
-        console.log('Created: ', tab.url);
+        console.log('<Info> Created: ', tab.url);
         if (this.isNetflix(tab) && !this.netflixOpen()) {
             startController(tab.id);
         }
     } 
 
+    getUrlParams(tab) {
+        if (!tab) return '';
+        return tab.url.split('netflix.com/')[1].split('?')[0];
+    }
+
     update (tabId, changeInfo, tab) {
-        console.log('Updated: ', tab.url);
+        console.log('<Info> Updated: ', tab.url);
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         chrome.tabs.query({
             currentWindow: true, active: true
         }, (tabs) => {
             const activeTab = tabs[0];
-            if (this.isNetflix(activeTab) && !this.netflixOpen()) {
-                this.startController(activeTab.id);
+            if (this.isNetflix(activeTab)) {
+                if (!this.netflixOpen()) {
+                    this.startController(activeTab.id);
+                }
+                const urlParams = this.getUrlParams(activeTab);
+                if (this.ldn.urlParams !== urlParams) {
+                    this.ldn.urlParams = urlParams;
+                }
             }
         });
     }
@@ -104,23 +117,37 @@ export class BackgroundMessageListener {
 
     message (req, sender, sendResponse) {
         if (!req.type) {
-            console.log('LDN background received a broken message from a content script.');
+            console.log('<Error> LDN background received a broken message from a content script.');
             return;
         }
 
-        console.log('LDN background received message type: ', req.type);
+        console.log('<Info> LDN background received message type: ', req.type);
         if (req.type === 'POPUP_LOADED') {
             this.wrappedSendResponse(sendResponse, BackgroundProtocol.POPUP_LOADED_ACK);
         } else if (req.type === 'UPDATE_POPUP_STATE') {
             this.wrappedSendResponse(sendResponse, BackgroundProtocol.UPDATE_POPUP_STATE_ACK(this.ldn.updatePopupState(req)));
         } else if (req.type === 'GET_LOBBY_ID') {
             this.wrappedSendResponse(sendResponse, BackgroundProtocol.GET_LOBBY_ID_ACK(this.ldn.currentLobby));
+        } else if (req.type === 'START_LOBBY') {
+
         }
     }
 
     wrappedSendResponse (sendResponse, data) {
-        console.log('Sending the following response: ');
+        console.log('<Info> Sending the following response: ');
         console.log(data);
         sendResponse(data);
     }
+}
+
+export class SocketListener {
+
+    constructor () {
+        
+    }
+}
+
+// Controller
+export class ControllerMessageListener {
+
 }
