@@ -80,7 +80,7 @@ class LDNServer {
         const user = User(lobbyId, userId, -1, '', ProgressState());
         const lobby = Lobby(lobbyId, user);
         this.addLobby(lobby);
-        this.socket.send(ServerProtocol.startLobbyAck(lobbyId, success=true));
+        this.socket.send(ServerProtocol.startLobbyAck(lobby.toJson(), success=true));
         this.printLobbies();
     }
 

@@ -1,8 +1,8 @@
 module.exports = class ServerProtocol {
 
-    static START_LOBBY_ACK(lobbyId, success=true) {
+    static START_LOBBY_ACK(lobby, success=true) {
         return JSON.stringify({
-            lobby_id: lobbyId,
+            'lobby': lobby,
             success: success,
             type: 'START_LOBBY_ACK'
         });

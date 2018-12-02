@@ -1,8 +1,10 @@
-module.exports = class Lobby {
-    constructor(id, controller) {
+const JsonObject = require('./generic/jsonObject');
+
+module.exports = class Lobby extends JsonObject {
+    constructor(id, controller, users={}) {
         this.id = id;
         this.controller = controller;
-        this.users = {};
+        this.users = users;
         this.add(this.controller);
     }
 
@@ -16,5 +18,14 @@ module.exports = class Lobby {
 
     remove(user) {
         if (this.contains(user)) delete this.users[user.id];
+    }
+
+    static fromJson(jsonString) {
+        const data = JSON.parse(jsonString);
+        if (!('id' in data) || !('controller' in data) || !('users' in data)) {
+            console.log('<Error> Tried to instantiate lobby with corrupt data!');
+            return null;
+        }
+        return new User(data['id'], data['controller'], data['users']);
     }
 }
