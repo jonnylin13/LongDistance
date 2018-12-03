@@ -53,7 +53,7 @@ class Popup {
 
         if (newState == Constants.Codes.ViewState.IN_LOBBY) {
             chrome.runtime.sendMessage(new GetLobbyIdMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
-                if (response instanceof GetLobbyIdAckMessage && this._getLobbyIdText()) this._getLobbyIdText().innerHTML = response.lobbyId;
+                if (response.type == 'GET_LOBBY_ID_ACK' && this._getLobbyIdText()) this._getLobbyIdText().innerHTML = response.lobbyId;
                 // TODO: Handle default response
             });
         } else {
@@ -70,7 +70,7 @@ class Popup {
                 console.log('<Error> Popup received invalid response.');
                 return false;
             }
-            if (response instanceof StartLobbyMessageAck) {
+            if (response.type === 'START_LOBBY_ACK') {
                 // IN PROGRESS: Implement
                 // Update the view state to display lobby ID
                 if (response.code === Constants.Codes.Protocol.SUCCESS) {

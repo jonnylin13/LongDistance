@@ -13,7 +13,7 @@ class LDNClient {
         console.log('<Info> Starting LDN...');
 
         this.user = new User(this._provisionClientId(), Constants.Codes.ControllerState.INACTIVE, '', new ProgressState());
-        this.currentLobby = null;
+        // this.currentLobby = null;
         this.ws = null;
 
         this.tabListener = new TabListener(this);
@@ -79,7 +79,8 @@ class LDNClient {
                     const data = JSON.parse(event.data);
                     if (data.type === 'START_LOBBY_ACK') {
                         // TODO: Update user
-                        // TODO: Update lobby ID in popup
+                        this.ldn.user.updateFromJson(event.data);
+                        // TODO: Update lobby ID in popup?
                         resolve(data);
                     }
                 }
@@ -90,7 +91,7 @@ class LDNClient {
     }
 
     isConnected () {
-        return this.currentLobby && this.user.id;
+        return this.user.currentLobby && this.user.id;
     }
 
     isSocketConnected () {
