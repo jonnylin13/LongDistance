@@ -1,23 +1,29 @@
 const Lobby = require('./shared/model/lobby');
 const User = require('./shared/model/user');
-const ProgressState = require('./shared/model/progress_state');
-const ServerProtocol = require('./shared/protocol/server_protocol');
+const ProgressState = require('./shared/model/progressState');
+const StartLobbyAckMessage = require('./shared/protocol/startLobbyAck');
 const short_id = require('shortid');
 const WebSocket = require('ws');
 
 const PORT = 3000;
-const PATH = '/ldn';
 
 class LDNServer {
 
     constructor(start=true) {
         this.lobbies = {}
+        process.on('exit', () => { this._exitHandler() });
+        process.on('SIGINT', () => { this._exitHandler() });
+        process.on('uncaughtException', () => { this._exitHandler() });
         if (start) {
             this._start();
         }
     }
 
-    start() {
+    _exitHandler() {
+        this.server.close();
+    }
+
+    _start() {
         this.server = new WebSocket.Server({port: PORT});
         console.log('<Info> Listening on port: ', PORT);
         this.server.on('connection', this.onConnection);
@@ -80,7 +86,7 @@ class LDNServer {
         }
         const lobby = Lobby(lobbyId, user);
         this.addLobby(lobby);
-        socket.send(ServerProtocol.startLobbyAck(user));
+        socket.send((new StartLobbyAckMessage(user)).toJson());
         this.printLobbies();
     }
 

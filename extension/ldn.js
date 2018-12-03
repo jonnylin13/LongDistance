@@ -10,10 +10,10 @@ class LDNClient {
 
     constructor () {
         console.log('<Info> Starting LDN...');
-        this.user = new User(this._provisionClientId(), Constants.ControllerState.INACTIVE, '', new ProgressState());
+        this.user = new User(this._provisionClientId(), Constants.Codes.ControllerState.INACTIVE, '', new ProgressState());
         this.tabListener = new TabListener(this);
         this.backgroundMessageListener = new BackgroundMessageListener(this);
-        this.viewState = Constants.ViewState.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
+        this.viewState = Constants.Codes.ViewState.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
         this.currentLobby = null;
         this.ws = null;
 

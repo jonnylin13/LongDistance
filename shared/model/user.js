@@ -3,6 +3,7 @@ const ProgressState = require('./progressState');
 
 module.exports = class User extends JsonObject {
     constructor(id, controllerState, urlParams, progressState, lobbyId = null) {
+        super();
         this.lobbyId = lobbyId;
         this.id = id;
         this.controllerState = controllerState;

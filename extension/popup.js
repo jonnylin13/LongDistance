@@ -1,5 +1,9 @@
 import Constants from '../shared/constants';
-import BackgroundProtocol from '../shared/protocol/bg_protocol';
+import StartLobbyMessage from '../shared/protocol/startLobby';
+import StartLobbyMessageAck from '../shared/protocol/startLobbyAck';
+import PopupLoadedMessage from '../shared/protocol/background/popupLoaded';
+import GetLobbyIdMessage from '../shared/protocol/background/getLobbyId';
+import GetLobbyIdAckMessage from '../shared/protocol/background/getLobbyIdAck';
 import Util from '../shared/util';
 
 
@@ -10,16 +14,16 @@ class Popup {
         this.views = {};
 
         $().ready(() => {
-            this.views[Constants.IN_LOBBY] = $('#in-lobby-container');
-            this.views[Constants.OUT_LOBBY] = $('#out-lobby-container');
-            this.views[Constants.CONNECT_LOBBY] = $('#connect-lobby-container');
+            this.views[Constants.Codes.ViewState.IN_LOBBY] = $('#in-lobby-container');
+            this.views[Constants.Codes.ViewState.OUT_LOBBY] = $('#out-lobby-container');
+            this.views[Constants.Codes.ViewState.CONNECT_LOBBY] = $('#connect-lobby-container');
 
             $('#start-lobby-btn').on('click', this.startLobbyClicked);
             $('#disconnect-btn').on('click', this.disconnectLobbyClicked);
             $('#connect-btn').on('click', this.connectClicked);
             $('#connect-btn-back').on('click', this.connectBackClicked);
             $('#connect-confirm-btn').on('click', this.connectConfirmClicked);
-            chrome.runtime.sendMessage(BackgroundProtocol.POPUP_LOADED, (response) => {
+            chrome.runtime.sendMessage(new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
 
             });
         });
@@ -31,13 +35,13 @@ class Popup {
     }
 
     startLobbyClicked($event) {
-        chrome.runtime.sendMessage(BackgroundProtocol.START_LOBBY, (response) => {
+        chrome.runtime.sendMessage(new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
             if (!Util.validateMessage(response)) {
                 console.log('<Error> Popup received invalid response.');
                 return false;
             }
-            if (response.type === 'START_LOBBY_ACK' && response.success) {
-                
+            if (response instanceof StartLobbyMessageAck) {
+                // TODO: Implement
             }
         });
     }
@@ -70,10 +74,10 @@ class Popup {
             else this.views[state].detach();
         }
 
-        if (newState == Constants.ViewState.IN_LOBBY) {
-            chrome.runtime.sendMessage(BackgroundProtocol.GET_LOBBY_ID, (response) => {
-                if (response && response.lobbyId && this.getLobbyIdText()) this.getLobbyIdText().innerHTML = response.lobbyId;
-                // Utility.default_response(response);
+        if (newState == Constants.Codes.ViewState.IN_LOBBY) {
+            chrome.runtime.sendMessage(new GetLobbyIdMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
+                if (response instanceof GetLobbyIdAckMessage && this.getLobbyIdText()) this.getLobbyIdText().innerHTML = response.lobbyId;
+                // TODO: Handle default response
             });
         } else {
             if (this.getLobbyIdText()) this.getLobbyIdText().innerHTML = '';

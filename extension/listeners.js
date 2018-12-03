@@ -1,10 +1,14 @@
-import BackgroundProtocol from '../shared/protocol/bg';
+import Constants from '../shared/constants';
+import PopupLoadedAckMessage from '../shared/protocol/background/popupLoadedAck';
+import UpdatePopupStateMessage from '../shared/protocol/background/updatePopupState';
+import GetLobbyIdAckMessage from '../shared/protocol/background/getLobbyIdAck';
 
 // Background script listeners
 export class TabListener {
 
     // TODO: Should we execute the script when popup.js is instantiated?
     constructor (ldn) {
+        // TODO: Check implementation
         this.ldn = ldn;
         this.search();
         chrome.tabs.onCreated.addListener((tab) => {
@@ -27,6 +31,7 @@ export class TabListener {
             if (tabs.length === 0) this.tabId = -1;
             else {
                 if (!this.netflixOpen()) {
+                    // TODO: Think of a better way to ensure Netflix is the tab
                     this.startController(tabs[0].id);
                 }
                 return tabs[0];
@@ -35,6 +40,7 @@ export class TabListener {
     }
 
     startController (tabId) {
+        // TODO: Reimplement
         this.tabId = tabId;
         chrome.tabs.executeScript(tabId, {
             file: 'scripts/jquery.min.js'
@@ -80,10 +86,12 @@ export class TabListener {
 
     getUrlParams(tab) {
         if (!tab) return '';
+        // TODO: Reimplement
         return tab.url.split('netflix.com/')[1].split('?')[0];
     }
 
     update (tabId, changeInfo, tab) {
+        // TODO: Reimplement
         console.log('<Info> Updated: ', tab.url);
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         chrome.tabs.query({
@@ -120,15 +128,16 @@ export class BackgroundMessageListener {
             console.log('<Error> LDN background received a broken message from a content script.');
             return;
         }
-
+        
+        // TODO: Check implementation
         console.log('<Info> LDN background received message type: ', req.type);
         if (req.type === 'POPUP_LOADED') {
-            this.wrappedSendResponse(sendResponse, BackgroundProtocol.POPUP_LOADED_ACK);
+            this.wrappedSendResponse(sendResponse, new PopupLoadedAckMessage(Constants.Codes.Protocol.SUCCESS));
         } else if (req.type === 'UPDATE_POPUP_STATE') {
-            this.wrappedSendResponse(sendResponse, BackgroundProtocol.UPDATE_POPUP_STATE_ACK(this.ldn.updatePopupState(req)));
+            // this.wrappedSendResponse(sendResponse, (new UpdatePopupStateMessage(Constants.Protocol.SUCCESS, this.ldn.viewState)).toJson());
         } else if (req.type === 'GET_LOBBY_ID') {
             if (this.ldn.currentLobby) {
-                this.wrappedSendResponse(sendResponse, BackgroundProtocol.GET_LOBBY_ID_ACK(this.ldn.currentLobby.id));
+                this.wrappedSendResponse(sendResponse, new GetLobbyIdAckMessage(this.ldn.currentLobby.id));
             }
         } else if (req.type === 'START_LOBBY') {
 

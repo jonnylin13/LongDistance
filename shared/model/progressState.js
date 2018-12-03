@@ -2,6 +2,7 @@ const JsonObject = require('./generic/jsonObject');
 
 module.exports = class ProgressState extends JsonObject {
     constructor(elapsed = 0, total = 0) {
+        super();
         this.elapsed = elapsed;
         this.total = total;
     }

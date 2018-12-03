@@ -1,7 +1,7 @@
 {
   "name": "ldn",
   "version": "0.0.1",
-  "description": "Long Distance Netflix",
+  "description": "Long Distance to replace Showgoers and Netflix Party",
   "main": "server.js",
   "scripts": {
     "test": "node test.js",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "\u001b[A\u001b[B"
+    "url": "https://github.com/jonnylin13/LongDistance.git"
   },
   "author": "",
   "license": "ISC",

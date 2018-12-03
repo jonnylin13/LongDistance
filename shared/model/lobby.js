@@ -2,6 +2,7 @@ const JsonObject = require('./generic/jsonObject');
 
 module.exports = class Lobby extends JsonObject {
     constructor(id, controller, users={}) {
+        super();
         this.id = id;
         this.controller = controller;
         this.users = users;

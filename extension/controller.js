@@ -8,7 +8,7 @@ class NetflixController {
         this._start();
         this._get_video().on('play', this.play);
         this._get_video().on('pause', this.pause);
-        this.playerState = Constants.ControllerState.IDLE;
+        this.playerState = Constants.Codes.ControllerState.IDLE;
         this.progressState = new ProgressState();
         this.sync();
         console.log('<Info> Controller has been started!');
@@ -49,9 +49,9 @@ class NetflixController {
     sync () {
         // Sync controller state
         if (this._get_video()) {
-            if (this._get_video().paused == true) this.playerState = Constants.PlayerState.PAUSE;
-            else this.playerState = Constants.PlayerState.PLAY;
-        } else this.playerState = Constants.PlayerState.IDLE;
+            if (this._get_video().paused == true) this.playerState = Constants.Codes.ControllerState.PAUSE;
+            else this.playerState = Constants.Codes.ControllerState.PLAY;
+        } else this.playerState = Constants.Codes.ControllerState.IDLE;
         // Sync progress state
     }
 }
