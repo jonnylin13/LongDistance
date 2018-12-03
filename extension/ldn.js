@@ -1,5 +1,3 @@
-
-
 import TabListener from './listeners/tabListener';
 import LDNMessageListener from './listeners/ldnListener';
 import Constants from  '../shared/constants';
@@ -7,16 +5,20 @@ import ProgressState from '../shared/model/progressState';
 import User from '../shared/model/user';
 import Util from '../shared/util';
 
+import StartLobbyMessage from '../shared/protocol/startLobby';
+
 class LDNClient {
 
     constructor () {
         console.log('<Info> Starting LDN...');
+
         this.user = new User(this._provisionClientId(), Constants.Codes.ControllerState.INACTIVE, '', new ProgressState());
-        this.tabListener = new TabListener(this);
-        this.messageListener = new LDNMessageListener(this);
-        this.viewState = Constants.Codes.ViewState.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
         this.currentLobby = null;
         this.ws = null;
+
+        this.tabListener = new TabListener(this);
+        this.messageListener = new LDNMessageListener(this);
+
 
         console.log('<Info> LDN has been started!');
     }
@@ -35,8 +37,9 @@ class LDNClient {
             if (id) {
                 return id;
             } else {
+                const clientId = Util.uuidv4();
                 chrome.storage.sync.set({ 'ldnClientId': clientId });
-                return Util.uuidv4();
+                return clientId;
             }
         });
     
@@ -66,8 +69,24 @@ class LDNClient {
     // Public Methods
     // ==============
 
-    startLobby () {
+    startLobby (startLobbyMessage) {
         this._connect();
+        return new Promise(resolve => {
+            this.ws.onopen = () => {
+
+                this.ws.send(startLobbyMessage.toJson());
+                this.ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'START_LOBBY_ACK') {
+                        // TODO: Update user
+                        // TODO: Update lobby ID in popup
+                        resolve(data);
+                    }
+                }
+            }
+        });
+        
+        
     }
 
     isConnected () {
@@ -81,20 +100,6 @@ class LDNClient {
     // ===============
     // Handler Methods
     // ===============
-
-    // TODO: If this is never used, remove it
-    updateViewState (data) {
-        if (!('viewState' in data)) { // Never reached?
-            console.log('<Error> Received corrupt view state data.');
-            return false;
-        }
-        if (this.viewState === data.viewState) {
-            console.log('<Error> Received duplicate view state.');
-            return false;
-        }
-        this.viewState = data.viewState;
-        return true;
-    }
     
 }
 

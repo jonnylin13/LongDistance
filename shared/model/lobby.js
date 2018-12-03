@@ -27,6 +27,6 @@ module.exports = class Lobby extends JsonObject {
             console.log('<Error> Tried to instantiate lobby with corrupt data!');
             return null;
         }
-        return new User(data['id'], data['controller'], data['users']);
+        return new Lobby(data['id'], data['controller'], data['users']);
     }
 }

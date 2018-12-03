@@ -2,6 +2,7 @@ import Constants from '../shared/constants';
 import StartLobbyMessage from '../shared/protocol/startLobby';
 import StartLobbyMessageAck from '../shared/protocol/startLobbyAck';
 import PopupLoadedMessage from '../shared/protocol/background/popupLoaded';
+import PopupLoadedAckMessage from '../shared/protocol/background/popupLoadedAck';
 import GetLobbyIdMessage from '../shared/protocol/background/getLobbyId';
 import GetLobbyIdAckMessage from '../shared/protocol/background/getLobbyIdAck';
 import Util from '../shared/util';
@@ -23,8 +24,14 @@ class Popup {
             $('#connect-btn').on('click', this.connectClicked);
             $('#connect-btn-back').on('click', this.connectBackClicked);
             $('#connect-confirm-btn').on('click', this.connectConfirmClicked);
-            chrome.runtime.sendMessage(new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
 
+            this._updateViewState(Constants.Codes.ViewState.OUT_LOBBY);
+            chrome.runtime.sendMessage(new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
+                if (response instanceof PopupLoadedAckMessage) {
+                    if (response.code === Constants.Codes.Protocol.SUCCESS) {
+
+                    }
+                }
             });
         });
         
@@ -38,11 +45,6 @@ class Popup {
     }
 
     _updateViewState(newState) {
-        
-        // TODO: Do we need to update LDN with popup state?
-        /** chrome.runtime.sendMessage(BackgroundProtocol.UPDATE_POPUP_STATE(newState), (response) => {
-
-        });**/
     
         for (const state in this.views) {
             if (state == newState) this.views[state].appendTo('body');
@@ -69,7 +71,13 @@ class Popup {
                 return false;
             }
             if (response instanceof StartLobbyMessageAck) {
-                // TODO: Implement
+                // IN PROGRESS: Implement
+                // Update the view state to display lobby ID
+                if (response.code === Constants.Codes.Protocol.SUCCESS) {
+                    this._updateViewState(Constants.Codes.ViewState.IN_LOBBY);
+                } else {
+                    // TODO: Handle error
+                }
             }
         });
     }

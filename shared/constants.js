@@ -21,7 +21,7 @@ module.exports = class Constants {
     }
 
     static get WS_URL() {
-        return '';
+        return 'ws://127.0.0.1:3000/';
     }
 
 }

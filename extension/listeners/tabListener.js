@@ -88,6 +88,7 @@ export default class TabListener {
 
     onUpdate (tabId, changeInfo, tab) {
         // TODO: Reimplement
+        if (tab.url === this.ldn.user.urlParams) return;
         console.log('<Info> Updated: ', tab.url);
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         chrome.tabs.query({

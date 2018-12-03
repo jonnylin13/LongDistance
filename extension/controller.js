@@ -55,12 +55,11 @@ class NetflixController {
     }
 
     sync () {
-        // Sync controller state
         if (this._get_video()) {
             if (this._get_video().paused == true) this.playerState = Constants.Codes.ControllerState.PAUSE;
             else this.playerState = Constants.Codes.ControllerState.PLAY;
         } else this.playerState = Constants.Codes.ControllerState.IDLE;
-        // Sync progress state
+        // TODO: Sync progress state
     }
 }
 

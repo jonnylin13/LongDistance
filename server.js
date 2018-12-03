@@ -18,7 +18,6 @@ class LDNServer {
         this.lobbies = {}
         process.on('exit', () => { this._exitHandler() });
         process.on('SIGINT', () => { this._exitHandler() });
-        process.on('uncaughtException', () => { this._exitHandler() });
         if (start) this.start();
     }
 
@@ -30,7 +29,7 @@ class LDNServer {
         if (this.server) this.server.close();
     }
 
-    _onConnection(socket) {
+    _onConnection(socket, req) {
 
         console.log('<Info> Connection received from: ', req.connection.remoteAddress);
         socket.on('message', (msg) => {
@@ -39,8 +38,7 @@ class LDNServer {
 
     }
 
-    _onMessage(socket, from, msg) {
-
+    _onMessage(socket, msg) {
         const data = JSON.parse(msg);
         if (!data) {
             console.log('<Error> Server received janky JSON data!');
@@ -65,7 +63,9 @@ class LDNServer {
     start() {
         this.server = new WebSocket.Server({port: PORT});
         console.log('<Info> Listening on port: ', PORT);
-        this.server.on('connection', this._onConnection);
+        this.server.on('connection', (socket, req) => {
+            this._onConnection(socket, req);
+        });
     }
 
     contains(lobbyId) {
@@ -100,8 +100,9 @@ class LDNServer {
             return;
         }
         const lobby = Lobby(lobbyId, user);
+        user.lobbyId = lobbyId;
         this.addLobby(lobby);
-        socket.send((new StartLobbyAckMessage(user)).toJson());
+        socket.send((new StartLobbyAckMessage({'lobbyId': lobby.id})).toJson());
         this.printLobbies();
     }
 
