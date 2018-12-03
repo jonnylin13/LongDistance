@@ -1,6 +1,7 @@
 
 
-import { TabListener, BackgroundMessageListener } from './listeners';
+import TabListener from './listeners/tabListener';
+import LDNMessageListener from './listeners/ldnListener';
 import Constants from  '../shared/constants';
 import ProgressState from '../shared/model/progressState';
 import User from '../shared/model/user';
@@ -12,7 +13,7 @@ class LDNClient {
         console.log('<Info> Starting LDN...');
         this.user = new User(this._provisionClientId(), Constants.Codes.ControllerState.INACTIVE, '', new ProgressState());
         this.tabListener = new TabListener(this);
-        this.backgroundMessageListener = new BackgroundMessageListener(this);
+        this.messageListener = new LDNMessageListener(this);
         this.viewState = Constants.Codes.ViewState.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
         this.currentLobby = null;
         this.ws = null;
