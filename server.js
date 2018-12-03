@@ -73,15 +73,14 @@ class LDNServer {
         
 
         const lobbyId = short_id.generate();
-        // TODO: fromJson() instantiation of user
-        const user = User(lobbyId, userId, -1, '', ProgressState());
+        const user = User.fromJson(data.user);
         if (this.isConnected(user)) {
             console.log('<Error> User is already connected. ID: ', str(user.id));
             return;
         }
         const lobby = Lobby(lobbyId, user);
         this.addLobby(lobby);
-        this.socket.send(ServerProtocol.startLobbyAck(lobby.toJson(), success=true));
+        this.socket.send(ServerProtocol.startLobbyAck(user));
         this.printLobbies();
     }
 

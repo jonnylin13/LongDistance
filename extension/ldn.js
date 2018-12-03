@@ -50,12 +50,15 @@ class LDNClient {
     }
 
     _connect () {
-        try {
-            this.ws = new WebSocket(Constants.WS_URL);
-            return true;
-        } catch (exception) {
-            return false;
+        if (!this.ws) {
+            try {
+                this.ws = new WebSocket(Constants.WS_URL);
+                return true;
+            } catch (exception) {
+                return false;
+            }
         }
+        
     }
 
     // ==============
@@ -70,6 +73,7 @@ class LDNClient {
         this._connect();
     }
 
+    // Probably not necessary
     updatePopupState (data) {
         if (!('popupState' in data)) { // Never reached?
             console.log('<Error> Received corrupt popup state data.');

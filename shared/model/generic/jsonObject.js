@@ -4,7 +4,11 @@ module.exports =  class JsonObject {
         const data = {};
         for (const member in this) {
             if (this.hasOwnProperty(member)) {
-                data[member] = this[member];
+                if (this[member] instanceof JsonObject) {
+                    data[member] = this[member].toJson();
+                } else {
+                    data[member] = this[member];
+                }
             }
         }
         return JSON.stringify(data);
