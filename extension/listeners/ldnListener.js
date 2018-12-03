@@ -1,6 +1,6 @@
-import Constants from '../shared/constants';
-import PopupLoadedAckMessage from '../shared/protocol/background/popupLoadedAck';
-import GetLobbyIdAckMessage from '../shared/protocol/background/getLobbyIdAck';
+import Constants from '../../shared/constants';
+import PopupLoadedAckMessage from '../../shared/protocol/background/popupLoadedAck';
+import GetLobbyIdAckMessage from '../../shared/protocol/background/getLobbyIdAck';
 
 export default class LDNMessageListener {
     constructor (ldn) {

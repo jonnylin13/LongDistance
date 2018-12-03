@@ -14,6 +14,10 @@ class NetflixController {
         console.log('<Info> Controller has been started!');
     }
 
+    // ===============
+    // Private Methods
+    // ===============
+
     _start () {
         
     }
@@ -37,6 +41,10 @@ class NetflixController {
     _get_scrubber () {
         return $('.scrubber-bar')[0];
     }
+
+    // ==============
+    // Public Methods
+    // ==============
 
     play () {
 

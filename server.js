@@ -19,15 +19,51 @@ class LDNServer {
         }
     }
 
+    // ========
+    // Handlers
+    // ========
+
     _exitHandler() {
-        this.server.close();
+        if (this.server) this.server.close();
     }
+
+    _onConnection(socket) {
+
+        console.log('<Info> Connection received from: ', req.connection.remoteAddress);
+        socket.on('message', (msg) => {
+            this._onMessage(socket, msg);
+        });
+
+    }
+
+    _onMessage(socket, from, msg) {
+
+        const data = JSON.parse(msg);
+        if (!data) {
+            console.log('<Error> Server received janky JSON data!');
+            return;
+        }
+
+        console.log('<Info> received message with type: ', data.type);
+        if (data.type == 'start_lobby') {
+            this.startLobby(socket);
+        }
+
+    }
+
+    // ===============
+    // Private Methods
+    // ===============
 
     _start() {
         this.server = new WebSocket.Server({port: PORT});
         console.log('<Info> Listening on port: ', PORT);
-        this.server.on('connection', this.onConnection);
+        this.server.on('connection', this._onConnection);
     }
+
+    // ==============
+    // Public Methods
+    // ==============
 
     contains(lobbyId) {
         return (lobbyId in this.lobbies);
@@ -45,30 +81,6 @@ class LDNServer {
             }
         }
         return false;
-    }
-
-    onConnection(socket) {
-
-        console.log('<Info> Connection received from: ', req.connection.remoteAddress);
-        socket.on('message', (msg) => {
-            this.onMessage(socket, msg);
-        });
-
-    }
-
-    onMessage(socket, from, msg) {
-
-        const data = JSON.parse(msg);
-        if (!data) {
-            console.log('<Error> Server received janky JSON data!');
-            return;
-        }
-
-        console.log('<Info> received message with type: ', data.type);
-        if (data.type == 'start_lobby') {
-            this.startLobby(socket);
-        }
-
     }
 
     startLobby(socket) {

@@ -62,13 +62,13 @@ class LDNClient {
         
     }
 
-    // ==============
-    // Public Methods
-    // ==============
-
-    connected () {
+    _connected () {
         return this.currentLobby && this.user.id;
     }
+
+    // ===========
+    // API Methods
+    // ===========
 
     startLobby () {
         this._connect();
