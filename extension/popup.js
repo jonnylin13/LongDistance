@@ -24,10 +24,10 @@ class Popup {
             $('#connect-confirm-btn').on('click', this.connectConfirmClicked);
 
             this._updateViewState(Constants.Codes.ViewState.OUT_LOBBY);
-            chrome.runtime.sendMessage(new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
-                if (response instanceof PopupLoadedAckMessage) {
+            chrome.runtime.sendMessage((new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS)).toJson(), (response) => {
+                if (response.type === 'POPUP_LOADED_ACK') {
                     if (response.code === Constants.Codes.Protocol.SUCCESS) {
-
+                        // TODO: Handle
                     }
                 }
             });
@@ -50,7 +50,7 @@ class Popup {
         }
 
         if (newState == Constants.Codes.ViewState.IN_LOBBY) {
-            chrome.runtime.sendMessage(new GetLobbyIdMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
+            chrome.runtime.sendMessage((new GetLobbyIdMessage(Constants.Codes.Protocol.SUCCESS)).toJson(), (response) => {
                 if (response.type == 'GET_LOBBY_ID_ACK' && this._getLobbyIdText()) this._getLobbyIdText().innerHTML = response.lobbyId;
                 // TODO: Handle default response
             });
@@ -63,7 +63,7 @@ class Popup {
     // UI Button Methods
     // =================
     startLobbyClicked($event) {
-        chrome.runtime.sendMessage(new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS), (response) => {
+        chrome.runtime.sendMessage((new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS)).toJson(), (response) => {
             if (!Util.validateMessage(response)) {
                 console.log('<Error> Popup received invalid response.');
                 return false;

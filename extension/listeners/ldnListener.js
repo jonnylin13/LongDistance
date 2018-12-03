@@ -13,24 +13,26 @@ export default class LDNMessageListener {
     }
 
     onMessage (req, sender, sendResponse) {
+
+        const data = JSON.parse(req);
         
-        if (!req.type) {
+        if (!data.type) {
             console.log('<Error> LDN background received a broken message from a content script.');
             console.log(req);
             return;
         }
-        console.log('<Info> LDN background received message type: ', req.type);
-        if (req.type === 'POPUP_LOADED') {
+        console.log('<Info> LDN background received message type: ', data.type);
+        if (data.type === 'POPUP_LOADED') {
             this.wrappedSendResponse(sendResponse, (new PopupLoadedAckMessage(Constants.Codes.Protocol.SUCCESS)).toJson());
-        } else if (req.type === 'GET_LOBBY_ID') {
+        } else if (data.type === 'GET_LOBBY_ID') {
             if (this.ldn.user.currentLobby) {
                 this.wrappedSendResponse(sendResponse, (new GetLobbyIdAckMessage(Constants.Codes.Protocol.SUCCESS, this.user.currentLobby.id)).toJson());
             } else {
                 this.wrappedSendResponse(sendResponse, (new GetLobbyIdAckMessage(Constants.Codes.Protocol.FAIL)));
             }
-        } else if (req.type === 'START_LOBBY') {
+        } else if (data.type === 'START_LOBBY') {
             // TODO: Fix this mess please
-            this.ldn.startLobby(StartLobbyMessage.fromJson(JSON.stringify(req))).then(result => {
+            this.ldn.startLobby(req).then(result => {
                 this.wrappedSendResponse(sendResponse, result);
             });
         }
