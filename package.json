@@ -4,7 +4,7 @@
   "description": "Long Distance Netflix",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node test.js",
     "start": "node server.js",
     "build": "webpack --prod",
     "dev": "npm run build && npm run start"

@@ -10,10 +10,10 @@ class LDNClient {
 
     constructor () {
         console.log('<Info> Starting LDN...');
-        this.user = new User(this._provisionClientId(), Constants.INACTIVE, '', new ProgressState());
+        this.user = new User(this._provisionClientId(), Constants.ControllerState.INACTIVE, '', new ProgressState());
         this.tabListener = new TabListener(this);
         this.backgroundMessageListener = new BackgroundMessageListener(this);
-        this.popupState = Constants.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
+        this.viewState = Constants.ViewState.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
         this.currentLobby = null;
         this.ws = null;
 
@@ -74,16 +74,16 @@ class LDNClient {
     }
 
     // TODO: If this is never used, remove it
-    updatePopupState (data) {
-        if (!('popupState' in data)) { // Never reached?
-            console.log('<Error> Received corrupt popup state data.');
+    updateViewState (data) {
+        if (!('viewState' in data)) { // Never reached?
+            console.log('<Error> Received corrupt view state data.');
             return false;
         }
-        if (this.popupState === data.popupState) {
-            console.log('<Error> Received duplicate popup state.');
+        if (this.viewState === data.viewState) {
+            console.log('<Error> Received duplicate view state.');
             return false;
         }
-        this.popupState = data.popupState;
+        this.viewState = data.viewState;
         return true;
     }
     

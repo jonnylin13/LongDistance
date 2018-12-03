@@ -1,4 +1,5 @@
 import Constants from '../shared/constants';
+import ProgressState from '../shared/model/progressState';
 
 class NetflixController {
 
@@ -7,7 +8,8 @@ class NetflixController {
         this._start();
         this._get_video().on('play', this.play);
         this._get_video().on('pause', this.pause);
-        this.state = Constants.IDLE;
+        this.playerState = Constants.ControllerState.IDLE;
+        this.progressState = new ProgressState();
         this.sync();
         console.log('<Info> Controller has been started!');
     }
@@ -45,10 +47,12 @@ class NetflixController {
     }
 
     sync () {
+        // Sync controller state
         if (this._get_video()) {
-            if (this._get_video().paused == true) this.state = Constants.PAUSE;
-            else this.state = Constants.PLAY;
-        } else this.state = Constants.IDLE;
+            if (this._get_video().paused == true) this.playerState = Constants.PlayerState.PAUSE;
+            else this.playerState = Constants.PlayerState.PLAY;
+        } else this.playerState = Constants.PlayerState.IDLE;
+        // Sync progress state
     }
 }
 
