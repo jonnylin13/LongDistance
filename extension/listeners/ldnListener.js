@@ -14,7 +14,6 @@ export default class LDNMessageListener {
 
     onMessage (req, sender, sendResponse) {
         
-        // TODO: Check implementation
         if (!req.type) {
             console.log('<Error> LDN background received a broken message from a content script.');
             console.log(req);
@@ -30,6 +29,7 @@ export default class LDNMessageListener {
                 this.wrappedSendResponse(sendResponse, (new GetLobbyIdAckMessage(Constants.Codes.Protocol.FAIL)));
             }
         } else if (req.type === 'START_LOBBY') {
+            // TODO: Fix this mess please
             this.ldn.startLobby(StartLobbyMessage.fromJson(JSON.stringify(req))).then(result => {
                 this.wrappedSendResponse(sendResponse, result);
             });

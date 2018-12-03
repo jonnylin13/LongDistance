@@ -1,8 +1,3 @@
-/** 
- * @author Jonathan Lin
- * @description Background JS script for LDN
- */
-
 const Lobby = require('./shared/model/lobby');
 const User = require('./shared/model/user');
 const ProgressState = require('./shared/model/progressState');

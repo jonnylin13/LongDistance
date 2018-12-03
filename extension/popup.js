@@ -1,10 +1,8 @@
 import Constants from '../shared/constants';
 import StartLobbyMessage from '../shared/protocol/startLobby';
-import StartLobbyMessageAck from '../shared/protocol/startLobbyAck';
 import PopupLoadedMessage from '../shared/protocol/background/popupLoaded';
 import PopupLoadedAckMessage from '../shared/protocol/background/popupLoadedAck';
 import GetLobbyIdMessage from '../shared/protocol/background/getLobbyId';
-import GetLobbyIdAckMessage from '../shared/protocol/background/getLobbyIdAck';
 import Util from '../shared/util';
 
 

@@ -1,3 +1,8 @@
+/** 
+ * @author Jonathan Lin
+ * @description Background script for LDN Chrome extension
+ */
+
 import TabListener from './listeners/tabListener';
 import LDNMessageListener from './listeners/ldnListener';
 import Constants from  '../shared/constants';
