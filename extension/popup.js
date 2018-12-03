@@ -60,7 +60,7 @@ class Popup {
 
     updatePopupState(newState) {
         
-        // Do we need this?
+        // TODO: Do we need to update LDN with popup state?
         chrome.runtime.sendMessage(BackgroundProtocol.UPDATE_POPUP_STATE(newState), (response) => {
 
         });
@@ -69,7 +69,7 @@ class Popup {
             if (state == newState) this.views[state].appendTo('body');
             else this.views[state].detach();
         }
-    
+        
         if (newState == Constants.IN_LOBBY) {
             chrome.runtime.sendMessage(BackgroundProtocol.GET_LOBBY_ID, (response) => {
                 if (response && response.lobbyId && this.getLobbyIdText()) this.getLobbyIdText().innerHTML = response.lobbyId;

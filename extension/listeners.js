@@ -3,7 +3,7 @@ import BackgroundProtocol from '../shared/protocol/bg';
 // Background script listeners
 export class TabListener {
 
-
+    // TODO: Should we execute the script when popup.js is instantiated?
     constructor (ldn) {
         this.ldn = ldn;
         this.search();
@@ -127,7 +127,9 @@ export class BackgroundMessageListener {
         } else if (req.type === 'UPDATE_POPUP_STATE') {
             this.wrappedSendResponse(sendResponse, BackgroundProtocol.UPDATE_POPUP_STATE_ACK(this.ldn.updatePopupState(req)));
         } else if (req.type === 'GET_LOBBY_ID') {
-            this.wrappedSendResponse(sendResponse, BackgroundProtocol.GET_LOBBY_ID_ACK(this.ldn.currentLobby));
+            if (this.ldn.currentLobby) {
+                this.wrappedSendResponse(sendResponse, BackgroundProtocol.GET_LOBBY_ID_ACK(this.ldn.currentLobby.id));
+            }
         } else if (req.type === 'START_LOBBY') {
 
         }

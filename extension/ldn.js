@@ -13,7 +13,7 @@ class LDNClient {
         this.user = new User(this._provisionClientId(), Constants.INACTIVE, '', new ProgressState());
         this.tabListener = new TabListener(this);
         this.backgroundMessageListener = new BackgroundMessageListener(this);
-        this.popupState = Constants.OUT_LOBBY; // Probably not necessary?
+        this.popupState = Constants.OUT_LOBBY; // TODO: Check if popup state is necessary in LDN
         this.currentLobby = null;
         this.ws = null;
 
@@ -26,16 +26,16 @@ class LDNClient {
 
     _provisionClientId () {
 
-        // TODO: local memory storage
         return Util.uuidv4();
 
+        // TODO: local memory storage
         chrome.storage.sync.get('ldnClientId', function (items) {
             const id = items.clientId;
             if (id) {
                 return id;
             } else {
                 chrome.storage.sync.set({ 'ldnClientId': clientId });
-                return Util.uuidv4(); // Should be done on server
+                return Util.uuidv4();
             }
         });
     
@@ -73,7 +73,7 @@ class LDNClient {
         this._connect();
     }
 
-    // Probably not necessary
+    // TODO: If this is never used, remove it
     updatePopupState (data) {
         if (!('popupState' in data)) { // Never reached?
             console.log('<Error> Received corrupt popup state data.');
