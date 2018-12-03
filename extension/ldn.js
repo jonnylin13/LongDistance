@@ -51,7 +51,7 @@ class LDNClient {
     }
 
     _connect () {
-        if (!this.ws) {
+        if (!this.isSocketConnected()) {
             try {
                 this.ws = new WebSocket(Constants.WS_URL);
                 return true;
@@ -62,17 +62,25 @@ class LDNClient {
         
     }
 
-    _connected () {
-        return this.currentLobby && this.user.id;
-    }
-
-    // ===========
-    // API Methods
-    // ===========
+    // ==============
+    // Public Methods
+    // ==============
 
     startLobby () {
         this._connect();
     }
+
+    isConnected () {
+        return this.currentLobby && this.user.id;
+    }
+
+    isSocketConnected () {
+        return this.ws && this.ws.readyState === this.ws.OPEN;
+    }
+
+    // ===============
+    // Handler Methods
+    // ===============
 
     // TODO: If this is never used, remove it
     updateViewState (data) {

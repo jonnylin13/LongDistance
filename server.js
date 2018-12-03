@@ -1,3 +1,8 @@
+/** 
+ * @author Jonathan Lin
+ * @description Background JS script for LDN
+ */
+
 const Lobby = require('./shared/model/lobby');
 const User = require('./shared/model/user');
 const ProgressState = require('./shared/model/progressState');
@@ -14,14 +19,12 @@ class LDNServer {
         process.on('exit', () => { this._exitHandler() });
         process.on('SIGINT', () => { this._exitHandler() });
         process.on('uncaughtException', () => { this._exitHandler() });
-        if (start) {
-            this._start();
-        }
+        if (start) this.start();
     }
 
-    // ========
-    // Handlers
-    // ========
+    // ===============
+    // Handler Methods
+    // ===============
 
     _exitHandler() {
         if (this.server) this.server.close();
@@ -55,15 +58,15 @@ class LDNServer {
     // Private Methods
     // ===============
 
-    _start() {
+    // ==============
+    // Public Methods
+    // ==============
+
+    start() {
         this.server = new WebSocket.Server({port: PORT});
         console.log('<Info> Listening on port: ', PORT);
         this.server.on('connection', this._onConnection);
     }
-
-    // ==============
-    // Public Methods
-    // ==============
 
     contains(lobbyId) {
         return (lobbyId in this.lobbies);

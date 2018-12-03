@@ -1,4 +1,4 @@
-module.exports =  class JsonObject {
+module.exports = class JsonObject {
 
     toJson() {
         const data = {};
@@ -14,16 +14,14 @@ module.exports =  class JsonObject {
         return JSON.stringify(data);
     }
 
-    update(jsonString) {
+    updateFromJson(jsonString) {
         const data = JSON.parse(jsonString);
         for (const member in this) {
-            if (this.hasOwnProperty(member)) {
-                if (member in data) {
-                    if (this[member] instanceof JsonObject) {
-                        // Implementation specific
-                    } else {
-                        this[member] = data[member]
-                    }
+            if (this.hasOwnProperty(member) && member in data) {
+                if (this[member] instanceof JsonObject) {
+                    this[member].updateFromJson(data[member]);
+                } else {
+                    this[member] = data[member]
                 }
             }
         }
