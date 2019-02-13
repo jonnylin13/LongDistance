@@ -1,0 +1,17 @@
+{
+    "name": "ldn-server",
+    "version": "0.0.1",
+    "description": "Long Distance Netflix Server",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"No tests\" && exit 1",
+        "start": "node index.js"
+    },
+    "author": "jonnylin13",
+    "license": "ISC",
+    "dependencies": {
+        "dotenv": "^6.2.0",
+        "shortid": "^2.2.14",
+        "ws": "^6.1.0"
+    }
+}
