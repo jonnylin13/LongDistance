@@ -4,6 +4,7 @@ class Lobby {
         this._id = lobbyId;
         this._master = master;
         this._slaves = {}; // X where X is the number of slaves
+        this._emitTask = null;
     }
 
     _swapMaster(promoted) {
@@ -44,6 +45,14 @@ class Lobby {
         this._master = promoted;
     }
 
+    get emitTask() {
+        return this._emitTask;
+    }
+
+    get id() {
+        return this._id;
+    }
+
     get master() {
         return this._master;
     }
@@ -77,6 +86,30 @@ class Lobby {
         for (const sessionId in this._slaves) {
             const slave = this._slaves[sessionId];
             slave.send(payload);
+        }
+    }
+
+    startEmitTask() {
+        try {
+            this._emitTask = setInterval(
+                () => {
+                    this.emit({
+                        type: 'update_request'
+                    });
+                }, 
+                ms=process.env.EMIT_DELAY);
+            return true;
+        } catch(e) {
+            console.log(e);
+            return false;
+        }
+        
+    }
+
+    stopEmitTask() {
+        if (this._emitTask) {
+            clearInterval(this._emitTask);
+            this._emitTask = null;
         }
     }
 }

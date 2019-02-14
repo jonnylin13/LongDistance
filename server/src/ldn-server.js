@@ -1,30 +1,14 @@
 const WebSocket = require('ws');
-const shortid = require('shortid');
 const crypto = require('crypto');
 
-const User = require('./models/user');
-const Lobby = require('./models/lobby');
-
-class LDNResponse {
-
-    static validate(socket, data, fields) {
-        for (const field in fields) {
-            if (!data[field]) { 
-                socket.send({ type: data.type + '_ack', msg: 'Missing field(s).', code: -1 });
-                return false;
-            }
-        }
-        return true;
-    }
-
-}
+const LobbyService = require('./services/lobby-service');
+const LDNResponse = require('./util/response');
 
 class LDNServer {
 
     constructor(start=true, port=3000) {
-        this._userMap = {}; // M amount of entries where M in the number of users
-        this._lobbies = {}; // N amount of entries where N is the number of lobbies
         this._port = port;
+        this._lobbyService = new LobbyService();
         if (start) this.start();
 
         process.on('SIGINT', () => {
@@ -46,50 +30,6 @@ class LDNServer {
         this._server.on('connection', this._onConnection);
     }
 
-    _startLobby(socket, sessionId) {
-        
-        // Check if user is in lobby
-        try {
-            const lobbyId = shortid.generate();
-            const user = new User(sessionId, socket);
-            const lobby = new Lobby(lobbyId, user);
-            this._userMap[sessionId] = lobbyId;
-            this._lobbies[lobbyId] = lobby;
-            return true;
-
-        } catch(e) {
-            return false;
-        }
-
-    }
-
-    _connectLobby(socket, lobbyId, sessionId) {
-
-        try {
-            // Check if user is in lobby
-            if (this.hasLobby(sessionId)) {
-                
-                // Get our lobby record
-                const lobby = this._lobbies[this._userMap[sessionId]];
-                lobby.removeUser(sessionId);
-                if (lobby.master === null) {
-                    delete this._lobbies[this._userMap[sessionId]];
-                    this._userMap[sessionId] = '';
-                }
-
-            }
-
-            const lobby = this._lobbies[lobbyId];
-            const user = new User(sessionId, socket);
-            lobby.addSlave(user);
-            this._userMap[sessionId] = lobbyId;
-            return true;
-        } catch(e) {
-            return false;
-        }
-        
-    }
-
     _onConnection(socket, req) {
 
         console.log('<Info> Connection received from: ', req.connection.remoteAddress);
@@ -103,81 +43,100 @@ class LDNServer {
         });
         
         // Add the session to the user map
-        this._userMap[sessionId] = '';
+        this._lobbyService.initUser(sessionId);
 
         socket.on('message', (msg) => {
-            this._onMessage(socket, req, msg);
+            this._onMessage(socket, msg);
         });
     }
 
-    _onMessage(socket, req, msg) {
+    _onMessage(socket, msg) {
         const data = JSON.parse(msg);
-            if (!data) {
-                console.log('<Error> Received bad data from socket connection: ', req.connection.remoteAddress);
-                return;
-            }
-            if (!LDNResponse.validate(socket, data, ['type'])) return;
-
-            const payload = { type: req.type + '_ack' }
-
-            if (data.type === 'start_lobby') {
-                
-                if (!LDNResponse.validate(socket, data, ['session_id'])) return;
-
-                const sessionId = data.session_id;
-
-                // Todo: Validate session ID
-
-                if (this._startLobby(socket, sessionId)) {
-                    payload.code = 1;
-                    payload.lobby_id = this._userMap[sessionId];
-                } else {
-                    payload.code = 0;
-                    payload.msg = 'Calling startLobby() failed.';
-                }
-
-            } else if (data.type === 'connect_lobby') {
-
-                if (!LDNResponse.validate(socket, data, ['session_id', 'lobby_id'])) return;
-
-                // Todo: Validate lobby
-
-                const sessionId = data.session_id;
-                const lobbyId = data.lobby_id;
-
-                if (this._connectLobby(socket, lobbyId, sessionId)) {
-                    payload.code = 1;
-                    payload.lobby_id = lobbyId;
-                } else {
-                    payload.code = 0;
-                    payload.msg = 'Calling connectLobby() failed.';
-                }
-
-            } else if (data.type === 'start_control') {
-
-                if (!LDNResponse.validate(socket, data, ['session_id'])) return;
-
-                const sessionId = data.sessionId;
-                const lobby = this._lobbies[this._userMap[sessionId]];
-                // Todo: Validate lobby
-                // Todo: Validate session id
-                // Todo: Start timer with emit pings for latency and master updates
-
-
-            }
-            socket.send(payload);
+        if (!data) {
+            console.log('<Error> Received bad data from socket connection: ', req.connection.remoteAddress);
             return;
+        }
+        if (!LDNResponse.validate(socket, data, ['type'])) return;
+        this._handleRequest(socket, data);
+        this._handleResponse(data);
+
+    }
+
+    _handleRequest(socket, data) {
+
+        const payload = { type: data.type + '_ack' }
+
+        if (data.type === 'create_lobby') {
+            
+            if (!LDNResponse.validateFields(socket, data, ['session_id'])) return;
+
+            const sessionId = data.session_id;
+
+            if (this._lobbyService.createLobby(socket, sessionId)) {
+                payload.code = 1;
+                payload.lobby_id = this._lobbyService.getLobbyId(sessionId);
+            } else {
+                payload.code = 0;
+                payload.msg = 'Calling createLobby() failed.';
+            }
+
+        } else if (data.type === 'connect_lobby') {
+
+            if (!LDNResponse.validateFields(socket, data, ['session_id', 'lobby_id'])) return;
+
+            const sessionId = data.session_id;
+            const lobbyId = data.lobby_id;
+            const lobby = this._lobbyService.getLobby(lobbyId);
+
+            if (!LDNResponse.validateLobby(socket, lobby, data)) return;
+
+            if (this._lobbyService.connectLobby(socket, lobby, sessionId)) {
+                payload.code = 1;
+                payload.lobby_id = lobbyId;
+            } else {
+                payload.code = 0;
+                payload.msg = 'Calling connectLobby() failed.';
+            }
+
+        } else if (data.type === 'start_control') {
+
+            if (!LDNResponse.validateFields(socket, data, ['session_id'])) return;
+
+            const sessionId = data.sessionId;
+            const lobby = this._lobbyService.getLobbyFromSession(sessionId);
+            if (!LDNResponse.validateLobby(socket, lobby, data)) return;
+            // Todo: Authorize session id
+
+            if (lobby.emitTask) {
+                // Todo: Test/never reached
+                lobby.stopEmitTask();
+            }
+
+            if (lobby.startEmitTask()) {
+                payload.code = 1;
+            }
+            
+
+        }
+        socket.send(payload);
+        return;
+    }
+
+    _handleResponse(data) {
+
+        // These do not send a response, they just update server state
+        if (data.type === 'update_ack') {
+            // Todo: Handle server state update
+        }
     }
 
     // ==============
     // Public Methods
     // ==============
-    hasLobby(sessionId) {
-        return this._userMap[sessionId] !== '';
-    }
 
-    isConnected(sessionId) {
-        return sessionId in this._userMap;
+    start() {
+        if (this._server) this._server.close();
+        this._start();
     }
 
     start() {

@@ -1,0 +1,23 @@
+{
+    "name": "Long Distance",
+    "description": "This extension allows users to create lobbies and invite friends to simultaneously stream Netflix content.",
+    "version": "0.1",
+    "manifest_version": 2,
+    "permissions": [
+        "tabs",
+        "declarativeContent",
+        "activeTab",
+        "storage",
+        "*//*.netflix.com/watch/*",
+        "*://netflix.com/watch/*"
+    ],
+    "background": {
+        "scripts": [
+            "ldn.bundle.js"
+        ],
+        "persistent": true
+    },
+    "page_action": {
+        "default_popup": "popup.html"
+    }
+}
