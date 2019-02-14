@@ -10,7 +10,6 @@ class NetflixController {
 
     constructor() {
         console.log('<LDN> Starting controller...');
-
     }
 
     getVideo() {

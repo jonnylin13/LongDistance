@@ -4,13 +4,16 @@ const Constants = require('./constants');
 class ViewState {
     constructor(views) {
         this._views = views;
-        this._state = Constants.ViewState.OUT_LOBBY;
+        this.update(Constants.ViewState.OUT_LOBBY);
     }
 
     update(newState) {
-        for (const state in this.views) {
-            if (state === newState) document.body.appendChild(this._views[state]);
-            else document.body.removeChild(this._views[state]);
+        for (const state in this._views) {
+            if (state == newState) {
+                this._views[state].style.display = 'block';
+            } else {
+                this._views[state].style.display = 'none';
+            }
         }
 
         if (newState == Constants.ViewState.IN_LOBBY) {
@@ -19,10 +22,6 @@ class ViewState {
             const lobbyIdText = document.getElementById('lobby-id-text');
             if (lobbyIdText) lobbyIdText.innerHTML = '';
         }
-    }
-
-    get() {
-        return this._state;
     }
 }
 

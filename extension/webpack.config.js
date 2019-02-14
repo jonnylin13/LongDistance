@@ -4,7 +4,7 @@ const copy = require('copy-webpack-plugin');
 module.exports = {
     mode: 'production',
     entry: {
-        controller: './src/netflix.js',
+        netflix: './src/netflix.js',
         client: './src/client.js',
         popup: './src/popup.js'
     },

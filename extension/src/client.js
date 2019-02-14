@@ -10,7 +10,7 @@ class NetflixTabListener {
         chrome.tabs.onCreated.addListener((tab) => { this._onCreated(tab) });
         chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => { this._onUpdated(tabId, changeInfo, tab) });
         chrome.tabs.onRemoved.addListener((tabId, removeInfo) => { this._onRemoved(tabId, removeInfo) });
-        
+
     }
 
     _onCreated(tab) {
@@ -22,10 +22,26 @@ class NetflixTabListener {
 
     _onUpdated(tabId, changeInfo, tab) {
         // Tracks URL params
+        if (tab.url === this._clientController.clientState.urlParams) return;
+        if (!changeInfo.status || changeInfo.status !== 'complete') return;
+        
+        console.log('<LDN> Updated tab: ', tab.url);
+        if (NetflixTabListener.isNetflix(tab)) {
+            if (!this._isTabCached()) {
+                this._startNetflixScript(tab.id);
+            }
+            const urlParams = NetflixTabListener.getUrlParams(tab);
+            if (this._clientController.clientState.urlParams !== urlParams) {
+                this._clientController.clientState.urlParams = urlParams;
+            }
+        }
     }
 
     _onRemoved(tabId, removeInfo) {
-        if (this._tabId === tabId) this._uncacheTab();
+        if (this._tabId === tabId) {
+            this._uncacheTab();
+            console.log('<LDN> Removed :(');
+        }
     }
 
     _queryNetflixTab() {
@@ -36,7 +52,7 @@ class NetflixTabListener {
                 else {
                     if (!this._isTabCached()) {
                         // Todo: Fix this
-                        this._startNetflixScript(tab[0].id);
+                        this._startNetflixScript(tabs[0].id);
                     }
                 }
             }
@@ -45,6 +61,7 @@ class NetflixTabListener {
 
     _startNetflixScript(tabId) {
         this._tabId = tabId;
+        console.log('<LDN> Starting Netflix script...');
         chrome.tabs.executeScript(tabId, {
             file: 'netflix.bundle.js',
             runAt: 'document_idle'
@@ -71,8 +88,7 @@ class NetflixTabListener {
     }
 
     static isNetflix(tab) {
-        if (!tab) return false;
-        return tab.url.includes('https://netflix.com/');
+        return tab.url.includes('netflix.com/');
     }
 
     static getUrlParams(tab) {
@@ -84,9 +100,16 @@ class NetflixTabListener {
 
 class ClientState {
     constructor() {
-        
+        this._urlParams = '';
     }
 
+    get urlParams() {
+        return this._urlParams;
+    }
+
+    set urlParams(params) {
+        this._urlParams = params;
+    }
 
 }
 

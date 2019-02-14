@@ -1,0 +1,12 @@
+.btn {
+    font-size: 10px;
+}
+
+.container {
+    padding: 10px;
+    margin: 10px;
+}
+
+body {
+    min-width: 300px;
+}
