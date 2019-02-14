@@ -8,7 +8,7 @@
         "declarativeContent",
         "activeTab",
         "storage",
-        "*//*.netflix.com/watch/*",
+        "*://*.netflix.com/watch/*",
         "*://netflix.com/watch/*"
     ],
     "background": {

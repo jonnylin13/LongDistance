@@ -135,11 +135,6 @@ class LDNServer {
     // ==============
 
     start() {
-        if (this._server) this._server.close();
-        this._start();
-    }
-
-    start() {
         if (this._server) {
             this._server.close((err) => {
                 if (err) {
