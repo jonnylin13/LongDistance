@@ -13,7 +13,7 @@
     ],
     "background": {
         "scripts": [
-            "ldn.bundle.js"
+            "client.bundle.js"
         ],
         "persistent": true
     },

@@ -1,30 +1,27 @@
 {
-    "name": "ldn-client",
-    "version": "0.0.1",
-    "description": "Long Distance to replace Showgoers and Netflix Party",
-    "scripts": {
-      "build": "webpack --prod"
-    },
-    "repository": {
-      "type": "git",
-      "url": "https://github.com/jonnylin13/LongDistance.git"
-    },
-    "author": "jonnylin13",
-    "license": "ISC",
-    "dependencies": {
-      "ws": "^6.1.0"
-    },
-    "devDependencies": {
-      "webpack": "^4.25.1",
-      "babel-loader": "^8.0.4",
-      "@babel/preset-env": "^7.1.5",
-      "@babel/core": "^7.1.5",
-      "babel-cli": "^6.26.0",
-      "copy-webpack-plugin": "^4.6.0",
-      "webpack-cli": "^3.1.2"
-    },
-    "optionalDependencies": {
-      "bufferutil": "^4.0.0",
-      "utf-8-validate": "^5.0.1"
-    }
+  "name": "ldn-client",
+  "version": "0.0.1",
+  "description": "Long Distance to replace Showgoers and Netflix Party",
+  "scripts": {
+    "build": "webpack --prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jonnylin13/LongDistance.git"
+  },
+  "author": "jonnylin13",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^4.25.1",
+    "babel-loader": "^8.0.4",
+    "@babel/preset-env": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "babel-cli": "^6.26.0",
+    "copy-webpack-plugin": "^4.6.0",
+    "webpack-cli": "^3.1.2"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.0",
+    "utf-8-validate": "^5.0.1"
   }
+}
