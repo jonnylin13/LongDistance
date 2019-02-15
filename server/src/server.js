@@ -27,7 +27,9 @@ class LDNServer {
     _start() {
         this._server = new WebSocket.Server({ port: this._port });
         console.log('<Info> Listening on port: ' + this.port);
-        this._server.on('connection', this._onConnection);
+        this._server.on('connection', (socket, req) => {
+            this._onConnection(socket, req);
+        });
     }
 
     _onConnection(socket, req) {
@@ -37,10 +39,10 @@ class LDNServer {
         const sessionId = crypto.randomBytes(16).toString('hex');
 
         // If this fails, then the client must disconnect and reconnect
-        socket.send({
+        socket.send(JSON.stringify({
             'type': 'connect_ack',
             'session_id': sessionId
-        });
+        }));
         
         // Add the session to the user map
         this._lobbyService.initUser(sessionId);
@@ -56,7 +58,9 @@ class LDNServer {
             console.log('<Error> Received bad data from socket connection: ', req.connection.remoteAddress);
             return;
         }
-        if (!LDNResponse.validate(socket, data, ['type'])) return;
+        if (!LDNResponse.validateFields(socket, data, ['type'])) return;
+        console.log('<Info> Received a message: ');
+        console.log(msg);
         this._handleRequest(socket, data);
         this._handleResponse(data);
 
@@ -118,7 +122,7 @@ class LDNServer {
             
 
         }
-        socket.send(payload);
+        socket.send(JSON.stringify(payload));
         return;
     }
 

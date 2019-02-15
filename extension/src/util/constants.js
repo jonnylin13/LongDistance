@@ -8,5 +8,9 @@ class Constants {
         };
     }
 
+    static get WS_URL() {
+        return 'ws://127.0.0.1:3000';
+    }
+
 }
 module.exports = Constants;

@@ -4,9 +4,9 @@ const copy = require('copy-webpack-plugin');
 module.exports = {
     mode: 'production',
     entry: {
-        netflix: './src/netflix.js',
-        client: './src/client.js',
-        popup: './src/popup.js'
+        netflix: './src/content/netflix.js',
+        background: './src/background.js',
+        popup: './src/content/popup.js'
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -26,9 +26,9 @@ module.exports = {
     },
     plugins: [
         new copy([
-            {from: './src/popup.html', to: 'popup.html'},
-            {from: './src/styles.css', to: 'styles.css'},
-            {from: './src/manifest.json', to: 'manifest.json'}
+            {from: './src/content/popup.html', to: 'popup.html'},
+            {from: './src/content/styles.css', to: 'styles.css'},
+            {from: './src/content/manifest.json', to: 'manifest.json'}
         ])
     ]
 };

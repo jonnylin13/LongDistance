@@ -7,13 +7,12 @@
         "tabs",
         "declarativeContent",
         "activeTab",
-        "storage",
         "*://*.netflix.com/watch/*",
         "*://netflix.com/watch/*"
     ],
     "background": {
         "scripts": [
-            "client.bundle.js"
+            "background.bundle.js"
         ],
         "persistent": true
     },

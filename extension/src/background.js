@@ -1,8 +1,60 @@
-class NetflixTabListener {
+const SocketController = require('./socket');
+const ClientState = require('./models/client-state');
 
-    constructor(clientController) {
+class BackgroundResponse {
 
-        this._clientController = clientController;
+    static validateFields(data, send) {
+        // Todo: Implement
+    }
+}
+ 
+
+class Background {
+
+    constructor() {
+        console.log('<LDN> Starting client extension');
+        this._clientState = new ClientState();
+        this._tabs = new BackgroundTabListener(this._clientState);
+        this._socketController = new SocketController(this._tabs);
+        chrome.runtime.onMessage.addListener((msg, sender, send) => {
+            this._onMessage(msg, sender, send);
+        });
+        console.log('<LDN> Background script started!');
+    }
+
+    _onMessage(data, sender, send) {
+
+        if (!data || !data.type) {
+            console.log('<LDN> Background script received broken message from a content script.');
+            return;
+        }
+        const payload = {
+            'type': data.type + '_ack'
+        };
+
+        console.log('<LDN> Background script received message of type: ', data.type);
+        if (data.type === 'popup_loaded') {
+
+        } else if (data.type === 'get_lobby_id') {
+
+        } else if (data.type === 'start_lobby') {
+            this._socketController.createLobby();
+            // This one sends a special response
+        }
+        console.log('<LDN> Background script sending response to content script: ');
+        console.log(payload);
+        send(payload);
+    }
+
+    
+
+}
+
+class BackgroundTabListener {
+
+    constructor(clientState) {
+
+        this._clientState = clientState;
 
         this._uncacheTab();
         this._queryNetflixTab();
@@ -15,24 +67,24 @@ class NetflixTabListener {
 
     _onCreated(tab) {
         console.log('<LDN> Created: ', tab.url);
-        if (NetflixTabListener.isNetflix(tab) && !this._isTabCached()) {
+        if (BackgroundTabListener.isNetflix(tab) && !this._isTabCached()) {
             this._startNetflixScript(tab.id);
         }
     }
 
     _onUpdated(tabId, changeInfo, tab) {
         // Tracks URL params
-        if (tab.url === this._clientController.clientState.urlParams) return;
+        if (tab.url === this._clientState.urlParams) return;
         if (!changeInfo.status || changeInfo.status !== 'complete') return;
         
         console.log('<LDN> Updated tab: ', tab.url);
-        if (NetflixTabListener.isNetflix(tab)) {
+        if (BackgroundTabListener.isNetflix(tab)) {
             if (!this._isTabCached()) {
                 this._startNetflixScript(tab.id);
             }
-            const urlParams = NetflixTabListener.getUrlParams(tab);
-            if (this._clientController.clientState.urlParams !== urlParams) {
-                this._clientController.clientState.urlParams = urlParams;
+            const urlParams = BackgroundTabListener.getUrlParams(tab);
+            if (this._clientState.urlParams !== urlParams) {
+                this._clientState.urlParams = urlParams;
             }
         }
     }
@@ -83,8 +135,12 @@ class NetflixTabListener {
         return this._tabId !== -1;
     }
 
-    get clientController() {
-        return this._clientController;
+    get tabId() {
+        return this._tabId;
+    }
+
+    get clientState() {
+        return this._clientState;
     }
 
     static isNetflix(tab) {
@@ -98,73 +154,4 @@ class NetflixTabListener {
 
 }
 
-class ClientState {
-    constructor() {
-        this._urlParams = '';
-    }
-
-    get urlParams() {
-        return this._urlParams;
-    }
-
-    set urlParams(params) {
-        this._urlParams = params;
-    }
-
-}
-
-class ClientResponse {
-
-    static validateFields(data, send) {
-        // Todo: Implement
-    }
-}
- 
-class ClientController {
-    constructor(clientState) {
-        this._clientState = clientState;
-        chrome.runtime.onMessage.addListener((req, sender, send) => {
-            this._onMessage(req, sender, send);
-        });
-    }
-
-    _onMessage(req, sender, send) {
-        const data = JSON.parse(req);
-
-        if (!data || !data.type) {
-            console.log('<LDN> Background script received broken message from a content script.');
-            return;
-        }
-        const payload = {
-            type: data.type + '_ack'
-        };
-
-        console.log('<LDN> Backgrount script received message of type: ', data.type);
-        if (data.type === 'popup_loaded') {
-
-        } else if (data.type === 'get_lobby_id') {
-
-        } else if (data.type === 'start_lobby') {
-
-        }
-        console.log('<LDN> Sending payload: ');
-        console.log(payload);
-        send(payload);
-    }
-
-    get clientState() {
-        return this._clientState;
-    }
-}
-
-class Client {
-
-    constructor() {
-        console.log('<LDN> Starting client extension');
-        new NetflixTabListener(new ClientController(new ClientState()));
-        console.log('<LDN> Background script started!');
-    }
-
-}
-
-new Client();
+new Background();
