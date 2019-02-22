@@ -51,15 +51,17 @@ class SocketController {
     _handleResponse(data) {
 
         if (data.type === 'create_lobby_ack') {
-            const lobbyId = data.lobbyId;
+            
+            const lobbyId = data.lobby_id;
             this._tabs.clientState.lobbyId = lobbyId;
+            this._tabs.clientState.sessionId = data.session_id;
+
+            // Send a start_lobby_ack to popup.js
             chrome.tabs.sendMessage(this._tabs.tabId, {
                 'type': 'start_lobby_ack',
                 'lobbyId': lobbyId,
                 'code': 1
             });
-        } else if (data.type === 'connect_ack') {
-            this._tabs.clientState.sessionId = data.session_id;
         }
     }
 

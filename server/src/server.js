@@ -35,17 +35,7 @@ class LDNServer {
     _onConnection(socket, req) {
 
         console.log('<Info> Connection received from: ', req.connection.remoteAddress);
-
-        const sessionId = crypto.randomBytes(16).toString('hex');
-
-        // If this fails, then the client must disconnect and reconnect
-        socket.send(JSON.stringify({
-            'type': 'connect_ack',
-            'session_id': sessionId
-        }));
         
-        // Add the session to the user map
-        this._lobbyService.initUser(sessionId);
 
         socket.on('message', (msg) => {
             this._onMessage(socket, msg);
@@ -72,13 +62,13 @@ class LDNServer {
 
         if (data.type === 'create_lobby') {
             
-            if (!LDNResponse.validateFields(socket, data, ['session_id'])) return;
-
-            const sessionId = data.session_id;
+            const sessionId = crypto.randomBytes(16).toString('hex');
+            this._lobbyService.initUser(sessionId);
 
             if (this._lobbyService.createLobby(socket, sessionId)) {
                 payload.code = 1;
                 payload.lobby_id = this._lobbyService.getLobbyId(sessionId);
+                payload.session_id = sessionId;
             } else {
                 payload.code = 0;
                 payload.msg = 'Calling createLobby() failed.';
@@ -86,9 +76,10 @@ class LDNServer {
 
         } else if (data.type === 'connect_lobby') {
 
-            if (!LDNResponse.validateFields(socket, data, ['session_id', 'lobby_id'])) return;
+            if (!LDNResponse.validateFields(socket, data, ['lobby_id'])) return;
 
-            const sessionId = data.session_id;
+            const sessionId = crypto.randomBytes(16).toString('hex');
+            this._lobbyService.initUser(sessionId);
             const lobbyId = data.lobby_id;
             const lobby = this._lobbyService.getLobby(lobbyId);
 
