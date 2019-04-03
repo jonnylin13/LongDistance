@@ -70,7 +70,7 @@ class LDNServer {
     const payload = { type: data.type + '_ack' };
 
     if (data.type === 'create_lobby') {
-      const sessionId = _generateSessionId();
+      const sessionId = this._generateSessionId();
 
       if (this._lobbyService.createLobby(socket, sessionId)) {
         payload.code = 1;

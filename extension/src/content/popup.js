@@ -24,7 +24,6 @@ class PopupController {
     }
 
     this._handleRequest(req, send);
-    if (!req.type.contains('_ack')) return;
     this._handleResponse(req, send);
   }
 
