@@ -1,5 +1,5 @@
-const SocketController = require('./socket');
-const ClientState = require('./models/client-state');
+const SocketController = require("./socket");
+const ClientState = require("./models/client-state");
 
 class BackgroundResponse {
   static validateFields(data, send) {
@@ -9,41 +9,41 @@ class BackgroundResponse {
 
 class Background {
   constructor() {
-    console.log('<LDN> Starting client extension');
+    console.log("<LDN> Starting client extension");
     this._clientState = new ClientState();
     this._tabs = new BackgroundTabListener(this._clientState);
     this._socketController = new SocketController(this._tabs);
     chrome.runtime.onMessage.addListener((msg, sender, send) => {
       this._onMessage(msg, sender, send);
     });
-    console.log('<LDN> Background script started!');
+    console.log("<LDN> Background script started!");
   }
 
   _onMessage(data, sender, send) {
     if (!data || !data.type) {
       console.log(
-        '<LDN> Background script received broken message from a content script.'
+        "<LDN> Background script received broken message from a content script."
       );
       return;
     }
     const payload = {
-      type: data.type + '_ack'
+      type: data.type + "_ack"
     };
 
     console.log(
-      '<LDN> Background script received message of type: ',
+      "<LDN> Background script received message of type: ",
       data.type
     );
-    if (data.type === 'popup_loaded') {
-    } else if (data.type === 'get_lobby_id') {
-    } else if (data.type === 'start_lobby') {
+    if (data.type === "popup_loaded") {
+    } else if (data.type === "get_lobby_id") {
+    } else if (data.type === "start_lobby") {
       this._socketController.createLobby();
       // This one sends a special response
-    } else if (data.type === 'disconnect') {
-      // TODO
+    } else if (data.type === "disconnect") {
+      // Todo: Handle disconnect #31
       // Send a disconnect to server?
     }
-    console.log('<LDN> Background script sending response to content script: ');
+    console.log("<LDN> Background script sending response to content script: ");
     console.log(payload);
     send(payload);
   }
@@ -68,7 +68,7 @@ class BackgroundTabListener {
   }
 
   _onCreated(tab) {
-    console.log('<LDN> Created: ', tab.url);
+    console.log("<LDN> Created: ", tab.url);
     if (BackgroundTabListener.isNetflix(tab) && !this._isTabCached()) {
       this._startNetflixScript(tab.id);
     }
@@ -77,9 +77,9 @@ class BackgroundTabListener {
   _onUpdated(tabId, changeInfo, tab) {
     // Tracks URL params
     if (tab.url === this._clientState.urlParams) return;
-    if (!changeInfo.status || changeInfo.status !== 'complete') return;
+    if (!changeInfo.status || changeInfo.status !== "complete") return;
 
-    console.log('<LDN> Updated tab: ', tab.url);
+    console.log("<LDN> Updated tab: ", tab.url);
     if (BackgroundTabListener.isNetflix(tab)) {
       if (!this._isTabCached()) {
         this._startNetflixScript(tab.id);
@@ -94,12 +94,12 @@ class BackgroundTabListener {
   _onRemoved(tabId, removeInfo) {
     if (this._tabId === tabId) {
       this._uncacheTab();
-      console.log('<LDN> Removed :(');
+      console.log("<LDN> Removed :(");
     }
   }
 
   _queryNetflixTab() {
-    chrome.tabs.query({ title: 'Netflix' }, tabs => {
+    chrome.tabs.query({ title: "Netflix" }, tabs => {
       if (tabs.length === 0) this._uncacheTab();
       else {
         if (!this._isTabCached()) {
@@ -112,19 +112,19 @@ class BackgroundTabListener {
 
   _startNetflixScript(tabId) {
     this._tabId = tabId;
-    console.log('<LDN> Starting Netflix script...');
+    console.log("<LDN> Starting Netflix script...");
     chrome.tabs.executeScript(
       tabId,
       {
-        file: 'netflix.bundle.js',
-        runAt: 'document_idle'
+        file: "netflix.bundle.js",
+        runAt: "document_idle"
       },
       err => {
         if (!err || err[0]) {
-          console.log('<LDN> Controller started!');
+          console.log("<LDN> Controller started!");
           chrome.pageAction.show(tabId, undefined);
         } else {
-          console.log('<LDN> Failed to start netflix.bundle.js!');
+          console.log("<LDN> Failed to start netflix.bundle.js!");
         }
       }
     );
@@ -147,12 +147,12 @@ class BackgroundTabListener {
   }
 
   static isNetflix(tab) {
-    return tab.url.includes('netflix.com/');
+    return tab.url.includes("netflix.com/");
   }
 
   static getUrlParams(tab) {
-    if (!tab) return '';
-    return tab.url.split('netflix.com/')[1].split('?')[0];
+    if (!tab) return "";
+    return tab.url.split("netflix.com/")[1].split("?")[0];
   }
 }
 
