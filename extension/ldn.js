@@ -10,8 +10,6 @@ import ProgressState from "../shared/model/progressState";
 import User from "../shared/model/user";
 import Util from "../shared/util";
 
-import StartLobbyMessage from "../shared/protocol/startLobby";
-
 class LDNClient {
   constructor() {
     console.log("<Info> Starting LDN...");
@@ -29,6 +27,18 @@ class LDNClient {
     this.messageListener = new LDNMessageListener(this);
 
     console.log("<Info> LDN has been started!");
+  }
+
+  _onMessage(event) {
+    console.log(event.data);
+    const data = JSON.parse(event.data);
+    if (data.type === "START_LOBBY_ACK") {
+      console.log("<Info> Received START_LOBBY_ACK");
+      // TODO: Update user
+      this.user.updateFromJson(event.data);
+      // TODO: Update lobby ID in popup?
+      resolve(data);
+    }
   }
 
   // ===============
@@ -63,6 +73,7 @@ class LDNClient {
     if (!this.isSocketConnected()) {
       try {
         this.ws = new WebSocket(Constants.WS_URL);
+        this.ws.onmessage = event => this._onMessage(event);
         console.log("<Info> Connected to websocket server");
         return true;
       } catch (exception) {
@@ -77,19 +88,11 @@ class LDNClient {
 
   startLobby(msg) {
     this._connect();
+    msg.user = this.user;
     return new Promise(resolve => {
       this.ws.onopen = () => {
-        this.ws.send(msg);
-        this.ws.onmessage = event => {
-          const data = JSON.parse(event.data);
-          if (data.type === "START_LOBBY_ACK") {
-            console.log("<Info> Received START_LOBBY_ACK");
-            // TODO: Update user
-            this.ldn.user.updateFromJson(event.data);
-            // TODO: Update lobby ID in popup?
-            resolve(data);
-          }
-        };
+        console.log(msg);
+        this.ws.send(msg.toJson());
       };
     });
   }

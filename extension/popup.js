@@ -70,8 +70,9 @@ class Popup {
   // =================
   startLobbyClicked($event) {
     chrome.runtime.sendMessage(
-      new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS).toJson(),
+      new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS),
       response => {
+        console.log(response);
         if (!Util.validateMessage(response)) {
           console.log("<Error> Popup received invalid response.");
           return false;

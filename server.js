@@ -46,7 +46,23 @@ class LDNServer {
 
     console.log("<Info> Received message with type: ", data.type);
     if (data.type == "START_LOBBY") {
-      this.startLobby(socket, data);
+      if (!data.user) {
+        console.log("<Error> Tried to start a lobby without a user!");
+        return;
+      }
+
+      const lobbyId = short_id.generate();
+      const user = User.fromJson(data.user);
+
+      if (this.isConnected(user)) {
+        console.log("<Error> User is already connected. ID: ", str(user.id));
+        return;
+      }
+      const lobby = Lobby(lobbyId, user);
+      user.lobbyId = lobbyId;
+      this.addLobby(lobby);
+      socket.send(new StartLobbyAckMessage({ lobbyId: lobby.id }).toJson());
+      this.printLobbies();
     }
   }
 
@@ -84,25 +100,7 @@ class LDNServer {
     return false;
   }
 
-  startLobby(socket) {
-    if (!data.user) {
-      console.log("<Error> Tried to start a lobby without a user!");
-      return;
-    }
-
-    const lobbyId = short_id.generate();
-    const user = User.fromJson(data.user);
-
-    if (this.isConnected(user)) {
-      console.log("<Error> User is already connected. ID: ", str(user.id));
-      return;
-    }
-    const lobby = Lobby(lobbyId, user);
-    user.lobbyId = lobbyId;
-    this.addLobby(lobby);
-    socket.send(new StartLobbyAckMessage({ lobbyId: lobby.id }).toJson());
-    this.printLobbies();
-  }
+  startLobby(socket) {}
 
   printLobbies() {
     console.log("<Info> New lobby information:");
