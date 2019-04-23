@@ -4,7 +4,7 @@
   "description": "Long Distance to replace Showgoers and Netflix Party",
   "main": "server.js",
   "scripts": {
-    "test": "node test.js",
+    "test": "mocha 'test/**/*.spec.js'",
     "start": "node server.js",
     "build": "webpack --prod",
     "dev": "npm run build && npm run start"
@@ -20,12 +20,14 @@
     "ws": "^6.1.0"
   },
   "devDependencies": {
-    "webpack": "^4.25.1",
-    "babel-loader": "^8.0.4",
-    "@babel/preset-env": "^7.1.5",
     "@babel/core": "^7.1.5",
+    "@babel/preset-env": "^7.1.5",
     "babel-cli": "^6.26.0",
+    "babel-loader": "^8.0.4",
+    "chai": "^4.2.0",
     "copy-webpack-plugin": "^4.6.0",
+    "mocha": "^6.1.4",
+    "webpack": "^4.25.1",
     "webpack-cli": "^3.1.2"
   },
   "optionalDependencies": {
