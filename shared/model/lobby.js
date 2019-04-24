@@ -18,6 +18,10 @@ module.exports = class Lobby {
     if (this.contains(user)) delete this.users[user.id];
   }
 
+  size() {
+    return this.users.size();
+  }
+
   static fromJson(jsonString) {
     const data = JSON.parse(jsonString);
     if (!("id" in data) || !("controller" in data) || !("users" in data)) {

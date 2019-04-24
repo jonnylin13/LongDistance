@@ -34,7 +34,7 @@ export default class LDNMessageListener {
         response.code = Constants.Protocol.FAIL;
       }
     } else if (data.type === Constants.Protocol.Messages.START_LOBBY) {
-      // TODO: Fix this mess please
+      // TODO: Fix this mess please.......!@!@!
       LDNClient.getInstance().startLobby(req);
     }
     console.log("<Info> Sending the following response: ");
