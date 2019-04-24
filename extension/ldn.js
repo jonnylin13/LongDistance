@@ -10,34 +10,40 @@ import ProgressState from "../shared/model/progressState";
 import User from "../shared/model/user";
 import Util from "../shared/util";
 
-class LDNClient {
+export default class LDNClient {
+  static getInstance() {
+    if (!this._instance) this._instance = new LDNClient();
+    return this._instance;
+  }
+
   constructor() {
     console.log("<Info> Starting LDN...");
 
     this.user = new User(
       this._provisionClientId(),
-      Constants.Codes.ControllerState.INACTIVE,
+      Constants.ControllerState.INACTIVE,
       "",
       new ProgressState()
     );
     // this.currentLobby = null;
     this.ws = null;
 
-    this.tabListener = new TabListener(this);
-    this.messageListener = new LDNMessageListener(this);
+    this.tabListener = new TabListener();
+    this.messageListener = new LDNMessageListener();
 
     console.log("<Info> LDN has been started!");
   }
 
   _onMessage(event) {
-    console.log(event.data);
     const data = JSON.parse(event.data);
-    if (data.type === "START_LOBBY_ACK") {
-      console.log("<Info> Received START_LOBBY_ACK");
-      // TODO: Update user
-      this.user.updateFromJson(event.data);
-      // TODO: Update lobby ID in popup?
-      resolve(data);
+    console.log("<Info> Received " + data.type + "from websocket server");
+    if (data.type === Constants.Protocol.Messages.START_LOBBY_ACK) {
+      if (data.code === Constants.Protocol.SUCCESS) {
+        // TODO: Update user
+        this.user.updateFromJson(data.user);
+        // TODO: Update lobby ID in popup?
+        // How?
+      }
     }
   }
 
@@ -63,7 +69,6 @@ class LDNClient {
 
   _hasController(data) {
     if (!data.controlId) {
-      console.log();
       return false;
     }
     return data.controlId == this.user.id;
@@ -89,12 +94,9 @@ class LDNClient {
   startLobby(msg) {
     this._connect();
     msg.user = this.user;
-    return new Promise(resolve => {
-      this.ws.onopen = () => {
-        console.log(msg);
-        this.ws.send(msg.toJson());
-      };
-    });
+    this.ws.onopen = () => {
+      this.ws.send(JSON.stringify(msg));
+    };
   }
 
   isConnected() {
@@ -110,4 +112,4 @@ class LDNClient {
   // ===============
 }
 
-const ldn = new LDNClient();
+LDNClient.getInstance();

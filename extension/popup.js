@@ -1,8 +1,4 @@
 import Constants from "../shared/constants";
-import StartLobbyMessage from "../shared/protocol/startLobby";
-import PopupLoadedMessage from "../shared/protocol/background/popupLoaded";
-import PopupLoadedAckMessage from "../shared/protocol/background/popupLoadedAck";
-import GetLobbyIdMessage from "../shared/protocol/background/getLobbyId";
 import Util from "../shared/util";
 
 class Popup {
@@ -10,11 +6,9 @@ class Popup {
     this.views = {};
 
     $().ready(() => {
-      this.views[Constants.Codes.ViewState.IN_LOBBY] = $("#in-lobby-container");
-      this.views[Constants.Codes.ViewState.OUT_LOBBY] = $(
-        "#out-lobby-container"
-      );
-      this.views[Constants.Codes.ViewState.CONNECT_LOBBY] = $(
+      this.views[Constants.ViewState.IN_LOBBY] = $("#in-lobby-container");
+      this.views[Constants.ViewState.OUT_LOBBY] = $("#out-lobby-container");
+      this.views[Constants.ViewState.CONNECT_LOBBY] = $(
         "#connect-lobby-container"
       );
 
@@ -24,12 +18,15 @@ class Popup {
       $("#connect-btn-back").on("click", this.connectBackClicked);
       $("#connect-confirm-btn").on("click", this.connectConfirmClicked);
 
-      this._updateViewState(Constants.Codes.ViewState.OUT_LOBBY);
+      this._updateViewState(Constants.ViewState.OUT_LOBBY);
       chrome.runtime.sendMessage(
-        new PopupLoadedMessage(Constants.Codes.Protocol.SUCCESS).toJson(),
+        JSON.stringify({
+          type: Constants.Protocol.Messages.POPUP_LOADED,
+          code: Constants.Protocol.SUCCESS
+        }),
         response => {
           if (response.type === "POPUP_LOADED_ACK") {
-            if (response.code === Constants.Codes.Protocol.SUCCESS) {
+            if (response.code === Constants.Protocol.SUCCESS) {
               // TODO: Handle
             }
           }
@@ -51,11 +48,17 @@ class Popup {
       else this.views[state].detach();
     }
 
-    if (newState == Constants.Codes.ViewState.IN_LOBBY) {
+    if (newState == Constants.ViewState.IN_LOBBY) {
       chrome.runtime.sendMessage(
-        new GetLobbyIdMessage(Constants.Codes.Protocol.SUCCESS).toJson(),
+        JSON.stringify({
+          type: Constants.Protocol.GET_LOBBY_ID,
+          code: Constants.Protocol.SUCCESS
+        }),
         response => {
-          if (response.type == "GET_LOBBY_ID_ACK" && this._getLobbyIdText())
+          if (
+            response.type == Constants.Protocol.Messages.GET_LOBBY_ID_ACK &&
+            this._getLobbyIdText()
+          )
             this._getLobbyIdText().innerHTML = response.lobbyId;
           // TODO: Handle default response
         }
@@ -70,18 +73,21 @@ class Popup {
   // =================
   startLobbyClicked($event) {
     chrome.runtime.sendMessage(
-      new StartLobbyMessage(Constants.Codes.Protocol.SUCCESS),
+      JSON.stringify({
+        type: Constants.Protocol.START_LOBBY,
+        code: Constants.Protocol.Messages.SUCCESS
+      }),
       response => {
         console.log(response);
         if (!Util.validateMessage(response)) {
           console.log("<Error> Popup received invalid response.");
           return false;
         }
-        if (response.type === "START_LOBBY_ACK") {
+        if (response.type === Constants.Protocol.Messages.START_LOBBY) {
           // IN PROGRESS: Implement
           // Update the view state to display lobby ID
-          if (response.code === Constants.Codes.Protocol.SUCCESS) {
-            this._updateViewState(Constants.Codes.ViewState.IN_LOBBY);
+          if (response.code === Constants.Protocol.SUCCESS) {
+            this._updateViewState(Constants.ViewState.IN_LOBBY);
           } else {
             // TODO: Handle error
           }

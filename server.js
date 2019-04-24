@@ -1,9 +1,8 @@
 const Lobby = require("./shared/model/lobby");
 const User = require("./shared/model/user");
-const ProgressState = require("./shared/model/progressState");
-const StartLobbyAckMessage = require("./shared/protocol/startLobbyAck");
 const short_id = require("shortid");
 const WebSocket = require("ws");
+const Constants = require("./shared/constants");
 
 const PORT = 3000;
 
@@ -45,7 +44,8 @@ class LDNServer {
     }
 
     console.log("<Info> Received message with type: ", data.type);
-    if (data.type == "START_LOBBY") {
+
+    if (data.type == Constants.Protocol.Messages.START_LOBBY) {
       if (!data.user) {
         console.log("<Error> Tried to start a lobby without a user!");
         return;
@@ -61,7 +61,14 @@ class LDNServer {
       const lobby = Lobby(lobbyId, user);
       user.lobbyId = lobbyId;
       this.addLobby(lobby);
-      socket.send(new StartLobbyAckMessage({ lobbyId: lobby.id }).toJson());
+
+      const payload = JSON.stringify({
+        type: Constants.Protocol.Messages.START_LOBBY_ACK,
+        code: Constants.Protocol.SUCCESS,
+        lobbyId: lobby.id
+      });
+
+      socket.send(payload);
       this.printLobbies();
     }
   }
@@ -99,8 +106,6 @@ class LDNServer {
     }
     return false;
   }
-
-  startLobby(socket) {}
 
   printLobbies() {
     console.log("<Info> New lobby information:");

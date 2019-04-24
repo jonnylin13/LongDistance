@@ -1,10 +1,8 @@
 import Constants from "../../shared/constants";
-import PopupLoadedAckMessage from "../../shared/protocol/background/popupLoadedAck";
-import GetLobbyIdAckMessage from "../../shared/protocol/background/getLobbyIdAck";
+import LDNClient from "../ldn";
 
 export default class LDNMessageListener {
-  constructor(ldn) {
-    this.ldn = ldn;
+  constructor() {
     chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
       this.onMessage(req, sender, sendResponse);
     });
@@ -21,37 +19,26 @@ export default class LDNMessageListener {
       return;
     }
     console.log("<Info> LDN background received message type: ", data.type);
-    if (data.type === "POPUP_LOADED") {
-      this.wrappedSendResponse(
-        sendResponse,
-        new PopupLoadedAckMessage(Constants.Codes.Protocol.SUCCESS).toJson()
-      );
-    } else if (data.type === "GET_LOBBY_ID") {
-      if (this.ldn.user.currentLobby) {
-        this.wrappedSendResponse(
-          sendResponse,
-          new GetLobbyIdAckMessage(
-            Constants.Codes.Protocol.SUCCESS,
-            this.user.currentLobby.id
-          ).toJson()
-        );
-      } else {
-        this.wrappedSendResponse(
-          sendResponse,
-          new GetLobbyIdAckMessage(Constants.Codes.Protocol.FAIL).toJson()
-        );
-      }
-    } else if (data.type === "START_LOBBY") {
-      // TODO: Fix this mess please
-      this.ldn.startLobby(req).then(result => {
-        this.wrappedSendResponse(sendResponse, result);
-      });
-    }
-  }
+    let response = {};
 
-  wrappedSendResponse(sendResponse, data) {
+    if (data.type === Constants.Protocol.Messages.POPUP_LOADED) {
+      response.type = Constants.Protocol.Messages.POPUP_LOADED_ACK;
+      response.code = Constants.Protocol.SUCCESS;
+    } else if (data.type === Constants.Protocol.Messages.GET_LOBBY_ID) {
+      if (LDNClient.getInstance().user.currentLobby) {
+        response.type = Constants.Protocol.Messages.GET_LOBBY_ID_ACK;
+        response.code = Constants.Protocol.SUCCESS;
+        response.lobbyId = LDNClient.getInstance();
+      } else {
+        response.type = Constants.Protocol.Messages.GET_LOBBY_ID_ACK;
+        response.code = Constants.Protocol.FAIL;
+      }
+    } else if (data.type === Constants.Protocol.Messages.START_LOBBY) {
+      // TODO: Fix this mess please
+      LDNClient.getInstance().startLobby(req);
+    }
     console.log("<Info> Sending the following response: ");
-    console.log(data);
-    sendResponse(data);
+    console.log(response);
+    sendResponse(JSON.stringify(response));
   }
 }

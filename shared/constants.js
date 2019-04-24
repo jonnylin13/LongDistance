@@ -1,27 +1,25 @@
-module.exports = class Constants {
+module.exports.ViewState = Object.freeze({
+  IN_LOBBY: 1,
+  OUT_LOBBY: 0,
+  CONNECT_LOBBY: 2
+});
+module.exports.ControllerState = Object.freeze({
+  INACTIVE: -1,
+  IDLE: 0,
+  PAUSE: 1,
+  PLAY: 2
+});
+module.exports.Protocol = Object.freeze({
+  SUCCESS: 1,
+  FAIL: 0,
+  Messages: {
+    START_LOBBY: "start_lobby",
+    START_LOBBY_ACK: "start_lobby_ack",
+    GET_LOBBY_ID: "get_lobby_id",
+    GET_LOBBY_ID_ACK: "get_lobby_id_ack",
+    POPUP_LOADED: "popup_loaded",
+    POPUP_LOADED_ACK: "popup_loaded_ack"
+  }
+});
 
-    static get Codes() {
-        return {
-            ViewState: {
-                IN_LOBBY: 1,
-                OUT_LOBBY: 0,
-                CONNECT_LOBBY: 2
-            },
-            ControllerState: {
-                INACTIVE: -1,
-                IDLE: 0,
-                PAUSE: 1,
-                PLAY: 2
-            },
-            Protocol: {
-                SUCCESS: 1,
-                FAIL: 0
-            }
-        };
-    }
-
-    static get WS_URL() {
-        return 'ws://127.0.0.1:3000/';
-    }
-
-}
+module.exports.WS_URL = Object.freeze("ws://127.0.0.1:3000/");
