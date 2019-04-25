@@ -25,9 +25,8 @@ export default class LDNClient {
       "",
       new ProgressState()
     );
-    // this.currentLobby = null;
-    this.ws = null;
 
+    this.ws = null;
     this.tabListener = new TabListener();
     this.messageListener = new LDNMessageListener();
 
@@ -36,7 +35,7 @@ export default class LDNClient {
 
   _onMessage(event) {
     const data = JSON.parse(event.data);
-    console.log("<Info> Received " + data.type + "from websocket server");
+    console.log("<Info> Received " + data.type + "from WebSocket server");
     if (data.type === Constants.Protocol.Messages.START_LOBBY_ACK) {
       if (data.code === Constants.Protocol.SUCCESS) {
         // TODO: Update user
@@ -79,7 +78,7 @@ export default class LDNClient {
       try {
         this.ws = new WebSocket(Constants.WS_URL);
         this.ws.onmessage = event => this._onMessage(event);
-        console.log("<Info> Connected to websocket server");
+        console.log("<Info> Connected to WebSocket server");
         return true;
       } catch (exception) {
         return false;

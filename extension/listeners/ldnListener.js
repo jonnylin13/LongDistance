@@ -25,16 +25,16 @@ export default class LDNMessageListener {
       response.type = Constants.Protocol.Messages.POPUP_LOADED_ACK;
       response.code = Constants.Protocol.SUCCESS;
     } else if (data.type === Constants.Protocol.Messages.GET_LOBBY_ID) {
-      if (LDNClient.getInstance().user.currentLobby) {
+      if (LDNClient.getInstance().user.lobbyId) {
         response.type = Constants.Protocol.Messages.GET_LOBBY_ID_ACK;
         response.code = Constants.Protocol.SUCCESS;
-        response.lobbyId = LDNClient.getInstance();
+        response.lobbyId = LDNClient.getInstance().user.lobbyId;
       } else {
         response.type = Constants.Protocol.Messages.GET_LOBBY_ID_ACK;
         response.code = Constants.Protocol.FAIL;
       }
     } else if (data.type === Constants.Protocol.Messages.START_LOBBY) {
-      // TODO: Fix this mess please.......!@!@!
+      // TODO #35
       LDNClient.getInstance().startLobby(req);
     }
     console.log("<Info> Sending the following response: ");
