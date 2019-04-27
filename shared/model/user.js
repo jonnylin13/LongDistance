@@ -1,7 +1,13 @@
 const ProgressState = require("./progressState");
 
 module.exports = class User {
-  constructor(id, controllerState, urlParams, progressState, lobbyId = null) {
+  constructor(
+    controllerState,
+    urlParams,
+    progressState,
+    lobbyId = null,
+    id = null
+  ) {
     this.lobbyId = lobbyId;
     this.id = id;
     this.controllerState = controllerState;
@@ -13,15 +19,14 @@ module.exports = class User {
     try {
       const data = JSON.parse(jsonString);
       return new User(
-        data["id"],
         data["controllerState"],
         data["urlParams"],
         ProgressState.fromJson(JSON.stringify(data["progressState"])),
-        data["lobbyId"]
+        data["lobbyId"],
+        data["id"]
       );
     } catch (err) {
-      console.log("<Error> Tried to instantiate user with corrupt data!");
-      return null;
+      throw new Error(err);
     }
   }
 };

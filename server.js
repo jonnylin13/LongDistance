@@ -4,6 +4,7 @@ const WebSocket = require("ws");
 const Constants = require("./shared/constants");
 // We use hri here because shared cannot import npm modules
 const hri = require("human-readable-ids").hri;
+const Util = require("./shared/util");
 
 const PORT = 3000;
 
@@ -67,6 +68,8 @@ class LDNServer {
 
     try {
       const user = User.fromJson(data.user);
+      user.id = Util.uuidv4();
+
       if (this.isConnected(user)) {
         console.log("<Error> User is already connected. ID: " + user.id);
         return;
@@ -75,8 +78,10 @@ class LDNServer {
       const lobby = new Lobby(hri.random(), user);
       user.lobbyId = lobby.id;
       this.addLobby(lobby);
+
       response.code = Constants.Protocol.SUCCESS;
       response.lobbyId = lobby.id;
+      response.userId = user.id;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
@@ -92,6 +97,10 @@ class LDNServer {
       const user = User.fromJson(data.user);
       const lobby = this.getLobby(user.lobbyId);
       lobby.remove(user);
+      // Remove the lobby from this.lobbies is empty
+      if (lobby.controller === null && lobby.size() === 0)
+        delete this.lobbies[user.lobbyId];
+
       response.code = Constants.Protocol.SUCCESS;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
@@ -121,17 +130,12 @@ class LDNServer {
   }
 
   getLobby(lobbyId) {
-    return this.lobbies[lobbyId];
+    if (!this.contains(lobbyId)) return this.lobbies[lobbyId];
+    else throw new Error("<Error> Could not find lobby in server.");
   }
 
   isConnected(user) {
-    for (const lobbyId in this.lobbies) {
-      const lobby = this.lobbies[lobbyId];
-      if (lobby.contains(user)) {
-        return true;
-      }
-    }
-    return false;
+    return this.lobbies[user.lobbyId].contains(user);
   }
 }
 

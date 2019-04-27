@@ -7,7 +7,6 @@ import TabListener from "./listeners/tabListener";
 import Constants from "../shared/constants";
 import ProgressState from "../shared/model/progressState";
 import User from "../shared/model/user";
-import Util from "../shared/util";
 
 export default class LDNClient {
   static getInstance() {
@@ -19,7 +18,6 @@ export default class LDNClient {
     console.log("<Info> Starting LDN...");
 
     this.user = new User(
-      this._provisionClientId(), // This should be provisioned by the server
       Constants.ControllerState.INACTIVE,
       "",
       new ProgressState()
@@ -45,22 +43,6 @@ export default class LDNClient {
     } catch (err) {
       console.log(err);
     }
-  }
-
-  _provisionClientId() {
-    return Util.uuidv4();
-
-    // TODO: local memory storage
-    chrome.storage.sync.get("ldnClientId", function(items) {
-      const id = items.clientId;
-      if (id) {
-        return id;
-      } else {
-        const clientId = Util.uuidv4();
-        chrome.storage.sync.set({ ldnClientId: clientId });
-        return clientId;
-      }
-    });
   }
 
   _hasController(data) {
@@ -106,6 +88,7 @@ export default class LDNClient {
               data.code === Constants.Protocol.SUCCESS
             ) {
               this.user.lobbyId = data.lobbyId;
+              this.user.id = data.userId;
               // Don't need to return anything
               resolve(true);
             } else reject(false);
