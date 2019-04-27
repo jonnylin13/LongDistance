@@ -3,11 +3,11 @@
  * @description Background script for LDN Chrome extension
  */
 
-import TabListener from './listeners/tabListener';
-import Constants from '../shared/constants';
-import ProgressState from '../shared/model/progressState';
-import User from '../shared/model/user';
-import Util from '../shared/util';
+import TabListener from "./listeners/tabListener";
+import Constants from "../shared/constants";
+import ProgressState from "../shared/model/progressState";
+import User from "../shared/model/user";
+import Util from "../shared/util";
 
 export default class LDNClient {
   static getInstance() {
@@ -16,35 +16,42 @@ export default class LDNClient {
   }
 
   constructor() {
-    console.log('<Info> Starting LDN...');
+    console.log("<Info> Starting LDN...");
 
     this.user = new User(
-      this._provisionClientId(),
+      this._provisionClientId(), // This should be provisioned by the server
       Constants.ControllerState.INACTIVE,
-      '',
+      "",
       new ProgressState()
     );
 
     this.ws = null;
     this.tabListener = new TabListener();
 
-    console.log('<Info> LDN has been started!');
-  }
-
-  _onMessage(event) {
-    const data = JSON.parse(event.data);
-    console.log('<Info> Received ' + data.type + 'from WebSocket server');
+    console.log("<Info> LDN has been started!");
   }
 
   // ===============
   // Private Methods
   // ===============
 
+  _onMessage(event) {
+    try {
+      const data = JSON.parse(event.data);
+      switch (data.type) {
+        case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
+          break; // Todo: #36
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   _provisionClientId() {
     return Util.uuidv4();
 
     // TODO: local memory storage
-    chrome.storage.sync.get('ldnClientId', function(items) {
+    chrome.storage.sync.get("ldnClientId", function(items) {
       const id = items.clientId;
       if (id) {
         return id;
@@ -64,16 +71,21 @@ export default class LDNClient {
   }
 
   _connect() {
-    if (!this.isSocketConnected()) {
-      try {
-        this.ws = new WebSocket(Constants.WS_URL);
-        this.ws.onmessage = event => this._onMessage(event);
-        console.log('<Info> Connected to WebSocket server');
-        return true;
-      } catch (exception) {
-        return false;
+    return new Promise((resolve, reject) => {
+      if (!this.isSocketConnected()) {
+        try {
+          this.ws = new WebSocket(Constants.WS_URL);
+          this.ws.onopen = () => {
+            console.log("<Info> Connected to WebSocket server");
+            resolve(null);
+          };
+        } catch (err) {
+          reject(err);
+        }
+      } else {
+        resolve(null);
       }
-    }
+    });
   }
 
   // ==============
@@ -81,10 +93,9 @@ export default class LDNClient {
   // ==============
 
   startLobby(msg) {
-    this._connect();
-    msg.user = JSON.stringify(this.user);
-    return new Promise((resolve, reject) => {
-      this.ws.onopen = () => {
+    this._connect()
+      .then(() => {
+        msg.user = JSON.stringify(this.user);
         this.ws.send(JSON.stringify(msg));
         // This is a one time event listener
         this.ws.onmessage = event => {
@@ -97,16 +108,29 @@ export default class LDNClient {
               this.user.lobbyId = data.lobbyId;
               // Don't need to return anything
               resolve(true);
-            }
+            } else reject(false);
           } catch (err) {
             reject(false);
           } finally {
-            // Changes it to _onMessage after completion
             this.ws.onmessage = event => this._onMessage(event);
           }
         };
-      };
-    });
+      })
+      .catch(err => {
+        reject(err);
+      });
+  }
+
+  // Todo: #36 check this
+  disconnectLobby(msg) {
+    this._connect()
+      .then(() => {
+        msg.user = JSON.stringify(this.user);
+        this.ws.send(JSON.stringify(msg));
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
 
   isConnected() {

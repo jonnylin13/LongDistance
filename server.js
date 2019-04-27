@@ -1,19 +1,19 @@
-const Lobby = require('./shared/model/lobby');
-const User = require('./shared/model/user');
-const WebSocket = require('ws');
-const Constants = require('./shared/constants');
+const Lobby = require("./shared/model/lobby");
+const User = require("./shared/model/user");
+const WebSocket = require("ws");
+const Constants = require("./shared/constants");
 // We use hri here because shared cannot import npm modules
-const hri = require('human-readable-ids').hri;
+const hri = require("human-readable-ids").hri;
 
 const PORT = 3000;
 
 class LDNServer {
   constructor(start = true) {
     this.lobbies = {};
-    process.on('exit', () => {
+    process.on("exit", () => {
       this._exitHandler();
     });
-    process.on('SIGINT', () => {
+    process.on("SIGINT", () => {
       this._exitHandler();
     });
     if (start) this.start();
@@ -29,10 +29,10 @@ class LDNServer {
 
   _onConnection(socket, req) {
     console.log(
-      '<Info> Connection received from: ',
+      "<Info> Connection received from: ",
       req.connection.remoteAddress
     );
-    socket.on('message', msg => {
+    socket.on("message", msg => {
       this._onMessage(socket, msg);
     });
   }
@@ -41,47 +41,64 @@ class LDNServer {
     const data = JSON.parse(msg);
 
     if (!data) {
-      console.log('<Error> Server received janky JSON data!');
+      console.log("<Error> Server received janky JSON data!");
       return;
     }
 
-    console.log('<Info> Received message with type: ', data.type);
+    console.log("<Info> Received message with type: ", data.type);
 
-    if (data.type == Constants.Protocol.Messages.START_LOBBY) {
-      if (!data.user) {
-        console.log('<Error> Tried to start a lobby without a user!');
-        return;
-      }
-      const user = User.fromJson(data.user);
-
-      if (user === null) {
-        // Todo: Handle
-        console.log('<Error> User could not be parsed from client.');
-        return;
-      }
-
-      if (this.isConnected(user)) {
-        console.log('<Error> User is already connected. ID: ' + user.id);
-        return;
-      }
-
-      const lobby = new Lobby(hri.random(), user);
-      user.lobbyId = lobby.id;
-      this.addLobby(lobby);
-
-      const payload = JSON.stringify({
-        type: Constants.Protocol.Messages.START_LOBBY_ACK,
-        code: Constants.Protocol.SUCCESS,
-        lobbyId: lobby.id
-      });
-
-      socket.send(payload);
+    switch (data.type) {
+      case Constants.Protocol.Messages.START_LOBBY:
+        this._startLobby(socket, data);
+      case Constants.Protocol.Messages.DISCONNECT_LOBBY:
+        this._disconnectLobby(socket, data);
     }
   }
 
   // ===============
   // Private Methods
   // ===============
+  _startLobby(socket, data) {
+    const response = JSON.stringify({
+      type: Constants.Protocol.Messages.START_LOBBY_ACK,
+      code: Constants.Protocol.SUCCESS,
+      lobbyId: lobby.id
+    });
+
+    try {
+      const user = User.fromJson(data.user);
+      if (this.isConnected(user)) {
+        console.log("<Error> User is already connected. ID: " + user.id);
+        return;
+      }
+
+      const lobby = new Lobby(hri.random(), user);
+      user.lobbyId = lobby.id;
+      this.addLobby(lobby);
+      response.code = Constants.Protocol.SUCCESS;
+      response.lobbyId = lobby.id;
+    } catch (err) {
+      response.code = Constants.Protocol.FAIL;
+      console.log(err);
+    }
+    socket.send(payload);
+  }
+
+  _disconnectLobby(socket, data) {
+    const response = {
+      type: Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK
+    };
+    try {
+      const user = User.fromJson(data.user);
+      const lobby = this.getLobby(user.lobbyId);
+      lobby.remove(user);
+      response.code = Constants.Protocol.SUCCESS;
+    } catch (err) {
+      response.code = Constants.Protocol.FAIL;
+      console.log(err);
+    }
+    socket.send(JSON.stringify(response));
+  }
 
   // ==============
   // Public Methods
@@ -89,8 +106,8 @@ class LDNServer {
 
   start() {
     this.server = new WebSocket.Server({ port: PORT });
-    console.log('<Info> Listening on port: ', PORT);
-    this.server.on('connection', (socket, req) => {
+    console.log("<Info> Listening on port: ", PORT);
+    this.server.on("connection", (socket, req) => {
       this._onConnection(socket, req);
     });
   }
@@ -101,6 +118,10 @@ class LDNServer {
 
   addLobby(lobby) {
     if (!this.contains(lobby.id)) this.lobbies[lobby.id] = lobby;
+  }
+
+  getLobby(lobbyId) {
+    return this.lobbies[lobbyId];
   }
 
   isConnected(user) {

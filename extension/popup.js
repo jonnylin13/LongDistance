@@ -56,18 +56,23 @@ class Popup {
   startLobbyClicked(event) {
     LDNClient.getInstance()
       .startLobby({
-        type: Constants.Protocol.Messages.START_LOBBY,
-        code: Constants.Protocol.SUCCESS
+        type: Constants.Protocol.Messages.START_LOBBY
       })
       .then(() => {
         this._updateViewState(Constants.ViewState.IN_LOBBY);
       })
       .catch(err => {
         console.log(err);
-      }); // TODO
+      });
   }
 
-  disconnectLobbyClicked() {}
+  // Todo: #36
+  disconnectLobbyClicked() {
+    LDNClient.getInstance().disconnectLobby({
+      type: Constants.Protocol.Messages.DISCONNECT_LOBBY
+    });
+    this._updateViewState(Constants.ViewState.OUT_LOBBY);
+  }
 
   connectClicked() {}
 
