@@ -104,7 +104,6 @@ export default class TabListener {
   onUpdate(tabId, changeInfo, tab) {
     // TODO: Reimplement
     if (tab.url === LDNClient.getInstance().user.urlParams) return;
-    console.log("<Info> Updated: ", tab.url);
     if (!changeInfo.status || changeInfo.status !== "complete") return;
     chrome.tabs.query(
       {
@@ -114,6 +113,7 @@ export default class TabListener {
       tabs => {
         const activeTab = tabs[0];
         if (TabListener.isNetflix(activeTab)) {
+          console.log("<Info> Updated: ", tab.url);
           if (!this.isTabCached()) {
             this._startControllerScript(activeTab.id);
           }
