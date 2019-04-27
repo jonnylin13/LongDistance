@@ -43,7 +43,6 @@ class Popup {
     }
 
     if (newState == Constants.ViewState.IN_LOBBY) {
-      console.log(this._getLobbyIdText());
       if (this._getLobbyIdText()) {
         this._getLobbyIdText().innerHTML = LDNClient.getInstance().user.lobbyId;
       }
