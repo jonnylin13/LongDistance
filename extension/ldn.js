@@ -36,9 +36,10 @@ export default class LDNClient {
   _onMessage(event) {
     try {
       const data = JSON.parse(event.data);
+      console.log("<Info> Received message with type: ", data.type);
       switch (data.type) {
         case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
-          break; // Todo: #36
+          break;
       }
     } catch (err) {
       console.log(err);
@@ -75,33 +76,35 @@ export default class LDNClient {
   // ==============
 
   startLobby(msg) {
-    this._connect()
-      .then(() => {
-        msg.user = JSON.stringify(this.user);
-        this.ws.send(JSON.stringify(msg));
-        // This is a one time event listener
-        this.ws.onmessage = event => {
-          try {
-            const data = JSON.parse(event.data);
-            if (
-              data.type === Constants.Protocol.Messages.START_LOBBY_ACK &&
-              data.code === Constants.Protocol.SUCCESS
-            ) {
-              this.user.lobbyId = data.lobbyId;
-              this.user.id = data.userId;
-              // Don't need to return anything
-              resolve(true);
-            } else reject(false);
-          } catch (err) {
-            reject(false);
-          } finally {
-            this.ws.onmessage = event => this._onMessage(event);
-          }
-        };
-      })
-      .catch(err => {
-        reject(err);
-      });
+    return new Promise((resolve, reject) => {
+      this._connect()
+        .then(() => {
+          msg.user = JSON.stringify(this.user);
+          this.ws.send(JSON.stringify(msg));
+          // This is a one time event listener
+          this.ws.onmessage = event => {
+            try {
+              const data = JSON.parse(event.data);
+              if (
+                data.type === Constants.Protocol.Messages.START_LOBBY_ACK &&
+                data.code === Constants.Protocol.SUCCESS
+              ) {
+                this.user.lobbyId = data.lobbyId;
+                this.user.id = data.userId;
+                // Don't need to return anything
+                resolve(true);
+              } else reject(false);
+            } catch (err) {
+              reject(false);
+            } finally {
+              this.ws.onmessage = event => this._onMessage(event);
+            }
+          };
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
   }
 
   // Todo: #36 check this

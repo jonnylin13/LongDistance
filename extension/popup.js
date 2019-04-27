@@ -68,6 +68,7 @@ class Popup {
 
   // Todo: #36
   disconnectLobbyClicked() {
+    console.log("Test");
     LDNClient.getInstance().disconnectLobby({
       type: Constants.Protocol.Messages.DISCONNECT_LOBBY
     });

@@ -47,12 +47,13 @@ class LDNServer {
     }
 
     console.log("<Info> Received message with type: ", data.type);
-
     switch (data.type) {
       case Constants.Protocol.Messages.START_LOBBY:
         this._startLobby(socket, data);
+        break;
       case Constants.Protocol.Messages.DISCONNECT_LOBBY:
         this._disconnectLobby(socket, data);
+        break;
     }
   }
 
@@ -60,18 +61,16 @@ class LDNServer {
   // Private Methods
   // ===============
   _startLobby(socket, data) {
-    const response = JSON.stringify({
-      type: Constants.Protocol.Messages.START_LOBBY_ACK,
-      code: Constants.Protocol.SUCCESS,
-      lobbyId: lobby.id
-    });
+    const response = {
+      type: Constants.Protocol.Messages.START_LOBBY_ACK
+    };
 
     try {
       const user = User.fromJson(data.user);
       user.id = Util.uuidv4();
 
       if (this.isConnected(user)) {
-        console.log("<Error> User is already connected. ID: " + user.id);
+        console.log("User is already connected. ID: " + user.id);
         return;
       }
 
@@ -86,7 +85,7 @@ class LDNServer {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
     }
-    socket.send(payload);
+    socket.send(JSON.stringify(response));
   }
 
   _disconnectLobby(socket, data) {
@@ -130,12 +129,16 @@ class LDNServer {
   }
 
   getLobby(lobbyId) {
-    if (!this.contains(lobbyId)) return this.lobbies[lobbyId];
-    else throw new Error("<Error> Could not find lobby in server.");
+    if (this.contains(lobbyId)) return this.lobbies[lobbyId];
+    else throw new Error("Could not find lobby in server.");
   }
 
   isConnected(user) {
-    return this.lobbies[user.lobbyId].contains(user);
+    try {
+      return this.getLobby(user.lobbyId).contains(user);
+    } catch (err) {
+      return false;
+    }
   }
 }
 

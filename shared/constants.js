@@ -16,6 +16,7 @@ module.exports.Protocol = Object.freeze({
     START_LOBBY: "start_lobby",
     START_LOBBY_ACK: "start_lobby_ack",
     DISCONNECT_LOBBY: "disconnect_lobby",
+    DISCONNECT_LOBBY_ACK: "disconnect_lobby_ack",
     GET_LOBBY_ID: "get_lobby_id",
     GET_LOBBY_ID_ACK: "get_lobby_id_ack",
     POPUP_LOADED: "popup_loaded",
