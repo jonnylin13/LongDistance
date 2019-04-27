@@ -42,7 +42,7 @@ export default class TabListener {
   // TODO: How do we remove the controller script?
   _startControllerScript(tabId) {
     // TODO: Reimplement
-    this.tabId = tabId;
+    this._cacheTab(tabId);
     chrome.tabs.executeScript(
       tabId,
       {
@@ -73,7 +73,13 @@ export default class TabListener {
   }
 
   _uncacheTab() {
+    console.log("<TabListener> Removing tab id: " + this.tabId);
     this.tabId = -1;
+  }
+
+  _cacheTab(tabId) {
+    console.log("<TabListener> Setting tab id: " + tabId);
+    this.tabId = tabId;
   }
 
   // ==============

@@ -96,11 +96,10 @@ export default class LDNClient {
             ) {
               this.user.lobbyId = data.lobbyId;
               // Don't need to return anything
-              resolve(null);
+              resolve(true);
             }
           } catch (err) {
-            console.log(err);
-            reject(null);
+            reject(false);
           } finally {
             // Changes it to _onMessage after completion
             this.ws.onmessage = event => this._onMessage(event);

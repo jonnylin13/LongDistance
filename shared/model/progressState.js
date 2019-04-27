@@ -13,13 +13,14 @@ module.exports = class ProgressState {
   }
 
   static fromJson(jsonString) {
-    const data = JSON.parse(jsonString);
-    if (!("elapsed" in data) || !("total" in data)) {
+    try {
+      const data = JSON.parse(jsonString);
+      return new ProgressState(data["elapsed"], data["total"]);
+    } catch (err) {
       console.log(
         "<Error> Tried to instantiate progress state with corrupt data!"
       );
       return null;
     }
-    return new ProgressState(data["elapsed"], data["total"]);
   }
 };

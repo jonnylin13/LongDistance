@@ -4,6 +4,8 @@ module.exports = class Lobby {
     this.controller = controller;
     this.users = users;
     this.add(this.controller);
+
+    console.log("<Lobby> New lobby created: " + this.id);
   }
 
   contains(user) {
@@ -23,11 +25,12 @@ module.exports = class Lobby {
   }
 
   static fromJson(jsonString) {
-    const data = JSON.parse(jsonString);
-    if (!("id" in data) || !("controller" in data) || !("users" in data)) {
+    try {
+      const data = JSON.parse(jsonString);
+      return new Lobby(data["id"], data["controller"], data["users"]);
+    } catch (err) {
       console.log("<Error> Tried to instantiate lobby with corrupt data!");
       return null;
     }
-    return new Lobby(data["id"], data["controller"], data["users"]);
   }
 };

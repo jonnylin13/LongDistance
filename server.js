@@ -37,7 +37,6 @@ class LDNServer {
   }
 
   _onMessage(socket, msg) {
-    console.log(msg);
     const data = JSON.parse(msg);
 
     if (!data) {
@@ -56,10 +55,17 @@ class LDNServer {
       const lobbyId = short_id.generate();
       const user = User.fromJson(data.user);
 
-      if (this.isConnected(user)) {
-        console.log("<Error> User is already connected. ID: ", str(user.id));
+      if (user === null) {
+        // Todo: Handle
+        console.log("<Error> User could not be parsed from client.");
         return;
       }
+
+      if (this.isConnected(user)) {
+        console.log("<Error> User is already connected. ID: " + user.id);
+        return;
+      }
+
       const lobby = new Lobby(lobbyId, user);
       user.lobbyId = lobbyId;
       this.addLobby(lobby);
@@ -71,7 +77,6 @@ class LDNServer {
       });
 
       socket.send(payload);
-      this.printLobbies();
     }
   }
 
@@ -107,11 +112,6 @@ class LDNServer {
       }
     }
     return false;
-  }
-
-  printLobbies() {
-    console.log("<Info> New lobby information:");
-    console.log(this.lobbies);
   }
 }
 

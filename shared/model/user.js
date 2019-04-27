@@ -10,23 +10,18 @@ module.exports = class User {
   }
 
   static fromJson(jsonString) {
-    const data = JSON.parse(jsonString);
-    if (
-      !("lobbyId" in data) ||
-      !("id" in data) ||
-      !("controllerState" in data) ||
-      !("urlParams" in data) ||
-      !("progressState" in data)
-    ) {
+    try {
+      const data = JSON.parse(jsonString);
+      return new User(
+        data["id"],
+        data["controllerState"],
+        data["urlParams"],
+        ProgressState.fromJson(JSON.stringify(data["progressState"])),
+        data["lobbyId"]
+      );
+    } catch (err) {
       console.log("<Error> Tried to instantiate user with corrupt data!");
       return null;
     }
-    return new User(
-      data["lobbyId"],
-      data["id"],
-      data["controllerState"],
-      data["urlParams"],
-      ProgressState.fromJson(JSON.stringify(data["progressState"]))
-    );
   }
 };

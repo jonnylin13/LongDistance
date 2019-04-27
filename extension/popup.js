@@ -12,11 +12,17 @@ class Popup {
         "#connect-lobby-container"
       );
 
-      $("#start-lobby-btn").on("click", this.startLobbyClicked);
-      $("#disconnect-btn").on("click", this.disconnectLobbyClicked);
-      $("#connect-btn").on("click", this.connectClicked);
-      $("#connect-btn-back").on("click", this.connectBackClicked);
-      $("#connect-confirm-btn").on("click", this.connectConfirmClicked);
+      $("#start-lobby-btn").on("click", event => this.startLobbyClicked(event));
+      $("#disconnect-btn").on("click", event =>
+        this.disconnectLobbyClicked(event)
+      );
+      $("#connect-btn").on("click", event => this.connectClicked(event));
+      $("#connect-btn-back").on("click", event =>
+        this.connectBackClicked(event)
+      );
+      $("#connect-confirm-btn").on("click", event =>
+        this.connectConfirmClicked(event)
+      );
 
       this._updateViewState(Constants.ViewState.OUT_LOBBY);
     });
@@ -26,19 +32,21 @@ class Popup {
   // Private Methods
   // ===============
   _getLobbyIdText() {
-    return $("#lobby-id-text");
+    return $("#lobby-id-text")[0];
   }
 
   _updateViewState(newState) {
+    console.log("<Popup> Updating view state: " + newState);
     for (const state in this.views) {
       if (state == newState) this.views[state].appendTo("body");
       else this.views[state].detach();
     }
 
     if (newState == Constants.ViewState.IN_LOBBY) {
-      if (this._getLobbyIdText())
+      console.log(this._getLobbyIdText());
+      if (this._getLobbyIdText()) {
         this._getLobbyIdText().innerHTML = LDNClient.getInstance().user.lobbyId;
-      console.log(LDNClient.getInstance().user.lobbyId);
+      }
     } else {
       if (this._getLobbyIdText()) this._getLobbyIdText().innerHTML = "";
     }
@@ -47,16 +55,18 @@ class Popup {
   // =================
   // UI Button Methods
   // =================
-  startLobbyClicked($event) {
+  startLobbyClicked(event) {
     LDNClient.getInstance()
       .startLobby({
         type: Constants.Protocol.Messages.START_LOBBY,
         code: Constants.Protocol.SUCCESS
       })
-      .then(() => {
+      .then(res => {
         this._updateViewState(Constants.ViewState.IN_LOBBY);
       })
-      .catch(() => {}); // TODO
+      .catch(err => {
+        console.log(err);
+      }); // TODO
   }
 
   disconnectLobbyClicked() {}
