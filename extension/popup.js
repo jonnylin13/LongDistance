@@ -1,10 +1,8 @@
 import Constants from "../shared/constants";
-import LDNClient from "./ldn";
 
 class Popup {
   constructor() {
     this.views = {};
-
     $().ready(() => {
       this.views[Constants.ViewState.IN_LOBBY] = $("#in-lobby-container");
       this.views[Constants.ViewState.OUT_LOBBY] = $("#out-lobby-container");
@@ -23,9 +21,17 @@ class Popup {
       $("#connect-confirm-btn").on("click", event =>
         this.connectConfirmClicked(event)
       );
-
-      this._updateViewState(Constants.ViewState.OUT_LOBBY);
+      console.log(this._getLDNClientInstance());
+      if (this._getLDNClientInstance().user.lobbyId !== null)
+        this._updateViewState(Constants.ViewState.IN_LOBBY);
+      else this._updateViewState(Constants.ViewState.OUT_LOBBY);
     });
+  }
+
+  // Popup script is not persistent, or run in the same context
+  // So we cannot use LDNClient.getInstance()
+  _getLDNClientInstance() {
+    return chrome.extension.getBackgroundPage().ldn;
   }
 
   // ===============
@@ -44,7 +50,7 @@ class Popup {
 
     if (newState == Constants.ViewState.IN_LOBBY) {
       if (this._getLobbyIdText())
-        this._getLobbyIdText().innerHTML = LDNClient.getInstance().user.lobbyId;
+        this._getLobbyIdText().innerHTML = this._getLDNClientInstance().user.lobbyId;
     } else {
       if (this._getLobbyIdText()) this._getLobbyIdText().innerHTML = "";
     }
@@ -54,7 +60,7 @@ class Popup {
   // UI Button Handlers
   // =================
   startLobbyClicked(event) {
-    LDNClient.getInstance()
+    this._getLDNClientInstance()
       .startLobby({
         type: Constants.Protocol.Messages.START_LOBBY
       })
@@ -66,9 +72,8 @@ class Popup {
       });
   }
 
-  // Todo: #36
   disconnectLobbyClicked() {
-    LDNClient.getInstance().disconnectLobby({
+    this._getLDNClientInstance().disconnectLobby({
       type: Constants.Protocol.Messages.DISCONNECT_LOBBY
     });
     this._updateViewState(Constants.ViewState.OUT_LOBBY);

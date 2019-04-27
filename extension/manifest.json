@@ -1,23 +1,21 @@
 {
-    "name": "Long Distance Netflix",
-    "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
-    "version": "0.1",
-    "manifest_version": 2,
-    "permissions": [
-        "tabs",
-        "declarativeContent",
-        "activeTab",
-        "storage",
-        "*://*.netflix.com/watch/*",
-        "*://netflix.com/watch/*"
-    ],
-    "background": {
-        "scripts": [
-            "ldn.bundle.js"
-        ],
-        "persistent": true
-    },
-    "page_action": {
-        "default_popup": "popup.html"
-    }
+  "name": "Long Distance Netflix",
+  "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
+  "version": "0.1",
+  "manifest_version": 2,
+  "permissions": [
+    "tabs",
+    "declarativeContent",
+    "activeTab",
+    "storage",
+    "*://*.netflix.com/watch/*",
+    "*://netflix.com/watch/*"
+  ],
+  "background": {
+    "scripts": ["ldn.bundle.js"],
+    "persistent": true
+  },
+  "page_action": {
+    "default_popup": "popup.html"
+  }
 }

@@ -51,13 +51,6 @@ export default class LDNClient {
     }
   }
 
-  _hasController(data) {
-    if (!data.controlId) {
-      return false;
-    }
-    return data.controlId == this.user.id;
-  }
-
   _connect() {
     return new Promise((resolve, reject) => {
       if (!this.isSocketConnected()) {
@@ -136,4 +129,4 @@ export default class LDNClient {
   // ===============
 }
 
-LDNClient.getInstance();
+window.ldn = LDNClient.getInstance();

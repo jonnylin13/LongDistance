@@ -119,6 +119,7 @@ export default class TabListener {
           }
           const urlParams = TabListener.getUrlParams(activeTab);
           if (LDNClient.getInstance().user.urlParams !== urlParams) {
+            console.log("<Info> Updated user url parameters: " + urlParams);
             LDNClient.getInstance().user.urlParams = urlParams;
           }
         }
