@@ -3,11 +3,11 @@
  * @description Background script for LDN Chrome extension
  */
 
-import TabListener from "./listeners/tabListener";
-import Constants from "../shared/constants";
-import ProgressState from "../shared/model/progressState";
-import User from "../shared/model/user";
-import Util from "../shared/util";
+import TabListener from './listeners/tabListener';
+import Constants from '../shared/constants';
+import ProgressState from '../shared/model/progressState';
+import User from '../shared/model/user';
+import Util from '../shared/util';
 
 export default class LDNClient {
   static getInstance() {
@@ -16,24 +16,24 @@ export default class LDNClient {
   }
 
   constructor() {
-    console.log("<Info> Starting LDN...");
+    console.log('<Info> Starting LDN...');
 
     this.user = new User(
       this._provisionClientId(),
       Constants.ControllerState.INACTIVE,
-      "",
+      '',
       new ProgressState()
     );
 
     this.ws = null;
     this.tabListener = new TabListener();
 
-    console.log("<Info> LDN has been started!");
+    console.log('<Info> LDN has been started!');
   }
 
   _onMessage(event) {
     const data = JSON.parse(event.data);
-    console.log("<Info> Received " + data.type + "from WebSocket server");
+    console.log('<Info> Received ' + data.type + 'from WebSocket server');
   }
 
   // ===============
@@ -44,7 +44,7 @@ export default class LDNClient {
     return Util.uuidv4();
 
     // TODO: local memory storage
-    chrome.storage.sync.get("ldnClientId", function(items) {
+    chrome.storage.sync.get('ldnClientId', function(items) {
       const id = items.clientId;
       if (id) {
         return id;
@@ -68,7 +68,7 @@ export default class LDNClient {
       try {
         this.ws = new WebSocket(Constants.WS_URL);
         this.ws.onmessage = event => this._onMessage(event);
-        console.log("<Info> Connected to WebSocket server");
+        console.log('<Info> Connected to WebSocket server');
         return true;
       } catch (exception) {
         return false;

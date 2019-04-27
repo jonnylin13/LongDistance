@@ -1,18 +1,19 @@
-const Lobby = require("./shared/model/lobby");
-const User = require("./shared/model/user");
-const short_id = require("shortid");
-const WebSocket = require("ws");
-const Constants = require("./shared/constants");
+const Lobby = require('./shared/model/lobby');
+const User = require('./shared/model/user');
+const WebSocket = require('ws');
+const Constants = require('./shared/constants');
+// We use hri here because shared cannot import npm modules
+const hri = require('human-readable-ids').hri;
 
 const PORT = 3000;
 
 class LDNServer {
   constructor(start = true) {
     this.lobbies = {};
-    process.on("exit", () => {
+    process.on('exit', () => {
       this._exitHandler();
     });
-    process.on("SIGINT", () => {
+    process.on('SIGINT', () => {
       this._exitHandler();
     });
     if (start) this.start();
@@ -28,10 +29,10 @@ class LDNServer {
 
   _onConnection(socket, req) {
     console.log(
-      "<Info> Connection received from: ",
+      '<Info> Connection received from: ',
       req.connection.remoteAddress
     );
-    socket.on("message", msg => {
+    socket.on('message', msg => {
       this._onMessage(socket, msg);
     });
   }
@@ -40,34 +41,32 @@ class LDNServer {
     const data = JSON.parse(msg);
 
     if (!data) {
-      console.log("<Error> Server received janky JSON data!");
+      console.log('<Error> Server received janky JSON data!');
       return;
     }
 
-    console.log("<Info> Received message with type: ", data.type);
+    console.log('<Info> Received message with type: ', data.type);
 
     if (data.type == Constants.Protocol.Messages.START_LOBBY) {
       if (!data.user) {
-        console.log("<Error> Tried to start a lobby without a user!");
+        console.log('<Error> Tried to start a lobby without a user!');
         return;
       }
-
-      const lobbyId = short_id.generate();
       const user = User.fromJson(data.user);
 
       if (user === null) {
         // Todo: Handle
-        console.log("<Error> User could not be parsed from client.");
+        console.log('<Error> User could not be parsed from client.');
         return;
       }
 
       if (this.isConnected(user)) {
-        console.log("<Error> User is already connected. ID: " + user.id);
+        console.log('<Error> User is already connected. ID: ' + user.id);
         return;
       }
 
-      const lobby = new Lobby(lobbyId, user);
-      user.lobbyId = lobbyId;
+      const lobby = new Lobby(hri.random(), user);
+      user.lobbyId = lobby.id;
       this.addLobby(lobby);
 
       const payload = JSON.stringify({
@@ -90,8 +89,8 @@ class LDNServer {
 
   start() {
     this.server = new WebSocket.Server({ port: PORT });
-    console.log("<Info> Listening on port: ", PORT);
-    this.server.on("connection", (socket, req) => {
+    console.log('<Info> Listening on port: ', PORT);
+    this.server.on('connection', (socket, req) => {
       this._onConnection(socket, req);
     });
   }
