@@ -39,6 +39,11 @@ export default class LDNClient {
       console.log("<Info> Received message with type: ", data.type);
       switch (data.type) {
         case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
+          if (data.code === Constants.Protocol.SUCCESS)
+            this.user.lobbyId = null;
+          else {
+            // Todo?
+          }
           break;
       }
     } catch (err) {

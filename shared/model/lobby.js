@@ -1,10 +1,9 @@
 module.exports = class Lobby {
   constructor(id, controller, users = {}) {
     this.id = id;
-    this.controller = controller;
+    this.controllerId = controller.id;
     this.users = users;
-    this.add(this.controller);
-
+    this.add(controller);
     console.log("<Lobby> New lobby created: " + this.id);
   }
 
@@ -18,15 +17,15 @@ module.exports = class Lobby {
 
   remove(user) {
     if (this.contains(user)) delete this.users[user.id];
-    if (this.controller === user) {
+    if (this.controllerId === user.id) {
       // Choose a different controller
-      if (this.size() > 0) this.controller = this.users[0];
-      else this.controller = null;
+      if (this.size() > 0) this.controllerId = this.users[0].id;
+      else this.controllerId = null;
     }
   }
 
   size() {
-    return this.users.size();
+    return Object.keys(this.users).length;
   }
 
   static fromJson(jsonString) {

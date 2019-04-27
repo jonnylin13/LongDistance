@@ -97,8 +97,10 @@ class LDNServer {
       const lobby = this.getLobby(user.lobbyId);
       lobby.remove(user);
       // Remove the lobby from this.lobbies is empty
-      if (lobby.controller === null && lobby.size() === 0)
+      if (lobby.controllerId === null && lobby.size() === 0) {
+        console.log("<Info> Deleting lobby: " + user.lobbyId);
         delete this.lobbies[user.lobbyId];
+      }
 
       response.code = Constants.Protocol.SUCCESS;
     } catch (err) {
