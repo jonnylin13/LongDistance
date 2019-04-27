@@ -142,4 +142,5 @@ class LDNServer {
   }
 }
 
-const ldnServer = new LDNServer(true);
+// So we can do testing?
+module.exports = new LDNServer(true);

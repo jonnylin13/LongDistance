@@ -107,7 +107,6 @@ export default class LDNClient {
     });
   }
 
-  // Todo: #36 check this
   disconnectLobby(msg) {
     this._connect()
       .then(() => {
