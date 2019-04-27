@@ -35,7 +35,15 @@ export default class LDNMessageListener {
       }
     } else if (data.type === Constants.Protocol.Messages.START_LOBBY) {
       // TODO #35
-      LDNClient.getInstance().startLobby(req);
+      LDNClient.getInstance()
+        .startLobby(req)
+        .then(res => {
+          // Parse the response
+        })
+        .catch(err => {
+          response.type = Constants.Protocol.Messages.START_LOBBY_ACK;
+          response.code = Constants.Protocol.FAIL;
+        });
     }
     console.log("<Info> Sending the following response: ");
     console.log(response);

@@ -36,14 +36,6 @@ export default class LDNClient {
   _onMessage(event) {
     const data = JSON.parse(event.data);
     console.log("<Info> Received " + data.type + "from WebSocket server");
-    if (data.type === Constants.Protocol.Messages.START_LOBBY_ACK) {
-      if (data.code === Constants.Protocol.SUCCESS) {
-        // TODO: Update user
-        this.user.updateFromJson(data.user);
-        // TODO: Update lobby ID in popup?
-        // How?
-      }
-    }
   }
 
   // ===============
@@ -90,11 +82,28 @@ export default class LDNClient {
   // Public Methods
   // ==============
 
-  startLobby(msg) {
+  async startLobby(msg) {
     this._connect();
     msg.user = this.user;
     this.ws.onopen = () => {
       this.ws.send(JSON.stringify(msg));
+      // This is a one time event listener
+      // Changes it to _onMessage after completion
+      this.ws.onmessage = event => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === Constants.Protocol.Messages.START_LOBBY_ACK) {
+            if (data.code === Constants.Protocol.SUCCESS) {
+              // TODO: Update user
+              this.user.updateFromJson(data.user);
+              // TODO: Resolve the lobbyId
+            }
+          }
+        } catch (err) {
+          this.ws.onmessage = event => this._onMessage(event);
+          return Promise.reject(err);
+        }
+      };
     };
   }
 
