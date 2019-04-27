@@ -37,7 +37,9 @@ class LDNServer {
   }
 
   _onMessage(socket, msg) {
+    console.log(msg);
     const data = JSON.parse(msg);
+
     if (!data) {
       console.log("<Error> Server received janky JSON data!");
       return;
@@ -58,7 +60,7 @@ class LDNServer {
         console.log("<Error> User is already connected. ID: ", str(user.id));
         return;
       }
-      const lobby = Lobby(lobbyId, user);
+      const lobby = new Lobby(lobbyId, user);
       user.lobbyId = lobbyId;
       this.addLobby(lobby);
 
@@ -98,7 +100,7 @@ class LDNServer {
   }
 
   isConnected(user) {
-    for (lobbyId in this.lobbies) {
+    for (const lobbyId in this.lobbies) {
       const lobby = this.lobbies[lobbyId];
       if (lobby.contains(user)) {
         return true;

@@ -4,7 +4,6 @@
  */
 
 import TabListener from "./listeners/tabListener";
-import LDNMessageListener from "./listeners/ldnListener";
 import Constants from "../shared/constants";
 import ProgressState from "../shared/model/progressState";
 import User from "../shared/model/user";
@@ -28,7 +27,6 @@ export default class LDNClient {
 
     this.ws = null;
     this.tabListener = new TabListener();
-    this.messageListener = new LDNMessageListener();
 
     console.log("<Info> LDN has been started!");
   }
@@ -82,29 +80,34 @@ export default class LDNClient {
   // Public Methods
   // ==============
 
-  async startLobby(msg) {
+  startLobby(msg) {
     this._connect();
-    msg.user = this.user;
-    this.ws.onopen = () => {
-      this.ws.send(JSON.stringify(msg));
-      // This is a one time event listener
-      // Changes it to _onMessage after completion
-      this.ws.onmessage = event => {
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === Constants.Protocol.Messages.START_LOBBY_ACK) {
-            if (data.code === Constants.Protocol.SUCCESS) {
-              // TODO: Update user
-              this.user.updateFromJson(data.user);
-              // TODO: Resolve the lobbyId
+    msg.user = JSON.stringify(this.user);
+    return new Promise((resolve, reject) => {
+      this.ws.onopen = () => {
+        this.ws.send(JSON.stringify(msg));
+        // This is a one time event listener
+        this.ws.onmessage = event => {
+          try {
+            const data = JSON.parse(event.data);
+            if (
+              data.type === Constants.Protocol.Messages.START_LOBBY_ACK &&
+              data.code === Constants.Protocol.SUCCESS
+            ) {
+              this.user.lobbyId = data.lobbyId;
+              // Don't need to return anything
+              resolve(null);
             }
+          } catch (err) {
+            console.log(err);
+            reject(null);
+          } finally {
+            // Changes it to _onMessage after completion
+            this.ws.onmessage = event => this._onMessage(event);
           }
-        } catch (err) {
-          this.ws.onmessage = event => this._onMessage(event);
-          return Promise.reject(err);
-        }
+        };
       };
-    };
+    });
   }
 
   isConnected() {
