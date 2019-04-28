@@ -29,7 +29,7 @@ module.exports = class Lobby {
       console.log('<Lobby: ' + this.id + '> Removed user: ' + user.id);
     }
     if (this.isController(user)) {
-      // Choose a different controller
+      // Choose a different controller - this might be too complex
       if (this.size() > 0) {
         this.controllerId = this.users[Object.keys(this.users)[0]].id;
         console.log(

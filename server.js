@@ -102,6 +102,8 @@ class LDNServer {
       response.code = Constants.Protocol.SUCCESS;
       response.lobbyId = lobby.id;
       this.sockets[user.id] = socket;
+      // Not really necessary
+      user.controller = true;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
@@ -146,6 +148,8 @@ class LDNServer {
       if (lobby.controllerId === null && lobby.size() === 0) {
         console.log('<Info> Deleting lobby: ' + user.lobbyId);
         delete this.lobbies[user.lobbyId];
+      } else {
+        // Send a control update to the new controller here?
       }
 
       response.code = Constants.Protocol.SUCCESS;
