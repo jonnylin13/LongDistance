@@ -1,6 +1,7 @@
 import Constants from "../shared/constants";
 import ProgressState from "../shared/model/progressState";
 
+// NOT PERSISTENT
 class NetflixController {
   constructor() {
     console.log("<Info> Starting controller...");

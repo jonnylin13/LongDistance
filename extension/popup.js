@@ -1,5 +1,6 @@
 import Constants from "../shared/constants";
 
+// NOT PERSISTENT
 class Popup {
   constructor() {
     this.views = {};
