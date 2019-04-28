@@ -8,7 +8,11 @@ module.exports = class Lobby {
   }
 
   isController(user) {
-    return user.id === this.controllerId;
+    return this.isControllerId(user.id);
+  }
+
+  isControllerId(userId) {
+    return userId === this.controllerId;
   }
 
   contains(user) {

@@ -176,16 +176,18 @@ class LDNServer {
       }
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
+      console.log(err);
     }
     socket.send(JSON.stringify(response));
   }
 
-  _emit(lobby, msg) {
+  _emit(lobby, msg, sendController = false) {
     console.log(
-      '<Info> Emitting a msg with type: ' + msg.type + ' to ' + lobby.id
+      '<Info> Emitting a msg with type ' + msg.type + ' to ' + lobby.id
     );
     Object.keys(lobby.users).forEach(userId => {
       if (userId in this.sockets) {
+        if (lobby.isControllerId(userId) && !sendController) return;
         const socket = this.sockets[userId];
         socket.send(JSON.stringify(msg));
       } else {

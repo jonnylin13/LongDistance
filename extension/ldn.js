@@ -144,7 +144,7 @@ export default class LDNClient {
         const msg = {
           type: Constants.Protocol.Messages.UPDATE_URL,
           urlParams: this.user.urlParams,
-          user: this.user
+          user: JSON.stringify(this.user)
         };
         this.ws.send(JSON.stringify(msg));
       });
