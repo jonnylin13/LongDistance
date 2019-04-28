@@ -3,10 +3,10 @@
  * @description Background script for LDN Chrome extension
  */
 
-import TabListener from "./listeners/tabListener";
-import Constants from "../shared/constants";
-import ProgressState from "../shared/model/progressState";
-import User from "../shared/model/user";
+import TabListener from './listeners/tabListener';
+import Constants from '../shared/constants';
+import ProgressState from '../shared/model/progressState';
+import User from '../shared/model/user';
 
 export default class LDNClient {
   static getInstance() {
@@ -15,18 +15,18 @@ export default class LDNClient {
   }
 
   constructor() {
-    console.log("<Info> Starting LDN...");
+    console.log('<Info> Starting LDN...');
 
     this.user = new User(
       Constants.ControllerState.INACTIVE,
-      "",
+      '',
       new ProgressState()
     );
 
     this.ws = null;
     this.tabListener = new TabListener();
 
-    console.log("<Info> LDN has been started!");
+    console.log('<Info> LDN has been started!');
   }
 
   // ===============
@@ -39,7 +39,7 @@ export default class LDNClient {
         try {
           this.ws = new WebSocket(Constants.WS_URL);
           this.ws.onopen = () => {
-            console.log("<Info> Connected to WebSocket server");
+            console.log('<Info> Connected to WebSocket server');
             resolve(null);
           };
         } catch (err) {
@@ -148,7 +148,7 @@ export default class LDNClient {
   _onMessage(event) {
     try {
       const data = JSON.parse(event.data);
-      console.log("<Info> Received message with type: ", data.type);
+      console.log('<Info> Received message with type: ', data.type);
       switch (data.type) {
         case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
           if (data.code === Constants.Protocol.SUCCESS)
