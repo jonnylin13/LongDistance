@@ -156,7 +156,7 @@ class LDNServer {
             type: Constants.Protocol.Messages.UPDATE_CONTROL,
             code: true
           };
-          this.sockets[controlUpdate].send(JSON.stringify(controlUpdate));
+          this.sockets[lobby.controllerId].send(JSON.stringify(controlUpdate));
         }
       }
 
