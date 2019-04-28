@@ -89,7 +89,7 @@ class Popup {
     this._getLDNClientInstance()
       .connectLobby({
         type: Constants.Protocol.Messages.CONNECT_LOBBY,
-        lobbyId: 'todo'
+        lobbyId: $('#lobby-id').val()
       })
       .then(() => {
         this._updateViewState(Constants.ViewState.IN_LOBBY);
