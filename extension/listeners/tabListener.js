@@ -49,7 +49,7 @@ export default class TabListener {
         file: "scripts/jquery.min.js"
       },
       results => {
-        if (!results || results[0]) {
+        if (results[0]) {
           chrome.tabs.executeScript(
             tabId,
             {
@@ -57,11 +57,11 @@ export default class TabListener {
               runAt: "document_idle"
             },
             results => {
-              if (!results || results[0]) {
-                console.log("<Info> Controller started!");
+              if (results[0]) {
+                console.log("<TabListener> Controller script executed!");
                 chrome.pageAction.show(tabId, undefined);
               } else {
-                console.log("<Error> Failed to start controller!");
+                console.log("<Error> Failed to start controller script.");
               }
             }
           );
@@ -95,7 +95,7 @@ export default class TabListener {
   // ===============
 
   onCreate(tab) {
-    console.log("<Info> Created: ", tab.url);
+    console.log("<TabListener> Created: ", tab.url);
     if (TabListener.isNetflix(tab) && !this.isTabCached()) {
       this._startControllerScript(tab.id);
     }
@@ -113,13 +113,15 @@ export default class TabListener {
       tabs => {
         const activeTab = tabs[0];
         if (TabListener.isNetflix(activeTab)) {
-          console.log("<Info> Updated: ", tab.url);
+          console.log("<TabListener> Updated: ", tab.url);
           if (!this.isTabCached()) {
             this._startControllerScript(activeTab.id);
           }
           const urlParams = TabListener.getUrlParams(activeTab);
           if (LDNClient.getInstance().user.urlParams !== urlParams) {
-            console.log("<Info> Updated user url parameters: " + urlParams);
+            console.log(
+              "<TabListener> Updated user url parameters: " + urlParams
+            );
             LDNClient.getInstance().user.urlParams = urlParams;
           }
         }
