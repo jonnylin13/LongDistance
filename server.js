@@ -178,13 +178,13 @@ class LDNServer {
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
     }
-    socket.send(response);
+    socket.send(JSON.stringify(response));
   }
 
   _emit(lobbyId, msg) {
     if (lobbyId in this.sockets) {
       this.sockets[lobbyId].forEach(socket => {
-        socket.send(msg);
+        socket.send(JSON.stringify(msg));
       });
     }
   }

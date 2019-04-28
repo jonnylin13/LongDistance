@@ -146,7 +146,7 @@ export default class LDNClient {
           urlParams: this.user.urlParams,
           user: this.user
         };
-        this.ws.send(msg);
+        this.ws.send(JSON.stringify(msg));
       });
     }
   }
