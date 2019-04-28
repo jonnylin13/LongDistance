@@ -182,16 +182,14 @@ class LDNServer {
   }
 
   _emit(lobby, msg, sendController = false) {
-    console.log(
-      '<Info> Emitting a msg with type ' + msg.type + ' to ' + lobby.id
-    );
+    console.log('<Info> Emitting a msg ' + msg.type + ' to ' + lobby.id);
     Object.keys(lobby.users).forEach(userId => {
       if (userId in this.sockets) {
         if (lobby.isControllerId(userId) && !sendController) return;
         const socket = this.sockets[userId];
         socket.send(JSON.stringify(msg));
       } else {
-        console.log('<Warning> Failed to send msg to: ' + userId);
+        console.log('<Warning> Failed to send ' + msg.type + ' to ' + userId);
       }
     });
   }
