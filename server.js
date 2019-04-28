@@ -150,6 +150,14 @@ class LDNServer {
         delete this.lobbies[user.lobbyId];
       } else {
         // Send a control update to the new controller here?
+        // Needs testing
+        if (lobby.controllerId in this.sockets) {
+          const controlUpdate = {
+            type: Constants.Protocol.Messages.UPDATE_CONTROL,
+            code: true
+          };
+          this.sockets[controlUpdate].send(JSON.stringify(controlUpdate));
+        }
       }
 
       response.code = Constants.Protocol.SUCCESS;

@@ -139,7 +139,6 @@ export default class LDNClient {
     this.user.urlParams = urlParams;
     // If the user is a controller && user is watching new content, then send url update request to server
     if (this.user.controller && urlParams.includes('watch/')) {
-      // Todo
       this._connect().then(() => {
         const msg = {
           type: Constants.Protocol.Messages.UPDATE_URL,
@@ -178,11 +177,15 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.UPDATE_URL:
           if (this.user.urlParams !== data.urlParams) {
-            // Test this
+            // Should be working
             chrome.tabs.update(this.tabListener.tabId, {
               url: 'https://netflix.com/' + data.urlParams
             });
           }
+          break;
+        case Constants.Protocol.Messages.CONTROL_UPDATE:
+          // Needs testing, but simple enough
+          this.user.controller = data.code;
           break;
       }
     } catch (err) {
