@@ -1,5 +1,4 @@
 import Constants from '../shared/constants';
-import ProgressState from '../shared/model/progressState';
 
 // NOT PERSISTENT
 class NetflixController {
@@ -8,8 +7,6 @@ class NetflixController {
     this._start();
     this._get_video().on('play', this.play);
     this._get_video().on('pause', this.pause);
-    this.playerState = Constants.ControllerState.IDLE;
-    this.progressState = new ProgressState();
     this.sync();
     console.log('<Info> Controller has been started!');
   }
@@ -17,6 +14,12 @@ class NetflixController {
   // ===============
   // Private Methods
   // ===============
+
+  // Popup script is not persistent, or run in the same context
+  // So we cannot use LDNClient.getInstance()
+  _getLDNClientInstance() {
+    return chrome.extension.getBackgroundPage().ldn;
+  }
 
   _start() {}
 
@@ -49,12 +52,17 @@ class NetflixController {
   pause() {}
 
   sync() {
+    // TODO: Re-implement this
     if (this._get_video()) {
       if (this._get_video().paused == true)
-        this.playerState = Constants.ControllerState.PAUSE;
-      else this.playerState = Constants.ControllerState.PLAY;
-    } else this.playerState = Constants.ControllerState.IDLE;
-    // TODO: Sync progress state
+        this._getLDNClientInstance().user.controllerState =
+          Constants.ControllerState.PAUSE;
+      else
+        this._getLDNClientInstance().user.controllerState =
+          Constants.ControllerState.PLAY;
+    } else
+      this._getLDNClientInstance().user.controllerState =
+        Constants.ControllerState.IDLE;
   }
 }
 
