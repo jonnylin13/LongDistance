@@ -16,12 +16,21 @@ module.exports = class Lobby {
   }
 
   remove(user) {
-    if (this.contains(user)) delete this.users[user.id];
+    if (this.contains(user)) {
+      delete this.users[user.id];
+      console.log("<Lobby: " + this.id + "> Removed user: " + user.id);
+    }
     if (this.controllerId === user.id) {
       // Choose a different controller
-      if (this.size() > 0)
+      if (this.size() > 0) {
         this.controllerId = this.users[Object.keys(this.users)[0]].id;
-      else this.controllerId = null;
+        console.log(
+          "<Lobby: " +
+            this.id +
+            "> Re-assigned controller to user: " +
+            this.controllerId
+        );
+      } else this.controllerId = null;
     }
   }
 
