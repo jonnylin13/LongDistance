@@ -33,24 +33,6 @@ export default class LDNClient {
   // Private Methods
   // ===============
 
-  _onMessage(event) {
-    try {
-      const data = JSON.parse(event.data);
-      console.log("<Info> Received message with type: ", data.type);
-      switch (data.type) {
-        case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
-          if (data.code === Constants.Protocol.SUCCESS)
-            this.user.lobbyId = null;
-          else {
-            // Todo?
-          }
-          break;
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   _connect() {
     return new Promise((resolve, reject) => {
       if (!this.isSocketConnected()) {
@@ -88,11 +70,46 @@ export default class LDNClient {
                 data.code === Constants.Protocol.SUCCESS
               ) {
                 this.user.lobbyId = data.lobbyId;
-                this.user.id = data.userId;
+                // Server provisions the user ID in response if none is sent in request
+                if (this.user.id === null) this.user.id = data.userId;
                 // Don't need to return anything
                 resolve(true);
               } else reject(false);
             } catch (err) {
+              // Todo?
+              reject(false);
+            } finally {
+              this.ws.onmessage = event => this._onMessage(event);
+            }
+          };
+        })
+        .catch(err => {
+          reject(err);
+        });
+    });
+  }
+
+  // Pretty much identical to start_lobby, but we'll leave this for now for testing
+  connectLobby(msg) {
+    return new Promise((resolve, reject) => {
+      this._connect()
+        .then(() => {
+          msg.user = JSON.stringify(this.user);
+          this.ws.send(JSON.stringify(msg));
+          // 1 time listener
+          this.ws.onmessage = event => {
+            try {
+              const data = JSON.parse(event.data);
+              if (
+                data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
+                data.code === Constants.Protocol.SUCCESS
+              ) {
+                this.user.lobbyId = data.lobbyId;
+                if (this.user.id === null) this.user.id = data.userId;
+                resolve(true);
+              } else reject(false);
+            } catch (err) {
+              // Todo?
               reject(false);
             } finally {
               this.ws.onmessage = event => this._onMessage(event);
@@ -127,6 +144,24 @@ export default class LDNClient {
   // ===============
   // Handler Methods
   // ===============
+
+  _onMessage(event) {
+    try {
+      const data = JSON.parse(event.data);
+      console.log("<Info> Received message with type: ", data.type);
+      switch (data.type) {
+        case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
+          if (data.code === Constants.Protocol.SUCCESS)
+            this.user.lobbyId = null;
+          else {
+            // Todo?
+          }
+          break;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
 }
 
 window.ldn = LDNClient.getInstance();

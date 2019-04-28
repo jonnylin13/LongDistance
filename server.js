@@ -67,11 +67,18 @@ class LDNServer {
 
     try {
       const user = User.fromJson(data.user);
-      user.id = Util.uuidv4();
 
       if (this.isConnected(user)) {
+        // Something went wrong here...
         console.log("User is already connected. ID: " + user.id);
         return;
+      }
+
+      // Server provisions user ID if none is sent in response
+      if (user.id === null) {
+        user.id = Util.uuidv4();
+        response.userId = user.id;
+        console.log("<Info> Provisioning new user: " + user.id);
       }
 
       const lobby = new Lobby(hri.random(), user);
@@ -80,7 +87,6 @@ class LDNServer {
 
       response.code = Constants.Protocol.SUCCESS;
       response.lobbyId = lobby.id;
-      response.userId = user.id;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);

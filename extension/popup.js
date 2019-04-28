@@ -29,15 +29,16 @@ class Popup {
     });
   }
 
+  // ===============
+  // Private Methods
+  // ===============
+
   // Popup script is not persistent, or run in the same context
   // So we cannot use LDNClient.getInstance()
   _getLDNClientInstance() {
     return chrome.extension.getBackgroundPage().ldn;
   }
 
-  // ===============
-  // Private Methods
-  // ===============
   _getLobbyIdText() {
     return $("#lobby-id-text")[0];
   }
@@ -73,7 +74,7 @@ class Popup {
       });
   }
 
-  disconnectLobbyClicked() {
+  disconnectLobbyClicked(event) {
     this._getLDNClientInstance().disconnectLobby({
       type: Constants.Protocol.Messages.DISCONNECT_LOBBY
     });
@@ -84,9 +85,20 @@ class Popup {
     this._updateViewState(Constants.ViewState.CONNECT_LOBBY);
   }
 
-  connectConfirmClicked() {}
+  connectConfirmClicked(event) {
+    this._getLDNClientInstance()
+      .connectLobby({
+        type: Constants.Protocol.Messages.CONNECT_LOBBY
+      })
+      .then(() => {
+        this._updateViewState(Constants.ViewState.IN_LOBBY);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
 
-  connectBackClicked() {
+  connectBackClicked(event) {
     this._updateViewState(Constants.ViewState.OUT_LOBBY);
   }
 }
