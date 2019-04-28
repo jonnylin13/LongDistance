@@ -226,7 +226,9 @@ class LDNServer {
 
   isConnected(user) {
     try {
-      return this.getLobby(user.lobbyId).contains(user);
+      return (
+        this.getLobby(user.lobbyId).contains(user) && user.id in this.sockets
+      );
     } catch (err) {
       return false;
     }
