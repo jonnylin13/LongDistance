@@ -101,8 +101,7 @@ class LDNServer {
 
       response.code = Constants.Protocol.SUCCESS;
       response.lobbyId = lobby.id;
-      this.sockets[lobby.id] = [];
-      this.sockets[lobby.id].push(socket);
+      this.sockets[user.id] = socket;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
@@ -127,7 +126,7 @@ class LDNServer {
 
       lobby.add(user);
       response.code = Constants.Protocol.SUCCESS;
-      this.sockets[lobby.id].push(socket);
+      this.sockets[user.id] = socket;
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
@@ -147,11 +146,10 @@ class LDNServer {
       if (lobby.controllerId === null && lobby.size() === 0) {
         console.log('<Info> Deleting lobby: ' + user.lobbyId);
         delete this.lobbies[user.lobbyId];
-        delete this.sockets[lobby.id];
       }
 
       response.code = Constants.Protocol.SUCCESS;
-      if (lobby.id in this.sockets) this.sockets[lobby.id].remove(socket);
+      if (user.id in this.sockets) delete this.sockets[user.id];
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);
@@ -171,7 +169,7 @@ class LDNServer {
           type: data.type,
           urlParams: data.urlParams
         };
-        this._emit(lobby.id, updateRequest);
+        this._emit(lobby, updateRequest);
         response.code = Constants.Protocol.SUCCESS;
       } else {
         response.code = Constants.Protocol.FAIL;
@@ -182,22 +180,18 @@ class LDNServer {
     socket.send(JSON.stringify(response));
   }
 
-  _emit(lobbyId, msg) {
-    if (lobbyId in this.sockets) {
-      console.log(
-        '<Info> Emitting a msg with type: ' + msg.type + ' to ' + lobbyId
-      );
-      this.sockets[lobbyId].forEach(socket => {
+  _emit(lobby, msg) {
+    console.log(
+      '<Info> Emitting a msg with type: ' + msg.type + ' to ' + lobby.id
+    );
+    Object.keys(lobby.users).forEach(userId => {
+      if (userId in this.sockets) {
+        const socket = this.sockets[userId];
         socket.send(JSON.stringify(msg));
-      });
-    } else {
-      console.log(
-        '<Warning> Failed to emit a msg with type: ' +
-          msg.type +
-          ' to ' +
-          lobbyId
-      );
-    }
+      } else {
+        console.log('<Warning> Failed to send msg to: ' + userId);
+      }
+    });
   }
 
   // ==============
