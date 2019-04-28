@@ -80,11 +80,15 @@ class Popup {
     this._updateViewState(Constants.ViewState.OUT_LOBBY);
   }
 
-  connectClicked() {}
+  connectClicked() {
+    this._updateViewState(Constants.ViewState.CONNECT_LOBBY);
+  }
 
   connectConfirmClicked() {}
 
-  connectBackClicked() {}
+  connectBackClicked() {
+    this._updateViewState(Constants.ViewState.OUT_LOBBY);
+  }
 }
 
 const popup = new Popup();
