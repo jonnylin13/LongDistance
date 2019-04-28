@@ -104,7 +104,7 @@ export default class LDNClient {
                 data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
                 data.code === Constants.Protocol.SUCCESS
               ) {
-                this.user.lobbyId = data.lobbyId;
+                this.user.lobbyId = msg.lobbyId;
                 if (this.user.id === null) this.user.id = data.userId;
                 resolve(true);
               } else reject(false);
