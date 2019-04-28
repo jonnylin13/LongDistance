@@ -3,10 +3,10 @@
  * @description Background script for LDN Chrome extension
  */
 
-import TabListener from "./listeners/tabListener";
-import Constants from "../shared/constants";
-import ProgressState from "../shared/model/progressState";
-import User from "../shared/model/user";
+import TabListener from './listeners/tabListener';
+import Constants from '../shared/constants';
+import ProgressState from '../shared/model/progressState';
+import User from '../shared/model/user';
 
 export default class LDNClient {
   static getInstance() {
@@ -15,18 +15,18 @@ export default class LDNClient {
   }
 
   constructor() {
-    console.log("<Info> Starting LDN...");
+    console.log('<Info> Starting LDN...');
 
     this.user = new User(
       Constants.ControllerState.INACTIVE,
-      "",
+      '',
       new ProgressState()
     );
 
     this.ws = null;
     this.tabListener = new TabListener();
 
-    console.log("<Info> LDN has been started!");
+    console.log('<Info> LDN has been started!');
   }
 
   // ===============
@@ -39,7 +39,7 @@ export default class LDNClient {
         try {
           this.ws = new WebSocket(Constants.WS_URL);
           this.ws.onopen = () => {
-            console.log("<Info> Connected to WebSocket server");
+            console.log('<Info> Connected to WebSocket server');
             resolve(null);
           };
         } catch (err) {
@@ -70,6 +70,7 @@ export default class LDNClient {
                 data.code === Constants.Protocol.SUCCESS
               ) {
                 this.user.lobbyId = data.lobbyId;
+                this.user.controller = true;
                 // Server provisions the user ID in response if none is sent in request
                 if (this.user.id === null) this.user.id = data.userId;
                 // Don't need to return anything
@@ -105,6 +106,7 @@ export default class LDNClient {
                 data.code === Constants.Protocol.SUCCESS
               ) {
                 this.user.lobbyId = msg.lobbyId;
+                this.user.controller = false;
                 if (this.user.id === null) this.user.id = data.userId;
                 resolve(true);
               } else reject(false);
@@ -133,6 +135,22 @@ export default class LDNClient {
       });
   }
 
+  setUrlParams(urlParams) {
+    this.user.urlParams = urlParams;
+    // If the user is a controller && user is watching new content, then send url update request to server
+    if (this.user.controller && urlParams.includes('watch/')) {
+      // Todo
+      this._connect().then(() => {
+        const msg = {
+          type: Constants.Protocol.Messages.UPDATE_URL,
+          urlParams: this.user.urlParams,
+          user: this.user
+        };
+        this.ws.send(msg);
+      });
+    }
+  }
+
   isConnected() {
     return this.user.currentLobby && this.user.id;
   }
@@ -148,14 +166,18 @@ export default class LDNClient {
   _onMessage(event) {
     try {
       const data = JSON.parse(event.data);
-      console.log("<Info> Received message with type: ", data.type);
+      console.log('<Info> Received message with type: ', data.type);
       switch (data.type) {
         case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
-          if (data.code === Constants.Protocol.SUCCESS)
+          if (data.code === Constants.Protocol.SUCCESS) {
             this.user.lobbyId = null;
-          else {
+            this.user.controller = false;
+          } else {
             // Todo?
           }
+          break;
+        case Constants.Protocol.Messages.UPDATE_URL:
+          console.log(data);
           break;
       }
     } catch (err) {

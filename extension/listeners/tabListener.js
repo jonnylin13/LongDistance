@@ -1,4 +1,4 @@
-import LDNClient from "../ldn";
+import LDNClient from '../ldn';
 
 export default class TabListener {
   // TODO: Should we execute the script when popup.js is instantiated?
@@ -15,7 +15,7 @@ export default class TabListener {
       this.onRemove(tabId, removeInfo);
     });
     this.tabId = -1; // not found
-    console.log("<Info> Tab listener started!");
+    console.log('<TabListener> Tab listener started!');
   }
 
   // ===============
@@ -24,7 +24,7 @@ export default class TabListener {
   _queryNetflixTab() {
     chrome.tabs.query(
       {
-        title: "Netflix"
+        title: 'Netflix'
       },
       tabs => {
         if (tabs.length === 0) this.tabId = -1;
@@ -46,39 +46,35 @@ export default class TabListener {
     chrome.tabs.executeScript(
       tabId,
       {
-        file: "scripts/jquery.min.js"
+        file: 'scripts/jquery.min.js'
       },
       results => {
         if (results[0]) {
           chrome.tabs.executeScript(
             tabId,
             {
-              file: "controller.bundle.js",
-              runAt: "document_idle"
+              file: 'controller.bundle.js',
+              runAt: 'document_idle'
             },
             results => {
               if (results[0]) {
-                console.log("<TabListener> Controller script executed!");
+                console.log('<TabListener> Controller script executed!');
                 chrome.pageAction.show(tabId, undefined);
-              } else {
-                console.log("<Error> Failed to start controller script.");
-              }
+              } else console.log('<Error> Failed to start controller script.');
             }
           );
-        } else {
-          console.log("<Error> Failed to start jQuery!");
-        }
+        } else console.log('<Error> Failed to start jQuery!');
       }
     );
   }
 
   _uncacheTab() {
-    console.log("<TabListener> Removing tab id: " + this.tabId);
+    console.log('<TabListener> Removing tab id: ' + this.tabId);
     this.tabId = -1;
   }
 
   _cacheTab(tabId) {
-    console.log("<TabListener> Setting tab id: " + tabId);
+    console.log('<TabListener> Setting tab id: ' + tabId);
     this.tabId = tabId;
   }
 
@@ -95,16 +91,15 @@ export default class TabListener {
   // ===============
 
   onCreate(tab) {
-    console.log("<TabListener> Created: ", tab.url);
-    if (TabListener.isNetflix(tab) && !this.isTabCached()) {
+    console.log('<TabListener> Created: ', tab.url);
+    if (TabListener.isNetflix(tab) && !this.isTabCached())
       this._startControllerScript(tab.id);
-    }
   }
 
   onUpdate(tabId, changeInfo, tab) {
     // TODO: Reimplement
     if (tab.url === LDNClient.getInstance().user.urlParams) return;
-    if (!changeInfo.status || changeInfo.status !== "complete") return;
+    if (!changeInfo.status || changeInfo.status !== 'complete') return;
     chrome.tabs.query(
       {
         currentWindow: true,
@@ -113,16 +108,16 @@ export default class TabListener {
       tabs => {
         const activeTab = tabs[0];
         if (TabListener.isNetflix(activeTab)) {
-          console.log("<TabListener> Updated: ", tab.url);
+          console.log('<TabListener> Updated: ', tab.url);
           if (!this.isTabCached()) {
             this._startControllerScript(activeTab.id);
           }
           const urlParams = TabListener.getUrlParams(activeTab);
           if (LDNClient.getInstance().user.urlParams !== urlParams) {
             console.log(
-              "<TabListener> Updated user url parameters: " + urlParams
+              '<TabListener> Updated user url parameters: ' + urlParams
             );
-            LDNClient.getInstance().user.urlParams = urlParams;
+            LDNClient.getInstance().setUrlParams(urlParams);
           }
         }
       }
@@ -139,12 +134,12 @@ export default class TabListener {
 
   static isNetflix(tab) {
     if (!tab) return false;
-    return tab.url.includes("https://www.netflix.com/");
+    return tab.url.includes('https://www.netflix.com/');
   }
 
   static getUrlParams(tab) {
-    if (!tab) return "";
+    if (!tab) return '';
     // TODO: Reimplement
-    return tab.url.split("netflix.com/")[1].split("?")[0];
+    return tab.url.split('netflix.com/')[1].split('?')[0];
   }
 }
