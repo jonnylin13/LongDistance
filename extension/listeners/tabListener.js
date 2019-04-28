@@ -59,7 +59,6 @@ export default class TabListener {
             results => {
               if (results[0]) {
                 console.log('<TabListener> Controller script executed!');
-                chrome.pageAction.show(tabId, undefined);
               } else console.log('<Error> Failed to start controller script.');
             }
           );
@@ -108,6 +107,7 @@ export default class TabListener {
       tabs => {
         const activeTab = tabs[0];
         if (TabListener.isNetflix(activeTab)) {
+          chrome.pageAction.show(tabId, undefined);
           console.log('<TabListener> Updated: ', tab.url);
           if (!this.isTabCached()) {
             this._startControllerScript(activeTab.id);
