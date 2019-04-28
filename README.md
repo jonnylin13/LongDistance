@@ -25,7 +25,7 @@ To build the extension and run the server `npm run dev`
 
 - extension/ldn.js
 
-Runs in the background of the extension persistently. Controls all WS entrypoints/local state of the extension. For persistent scripts, this can be accessed using `LDNClient.getInstance()`. For non-persistent scripts, a reference is attached to the window context `window.ldn`.
+Runs in the background of the extension persistently. Controls all WS entrypoints/local state of the extension. For persistent scripts, this can be accessed using `LDNClient.getInstance()`. For non-persistent scripts, a reference is attached to the window context `chrome.extension.getBackgroundPage().ldn`.
 
 - extension/controller.js
 
