@@ -1,20 +1,20 @@
-const Lobby = require('./shared/model/lobby');
-const User = require('./shared/model/user');
-const WebSocket = require('ws');
-const Constants = require('./shared/constants');
+const Lobby = require("./shared/model/lobby");
+const User = require("./shared/model/user");
+const WebSocket = require("ws");
+const Constants = require("./shared/constants");
 // We use hri here because shared cannot import npm modules
-const hri = require('human-readable-ids').hri;
-const Util = require('./shared/util');
+const hri = require("human-readable-ids").hri;
+const Util = require("./shared/util");
 
 const PORT = 3000;
 
 class LDNServer {
   constructor(start = true) {
     this.lobbies = {};
-    process.on('exit', () => {
+    process.on("exit", () => {
       this._exitHandler();
     });
-    process.on('SIGINT', () => {
+    process.on("SIGINT", () => {
       this._exitHandler();
     });
     if (start) this.start();
@@ -30,10 +30,10 @@ class LDNServer {
 
   _onConnection(socket, req) {
     console.log(
-      '<Info> Connection received from: ',
+      "<Info> Connection received from: ",
       req.connection.remoteAddress
     );
-    socket.on('message', msg => {
+    socket.on("message", msg => {
       this._onMessage(socket, msg);
     });
   }
@@ -42,11 +42,11 @@ class LDNServer {
     const data = JSON.parse(msg);
 
     if (!data) {
-      console.log('<Error> Server received janky JSON data!');
+      console.log("<Error> Server received janky JSON data!");
       return;
     }
 
-    console.log('<Info> Received message with type: ', data.type);
+    console.log("<Info> Received message with type: ", data.type);
     switch (data.type) {
       case Constants.Protocol.Messages.START_LOBBY:
         this._startLobby(socket, data);
@@ -73,7 +73,7 @@ class LDNServer {
 
       if (this.isConnected(user)) {
         // Something went wrong here...
-        console.log('User is already connected. ID: ' + user.id);
+        console.log("User is already connected. ID: " + user.id);
         return;
       }
 
@@ -81,7 +81,7 @@ class LDNServer {
       if (user.id === null) {
         user.id = Util.uuidv4();
         response.userId = user.id;
-        console.log('<Info> Provisioning new user: ' + user.id);
+        console.log("<Info> Provisioning new user: " + user.id);
       }
 
       const lobby = new Lobby(hri.random(), user);
@@ -109,7 +109,7 @@ class LDNServer {
       if (user.id === null) {
         user.id = Util.uuidv4();
         response.userId = user.id;
-        console.log('<Info> Provisioning new user: ' + user.id);
+        console.log("<Info> Provisioning new user: " + user.id);
       }
 
       lobby.add(user);
@@ -131,7 +131,7 @@ class LDNServer {
       lobby.remove(user);
       // Remove the lobby from this.lobbies is empty
       if (lobby.controllerId === null && lobby.size() === 0) {
-        console.log('<Info> Deleting lobby: ' + user.lobbyId);
+        console.log("<Info> Deleting lobby: " + user.lobbyId);
         delete this.lobbies[user.lobbyId];
       }
 
@@ -149,8 +149,8 @@ class LDNServer {
 
   start() {
     this.server = new WebSocket.Server({ port: PORT });
-    console.log('<Info> Listening on port: ', PORT);
-    this.server.on('connection', (socket, req) => {
+    console.log("<Info> Listening on port: ", PORT);
+    this.server.on("connection", (socket, req) => {
       this._onConnection(socket, req);
     });
   }
@@ -165,7 +165,7 @@ class LDNServer {
 
   getLobby(lobbyId) {
     if (this.contains(lobbyId)) return this.lobbies[lobbyId];
-    else throw new Error('Could not find lobby in server.');
+    else throw new Error("Could not find lobby in server.");
   }
 
   isConnected(user) {
