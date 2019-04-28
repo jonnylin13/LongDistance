@@ -177,7 +177,12 @@ export default class LDNClient {
           }
           break;
         case Constants.Protocol.Messages.UPDATE_URL:
-          console.log(data);
+          if (this.user.urlParams !== data.urlParams) {
+            // Test this
+            chrome.tabs.update(this.tabListener.tabId, {
+              url: 'https://netflix.com/' + data.urlParams
+            });
+          }
           break;
       }
     } catch (err) {
