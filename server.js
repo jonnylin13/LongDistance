@@ -67,6 +67,7 @@ class LDNServer {
 
   _onClose(event) {
     // Do we do anything here?
+    console.log('<Warning> A WebSocket client disconnected.');
     return;
   }
 
@@ -183,9 +184,19 @@ class LDNServer {
 
   _emit(lobbyId, msg) {
     if (lobbyId in this.sockets) {
+      console.log(
+        '<Info> Emitting a msg with type: ' + msg.type + ' to ' + lobbyId
+      );
       this.sockets[lobbyId].forEach(socket => {
         socket.send(JSON.stringify(msg));
       });
+    } else {
+      console.log(
+        '<Warning> Failed to emit a msg with type: ' +
+          msg.type +
+          ' to ' +
+          lobbyId
+      );
     }
   }
 

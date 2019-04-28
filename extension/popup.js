@@ -22,7 +22,6 @@ class Popup {
       $('#connect-confirm-btn').on('click', event =>
         this.connectConfirmClicked(event)
       );
-      console.log(this._getLDNClientInstance());
       if (this._getLDNClientInstance().user.lobbyId !== null)
         this._updateViewState(Constants.ViewState.IN_LOBBY);
       else this._updateViewState(Constants.ViewState.OUT_LOBBY);
