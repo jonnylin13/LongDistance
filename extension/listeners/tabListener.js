@@ -58,6 +58,7 @@ export default class TabListener {
             },
             results => {
               if (results[0]) {
+                chrome.pageAction.show(tabId, undefined);
                 console.log('<TabListener> Controller script executed!');
               } else console.log('<Error> Failed to start controller script.');
             }
