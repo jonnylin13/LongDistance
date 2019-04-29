@@ -102,8 +102,7 @@ export default class TabListener {
     if (!changeInfo.status || changeInfo.status !== 'complete') return;
     chrome.tabs.query(
       {
-        currentWindow: true,
-        active: true
+        title: 'Netflix'
       },
       tabs => {
         const activeTab = tabs[0];
