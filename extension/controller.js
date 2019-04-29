@@ -40,20 +40,6 @@ class NetflixController {
   // Private Methods
   // ===============
 
-  // Popup script is not persistent, or run in the same context
-  // So we cannot use LDNClient.getInstance()
-  getClient() {
-    return new Promise((resolve, reject) => {
-      chrome.runtime
-        .getBackgroundPage(page => {
-          resolve(page.ldn);
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
-  }
-
   getVP() {
     return $('video');
   }
