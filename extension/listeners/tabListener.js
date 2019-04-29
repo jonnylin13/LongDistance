@@ -42,7 +42,6 @@ export default class TabListener {
   // TODO: How do we remove the controller script?
   _startControllerScript(tabId) {
     // TODO: Reimplement
-    this._cacheTab(tabId);
     chrome.tabs.executeScript(
       tabId,
       {
@@ -58,6 +57,7 @@ export default class TabListener {
             },
             results => {
               if (results[0]) {
+                this._cacheTab(tabId);
                 chrome.pageAction.show(tabId, undefined);
                 console.log('<TabListener> Controller script executed!');
               } else console.log('<Error> Failed to start controller script.');
