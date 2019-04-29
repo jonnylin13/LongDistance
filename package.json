@@ -1,6 +1,6 @@
 {
   "name": "ldn",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Long Distance to replace Showgoers and Netflix Party",
   "main": "server.js",
   "scripts": {

@@ -3,8 +3,21 @@ import Constants from '../shared/constants';
 // NOT PERSISTENT
 class NetflixController {
   constructor() {
-    console.log('<Info> Starting controller...');
-    console.log('<Info> Controller has been started!');
+    const observer = new MutationObserver((mutList, observer) => {
+      mutList.forEach(mutation => {
+        if (mutation.target.className === 'VideoContainer') {
+          // DO something
+          this.getVP().on('play', event => this.userPlay(event));
+          this.getVP().on('pause', event => this.userPause(event));
+          observer.disconnect();
+        }
+      });
+    });
+
+    observer.observe(document.getElementById('appMountPoint'), {
+      childList: true,
+      subtree: true
+    });
   }
 
   // ===============
@@ -19,37 +32,37 @@ class NetflixController {
 
   _start() {}
 
-  _get_video() {
+  getVP() {
     return $('video');
-  }
-
-  _get_play() {
-    return $('.button-nfplayerPlay')[0];
-  }
-
-  _get_player() {
-    return $('.nf-player-container')[0];
-  }
-
-  _get_pause() {
-    return $('.button-nfplayerPause')[0];
-  }
-
-  _get_scrubber() {
-    return $('.scrubber-bar')[0];
   }
 
   // ==============
   // Public Methods
   // ==============
 
-  play() {}
+  play() {
+    if (this.getVP()) this.getVP().play();
+  }
 
-  pause() {}
+  pause() {
+    if (this.getVP()) this.getVP().pause();
+  }
 
   sync() {
     // TODO: Re-implement this
     return;
+  }
+
+  // ==============
+  // Handler methods
+  // ==============
+
+  userPlay() {
+    console.log('Play!');
+  }
+
+  userPause() {
+    console.log('Pause!');
   }
 }
 

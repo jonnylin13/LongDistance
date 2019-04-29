@@ -4,7 +4,7 @@ import Constants from '../shared/constants';
 class Popup {
   constructor() {
     this.views = {};
-    $().ready(() => {
+    $(() => {
       this.views[Constants.ViewState.IN_LOBBY] = $('#in-lobby-container');
       this.views[Constants.ViewState.OUT_LOBBY] = $('#out-lobby-container');
       this.views[Constants.ViewState.CONNECT_LOBBY] = $(

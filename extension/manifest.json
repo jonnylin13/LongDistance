@@ -1,7 +1,7 @@
 {
   "name": "Long Distance Netflix",
   "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "manifest_version": 2,
   "permissions": [
     "tabs",
