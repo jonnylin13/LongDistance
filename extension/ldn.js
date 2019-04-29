@@ -26,6 +26,10 @@ export default class LDNClient {
     this.ws = null;
     this.tabListener = new TabListener();
 
+    chrome.runtime.onMessage.addListener((req, sender, sendResponse) =>
+      this._onRuntimeMessage(req, sender, sendResponse)
+    );
+
     console.log('<Info> LDN has been started!');
   }
 
@@ -190,6 +194,14 @@ export default class LDNClient {
       }
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  _onRuntimeMessage(req, sender, sendResponse) {
+    switch (req.type) {
+      case Constants.Protocol.Messages.UPDATE_STATE:
+        this.user.progressState = req.progressState;
+        break;
     }
   }
 }

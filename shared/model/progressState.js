@@ -1,24 +1,24 @@
 module.exports = class ProgressState {
-  constructor(elapsed = 0, total = 0) {
+  constructor(elapsed = 0, duration = 0) {
     this.elapsed = elapsed;
-    this.total = total;
+    this.duration = duration;
   }
 
   getElapsed() {
     return this.elapsed;
   }
 
-  getTotal() {
-    return this.total;
+  getDuration() {
+    return this.duration;
   }
 
   static fromJson(jsonString) {
     try {
       const data = JSON.parse(jsonString);
-      return new ProgressState(data["elapsed"], data["total"]);
+      return new ProgressState(data['elapsed'], data['duration']);
     } catch (err) {
       console.log(
-        "<Error> Tried to instantiate progress state with corrupt data!"
+        '<Error> Tried to instantiate progress state with corrupt data!'
       );
       return null;
     }
