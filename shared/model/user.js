@@ -1,13 +1,14 @@
 const ProgressState = require('./progressState');
+const Constants = require('../constants');
 
 module.exports = class User {
   constructor(
-    controllerState,
-    urlParams,
-    progressState,
+    urlParams = '',
+    progressState = new ProgressState(),
     lobbyId = null,
     id = null,
-    controller = false
+    controller = false,
+    controllerState = Constants.ControllerState.INACTIVE
   ) {
     this.lobbyId = lobbyId;
     this.id = id;
@@ -21,12 +22,12 @@ module.exports = class User {
     try {
       const data = JSON.parse(jsonString);
       return new User(
-        data['controllerState'],
         data['urlParams'],
         ProgressState.fromJson(JSON.stringify(data['progressState'])),
         data['lobbyId'],
         data['id'],
-        data['controller']
+        data['controller'],
+        data['controllerState']
       );
     } catch (err) {
       throw new Error(err);

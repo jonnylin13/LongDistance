@@ -4,7 +4,7 @@ import Constants from '../shared/constants';
 class Popup {
   constructor() {
     this.views = {};
-    $().ready(() => {
+    $(() => {
       this.views[Constants.ViewState.IN_LOBBY] = $('#in-lobby-container');
       this.views[Constants.ViewState.OUT_LOBBY] = $('#out-lobby-container');
       this.views[Constants.ViewState.CONNECT_LOBBY] = $(
@@ -22,7 +22,7 @@ class Popup {
       $('#connect-confirm-btn').on('click', event =>
         this.connectConfirmClicked(event)
       );
-      if (this._getLDNClientInstance().user.lobbyId !== null)
+      if (this.getClient().user.lobbyId !== null)
         this._updateViewState(Constants.ViewState.IN_LOBBY);
       else this._updateViewState(Constants.ViewState.OUT_LOBBY);
     });
@@ -34,7 +34,7 @@ class Popup {
 
   // Popup script is not persistent, or run in the same context
   // So we cannot use LDNClient.getInstance()
-  _getLDNClientInstance() {
+  getClient() {
     return chrome.extension.getBackgroundPage().ldn;
   }
 
@@ -51,7 +51,7 @@ class Popup {
 
     if (newState == Constants.ViewState.IN_LOBBY) {
       if (this._getLobbyIdText())
-        this._getLobbyIdText().innerHTML = this._getLDNClientInstance().user.lobbyId;
+        this._getLobbyIdText().innerHTML = this.getClient().user.lobbyId;
     } else {
       if (this._getLobbyIdText()) this._getLobbyIdText().innerHTML = '';
     }
@@ -61,7 +61,7 @@ class Popup {
   // UI Button Handlers
   // =================
   startLobbyClicked(event) {
-    this._getLDNClientInstance()
+    this.getClient()
       .startLobby({
         type: Constants.Protocol.Messages.START_LOBBY
       })
@@ -74,7 +74,7 @@ class Popup {
   }
 
   disconnectLobbyClicked(event) {
-    this._getLDNClientInstance().disconnectLobby({
+    this.getClient().disconnectLobby({
       type: Constants.Protocol.Messages.DISCONNECT_LOBBY
     });
     this._updateViewState(Constants.ViewState.OUT_LOBBY);
@@ -85,7 +85,7 @@ class Popup {
   }
 
   connectConfirmClicked(event) {
-    this._getLDNClientInstance()
+    this.getClient()
       .connectLobby({
         type: Constants.Protocol.Messages.CONNECT_LOBBY,
         lobbyId: $('#lobby-id').val()

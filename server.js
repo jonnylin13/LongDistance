@@ -129,6 +129,7 @@ class LDNServer {
       lobby.add(user);
       response.code = Constants.Protocol.SUCCESS;
       this.sockets[user.id] = socket;
+      // Send controller state if it is active?
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);

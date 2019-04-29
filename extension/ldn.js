@@ -5,7 +5,6 @@
 
 import TabListener from './listeners/tabListener';
 import Constants from '../shared/constants';
-import ProgressState from '../shared/model/progressState';
 import User from '../shared/model/user';
 
 export default class LDNClient {
@@ -17,14 +16,13 @@ export default class LDNClient {
   constructor() {
     console.log('<Info> Starting LDN...');
 
-    this.user = new User(
-      Constants.ControllerState.INACTIVE,
-      '',
-      new ProgressState()
-    );
-
+    this.user = new User();
     this.ws = null;
     this.tabListener = new TabListener();
+
+    chrome.runtime.onMessage.addListener((req, sender, sendResponse) =>
+      this._onRuntimeMessage(req, sender, sendResponse)
+    );
 
     console.log('<Info> LDN has been started!');
   }
@@ -190,6 +188,17 @@ export default class LDNClient {
       }
     } catch (err) {
       console.log(err);
+    }
+  }
+
+  _onRuntimeMessage(req, sender, sendResponse) {
+    switch (req.type) {
+      case Constants.Protocol.Messages.UPDATE_TIME:
+        this.user.progressState = req.progressState;
+        break;
+      case Constants.Protocol.Messages.UPDATE_STATE:
+        this.user.controllerState = req.controllerState;
+        break;
     }
   }
 }
