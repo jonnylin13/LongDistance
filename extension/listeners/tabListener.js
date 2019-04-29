@@ -1,4 +1,5 @@
 import LDNClient from '../ldn';
+import Constants from '../../shared/constants';
 
 export default class TabListener {
   // TODO: Should we execute the script when popup.js is instantiated?
@@ -40,6 +41,9 @@ export default class TabListener {
   // TODO: How do we remove the controller script?
   _startControllerScript(tabId) {
     // TODO: Reimplement
+    LDNClient.getInstance().user.controllerState =
+      Constants.ControllerState.PENDING;
+
     chrome.tabs.executeScript(
       tabId,
       {
@@ -79,7 +83,12 @@ export default class TabListener {
       chrome.pageAction.show(tab.id, undefined);
       console.log('<TabListener> Updated: ', tab.url);
       if (!this.isTabCached()) this._cacheTab(tab.id);
-      if (tab.url.includes('watch')) this._startControllerScript(tab.id);
+      if (
+        tab.url.includes('watch') &&
+        LDNClient.getInstance().user.controllerState ===
+          Constants.ControllerState.INACTIVE
+      )
+        this._startControllerScript(tab.id);
 
       const urlParams = TabListener.getUrlParams(tab);
       if (LDNClient.getInstance().user.urlParams !== urlParams) {

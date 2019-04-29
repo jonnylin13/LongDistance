@@ -5,7 +5,7 @@ module.exports.ViewState = Object.freeze({
 });
 module.exports.ControllerState = Object.freeze({
   INACTIVE: -1,
-  IDLE: 0,
+  PENDING: 0,
   PAUSE: 1,
   PLAY: 2
 });
@@ -23,6 +23,8 @@ module.exports.Protocol = Object.freeze({
     UPDATE_URL_ACK: 'update_url_ack',
     UPDATE_CONTROL: 'update_control',
     UPDATE_CONTROL_ACK: 'update_control_ack',
+    UPDATE_TIME: 'update_time',
+    UPDATE_TIME_ACK: 'update_time_ack',
     UPDATE_STATE: 'update_state',
     UPDATE_STATE_ACK: 'update_state_ack',
     GET_LOBBY_ID: 'get_lobby_id',

@@ -51,6 +51,14 @@ class NetflixController {
     return $('video');
   }
 
+  stateUpdate(_controllerState) {
+    const req = {
+      type: Constants.Protocol.Messages.UPDATE_STATE,
+      controllerState: _controllerState
+    };
+    chrome.runtime.sendMessage(req);
+  }
+
   // ==============
   // Public Methods
   // ==============
@@ -84,18 +92,20 @@ class NetflixController {
   // ==============
 
   userPlay() {
-    console.log('Play!');
+    console.log('<Controller> Play!');
+    this.stateUpdate(Constants.ControllerState.PLAY);
   }
 
   userPause() {
-    console.log('Pause!');
+    console.log('<Controller> Pause!');
+    this.stateUpdate(Constants.ControllerState.PAUSE);
   }
 
   timeUpdate(event) {
     this.progressState.elapsed = event.target.currentTime;
     this.progressState.duration = event.target.duration;
     const req = {
-      type: Constants.Protocol.Messages.UPDATE_STATE,
+      type: Constants.Protocol.Messages.UPDATE_TIME,
       progressState: this.progressState
     };
     chrome.runtime.sendMessage(req);
