@@ -198,7 +198,6 @@ export default class LDNClient {
         break;
       case Constants.Protocol.Messages.UPDATE_STATE:
         this.user.controllerState = req.controllerState;
-        console.log(this.user);
         break;
     }
   }

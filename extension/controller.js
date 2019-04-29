@@ -14,9 +14,16 @@ class NetflixController {
       mutations.forEach(mutation => {
         if (mutation.target.className === 'VideoContainer') {
           // DO something
+          this.videoPlayer = netflix.appContext.state.playerApp.getAPI().videoPlayer;
+          this.sessionId = this.videoPlayer.getAllPlayerSessionIds()[0];
+          this.player = this.videoPlayer.getVideoPlayerBySessionId(
+            this.sessionId
+          );
           this.getVP().on('play', event => this.userPlay(event));
           this.getVP().on('pause', event => this.userPause(event));
           this.getVP().on('timeupdate', event => this.timeUpdate(event));
+          this.getVP().on('seeked', event => this.userSeek(event));
+
           console.log('<Controller> Script started!');
           observer.disconnect();
         }
@@ -63,21 +70,25 @@ class NetflixController {
   // Public Methods
   // ==============
 
+  seek(time) {
+    if (this.ready) this.player.seek(this.currentTime + time);
+  }
+
   play() {
-    if (this.ready) this.getVP()[0].play();
+    if (this.ready) this.player.play();
   }
 
   pause() {
-    if (this.ready) this.getVP()[0].pause();
+    if (this.ready) this.player.pause();
   }
 
   get currentTime() {
-    if (this.ready) return this.getVP()[0].currentTime;
+    if (this.ready) return this.player.getCurrentTime();
   }
 
   get duration() {
     if (this.ready && !this._duration) {
-      this._duration = this.getVP()[0].duration;
+      this._duration = this.player.getDuration();
     }
     return this._duration;
   }
@@ -91,14 +102,19 @@ class NetflixController {
   // Handler methods
   // ==============
 
-  userPlay() {
+  userPlay(event) {
     console.log('<Controller> Play!');
     this.stateUpdate(Constants.ControllerState.PLAY);
   }
 
-  userPause() {
+  userPause(event) {
     console.log('<Controller> Pause!');
     this.stateUpdate(Constants.ControllerState.PAUSE);
+  }
+
+  userSeek(event) {
+    // Todo
+    return;
   }
 
   timeUpdate(event) {
