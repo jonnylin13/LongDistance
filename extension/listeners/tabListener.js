@@ -22,6 +22,7 @@ export default class TabListener {
   // Private Methods
   // ===============
   _queryNetflixTab() {
+    // This is unsafe but works for now
     chrome.tabs.query(
       {
         title: 'Netflix'
@@ -29,10 +30,7 @@ export default class TabListener {
       tabs => {
         if (tabs.length === 0) this.tabId = -1;
         else {
-          if (!this.isTabCached()) {
-            // TODO: Think of a better way to ensure Netflix is the tab
-            this._startControllerScript(tabs[0].id);
-          }
+          this._update(tabs[0]);
           return tabs[0];
         }
       }
@@ -57,13 +55,11 @@ export default class TabListener {
             },
             results => {
               if (results[0]) {
-                this._cacheTab(tabId);
-                chrome.pageAction.show(tabId, undefined);
                 console.log('<TabListener> Controller script executed!');
-              } else console.log('<Error> Failed to start controller script.');
+              } else throw new Error('Failed to start controller script.');
             }
           );
-        } else console.log('<Error> Failed to start jQuery!');
+        } else throw new Error('Failed to start jQuery!');
       }
     );
   }
@@ -76,6 +72,21 @@ export default class TabListener {
   _cacheTab(tabId) {
     console.log('<TabListener> Setting tab id: ' + tabId);
     this.tabId = tabId;
+  }
+
+  _update(tab) {
+    if (TabListener.isNetflix(tab)) {
+      chrome.pageAction.show(tab.id, undefined);
+      console.log('<TabListener> Updated: ', tab.url);
+      if (!this.isTabCached()) this._cacheTab(tab.id);
+      if (tab.url.includes('watch')) this._startControllerScript(tab.id);
+
+      const urlParams = TabListener.getUrlParams(tab);
+      if (LDNClient.getInstance().user.urlParams !== urlParams) {
+        console.log('<TabListener> Updated user url parameters: ' + urlParams);
+        LDNClient.getInstance().setUrlParams(urlParams);
+      }
+    }
   }
 
   // ==============
@@ -92,36 +103,14 @@ export default class TabListener {
 
   onCreate(tab) {
     console.log('<TabListener> Created: ', tab.url);
-    if (TabListener.isNetflix(tab) && !this.isTabCached())
-      this._startControllerScript(tab.id);
+    this._update(tab);
   }
 
   onUpdate(tabId, changeInfo, tab) {
     // TODO: Reimplement
     if (tab.url === LDNClient.getInstance().user.urlParams) return;
     if (!changeInfo.status || changeInfo.status !== 'complete') return;
-    chrome.tabs.query(
-      {
-        title: 'Netflix'
-      },
-      tabs => {
-        const activeTab = tabs[0];
-        if (TabListener.isNetflix(activeTab)) {
-          chrome.pageAction.show(tabId, undefined);
-          console.log('<TabListener> Updated: ', tab.url);
-          if (!this.isTabCached()) {
-            this._startControllerScript(activeTab.id);
-          }
-          const urlParams = TabListener.getUrlParams(activeTab);
-          if (LDNClient.getInstance().user.urlParams !== urlParams) {
-            console.log(
-              '<TabListener> Updated user url parameters: ' + urlParams
-            );
-            LDNClient.getInstance().setUrlParams(urlParams);
-          }
-        }
-      }
-    );
+    this._update(tab);
   }
 
   onRemove(tabId, removeInfo) {

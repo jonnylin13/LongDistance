@@ -4,10 +4,6 @@ import Constants from '../shared/constants';
 class NetflixController {
   constructor() {
     console.log('<Info> Starting controller...');
-    this._start();
-    this._get_video().on('play', this.play);
-    this._get_video().on('pause', this.pause);
-    this.sync();
     console.log('<Info> Controller has been started!');
   }
 
@@ -53,16 +49,7 @@ class NetflixController {
 
   sync() {
     // TODO: Re-implement this
-    if (this._get_video()) {
-      if (this._get_video().paused == true)
-        this._getLDNClientInstance().user.controllerState =
-          Constants.ControllerState.PAUSE;
-      else
-        this._getLDNClientInstance().user.controllerState =
-          Constants.ControllerState.PLAY;
-    } else
-      this._getLDNClientInstance().user.controllerState =
-        Constants.ControllerState.IDLE;
+    return;
   }
 }
 
