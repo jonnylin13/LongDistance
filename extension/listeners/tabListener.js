@@ -83,12 +83,12 @@ export default class TabListener {
       chrome.pageAction.show(tab.id, undefined);
       console.log('<TabListener> Updated: ', tab.url);
       if (!this.isTabCached()) this._cacheTab(tab.id);
-      if (
+      /*if (
         tab.url.includes('watch') &&
         LDNClient.getInstance().user.controllerState ===
           Constants.ControllerState.INACTIVE
       )
-        this._startControllerScript(tab.id);
+        this._startControllerScript(tab.id);*/
 
       const urlParams = TabListener.getUrlParams(tab);
       if (LDNClient.getInstance().user.urlParams !== urlParams) {

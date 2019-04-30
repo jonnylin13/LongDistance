@@ -10,8 +10,11 @@ class NetflixController {
   constructor() {
     this.ready = false;
     this.progressState = new ProgressState();
-    this.port = chrome.runtime.connect({ name: 'LDNController' });
+    this.port = chrome.runtime.connect('maifkckfibcbnaclilfbnpbdmcebaidi', {
+      name: 'LDNController'
+    });
     this.port.onMessage.addListener(msg => this.onMessage(msg));
+
     const observer = new MutationObserver((mutations, observer) => {
       mutations.forEach(mutation => {
         if (mutation.target.className === 'VideoContainer') {

@@ -3,19 +3,19 @@
   "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
   "version": "0.0.5",
   "manifest_version": 2,
-  "permissions": [
-    "tabs",
-    "declarativeContent",
-    "activeTab",
-    "storage",
-    "*://*.netflix.com/watch/*",
-    "*://netflix.com/watch/*"
-  ],
+  "permissions": ["tabs", "declarativeContent", "activeTab"],
   "background": {
     "scripts": ["ldn.bundle.js"],
     "persistent": true
   },
+  "content_scripts": [
+    {
+      "js": ["loader.js"],
+      "matches": ["https://www.netflix.com/watch/*"]
+    }
+  ],
   "page_action": {
     "default_popup": "popup.html"
-  }
+  },
+  "web_accessible_resources": ["controller.bundle.js"]
 }
