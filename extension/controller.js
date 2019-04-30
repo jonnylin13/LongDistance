@@ -51,7 +51,7 @@ class NetflixController {
       type: Constants.Protocol.Messages.UPDATE_STATE,
       controllerState: _controllerState
     };
-    chrome.runtime.sendMessage(req);
+    this.port.postMessage(req);
   }
 
   // ==============
