@@ -15,6 +15,10 @@ module.exports = class Lobby {
     return userId === this.controllerId;
   }
 
+  getController() {
+    return this.users[this.controllerId];
+  }
+
   contains(user) {
     return user.id in this.users;
   }

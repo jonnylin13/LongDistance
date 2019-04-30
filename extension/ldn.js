@@ -20,10 +20,12 @@ export default class LDNClient {
     this.ws = null;
     this.tabListener = new TabListener();
 
-    chrome.runtime.onMessage.addListener((req, sender, sendResponse) =>
-      this._onRuntimeMessage(req, sender, sendResponse)
-    );
-
+    chrome.runtime.onConnect.addListener(port => {
+      if (port.name === 'LDNController') {
+        this.controllerPort = port;
+        port.onMessage.addListener(msg => this.onControllerMessage(msg));
+      }
+    });
     console.log('<Info> LDN has been started!');
   }
 
@@ -106,6 +108,21 @@ export default class LDNClient {
                 this.user.lobbyId = msg.lobbyId;
                 this.user.controller = false;
                 if (this.user.id === null) this.user.id = data.userId;
+                // If the response contains controller
+                if (req.controller) {
+                  const controller = JSON.parse(req.controller);
+                  this._onMessage({
+                    data: JSON.stringify({
+                      type: Constants.Protocol.Messages.UPDATE_URL,
+                      urlParams: controller.urlParams
+                    })
+                  });
+                  this.controllerPort.postMessage({
+                    type: Constants.Protocol.Messages.UPDATE_STATE_TIME,
+                    progressState: controller.progressState,
+                    controllerState: controller.controllerState
+                  });
+                }
                 resolve(true);
               } else reject(false);
             } catch (err) {
@@ -191,7 +208,7 @@ export default class LDNClient {
     }
   }
 
-  _onRuntimeMessage(req, sender, sendResponse) {
+  onControllerMessage(req) {
     switch (req.type) {
       case Constants.Protocol.Messages.UPDATE_TIME:
         this.user.progressState = req.progressState;

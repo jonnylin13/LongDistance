@@ -10,6 +10,8 @@ class NetflixController {
   constructor() {
     this.ready = false;
     this.progressState = new ProgressState();
+    this.port = chrome.runtime.connect({ name: 'LDNController' });
+    this.port.onMessage.addListener(msg => this.onMessage(msg));
     const observer = new MutationObserver((mutations, observer) => {
       mutations.forEach(mutation => {
         if (mutation.target.className === 'VideoContainer') {
@@ -79,11 +81,6 @@ class NetflixController {
     return this._duration;
   }
 
-  sync() {
-    // TODO: Re-implement this
-    return;
-  }
-
   // ==============
   // Handler methods
   // ==============
@@ -110,7 +107,29 @@ class NetflixController {
       type: Constants.Protocol.Messages.UPDATE_TIME,
       progressState: this.progressState
     };
-    chrome.runtime.sendMessage(req);
+    this.port.postMessage(req);
+  }
+
+  onMessage(req) {
+    switch (req.type) {
+      case Constants.Protocol.Messages.UPDATE_STATE:
+        break;
+      case Constants.Protocol.Messages.UPDATE_TIME:
+        break;
+      case Constants.Protocol.Messages.UPDATE_STATE_TIME:
+        switch (req.controllerState) {
+          case Constants.ControllerState.PLAY:
+            this.play();
+            break;
+          case Constants.ControllerState.PENDING:
+          case Constants.ControllerState.PAUSE:
+            this.pause();
+          default:
+            break;
+        }
+        this.seek(req.progressState.elapsed);
+        break;
+    }
   }
 }
 

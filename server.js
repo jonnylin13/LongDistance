@@ -130,6 +130,11 @@ class LDNServer {
       response.code = Constants.Protocol.SUCCESS;
       this.sockets[user.id] = socket;
       // Send controller state if it is active?
+      if (
+        lobby.getController().controllerState !==
+        Constants.ControllerState.INACTIVE
+      )
+        response.controller = JSON.stringify(lobby.getController());
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);

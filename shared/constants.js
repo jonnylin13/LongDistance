@@ -27,8 +27,8 @@ module.exports.Protocol = Object.freeze({
     UPDATE_TIME_ACK: 'update_time_ack',
     UPDATE_STATE: 'update_state',
     UPDATE_STATE_ACK: 'update_state_ack',
-    GET_LOBBY_ID: 'get_lobby_id',
-    GET_LOBBY_ID_ACK: 'get_lobby_id_ack',
+    UPDATE_STATE_TIME: 'update_state_time',
+    UPDATE_STATE_TIME_ACK: 'update_state_time_ack',
     POPUP_LOADED: 'popup_loaded',
     POPUP_LOADED_ACK: 'popup_loaded_ack'
   }
