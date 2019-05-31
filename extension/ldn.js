@@ -19,13 +19,9 @@ export default class LDNClient {
     this.user = new User();
     this.ws = null;
     this.tabListener = new TabListener();
-
-    chrome.runtime.onConnect.addListener(port => {
-      if (port.name === 'LDNController') {
-        this.controllerPort = port;
-        port.onMessage.addListener(msg => this.onControllerMessage(msg));
-      }
-    });
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) =>
+      this._onRuntimeMessage(msg, sender, sendResponse)
+    );
     console.log('<Info> LDN has been started!');
   }
 
@@ -208,14 +204,19 @@ export default class LDNClient {
     }
   }
 
-  onControllerMessage(req) {
-    switch (req.type) {
-      case Constants.Protocol.Messages.UPDATE_TIME:
-        this.user.progressState = req.progressState;
-        break;
-      case Constants.Protocol.Messages.UPDATE_STATE:
-        this.user.controllerState = req.controllerState;
-        break;
+  _onRuntimeMessage(msg, sender, sendResponse) {
+    try {
+      // console.log(msg);
+      switch (msg.type) {
+        case Constants.Protocol.Messages.UPDATE_TIME:
+          this.user.progressState = msg.progressState;
+          break;
+        case Constants.Protocol.Messages.UPDATE_STATE:
+          this.user.controllerState = msg.controllerState;
+          break;
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 }

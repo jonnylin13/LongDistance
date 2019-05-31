@@ -10,10 +10,10 @@ class NetflixController {
   constructor() {
     this.ready = false;
     this.progressState = new ProgressState();
-    this.port = chrome.runtime.connect('maifkckfibcbnaclilfbnpbdmcebaidi', {
-      name: 'LDNController'
+
+    window.addEventListener('message', event => {
+      this.onMessage(event.data);
     });
-    this.port.onMessage.addListener(msg => this.onMessage(msg));
 
     const observer = new MutationObserver((mutations, observer) => {
       mutations.forEach(mutation => {
@@ -24,10 +24,20 @@ class NetflixController {
           this.player = this.videoPlayer.getVideoPlayerBySessionId(
             this.sessionId
           );
-          this.getVP().on('play', event => this.userPlay(event));
+          this.getVP().addEventListener('play', event => this.userPlay(event));
+          this.getVP().addEventListener('pause', event =>
+            this.userPause(event)
+          );
+          this.getVP().addEventListener('timeupdate', event =>
+            this.timeUpdate(event)
+          );
+          this.getVP().addEventListener('seeked', event =>
+            this.userSeek(event)
+          );
+          /** this.getVP().on('play', event => this.userPlay(event));
           this.getVP().on('pause', event => this.userPause(event));
           this.getVP().on('timeupdate', event => this.timeUpdate(event));
-          this.getVP().on('seeked', event => this.userSeek(event));
+          this.getVP().on('seeked', event => this.userSeek(event));*/
 
           console.log('<Controller> Script started!');
           observer.disconnect();
@@ -46,7 +56,7 @@ class NetflixController {
   // ===============
 
   getVP() {
-    return $('video');
+    return document.getElementsByTagName('video')[0];
   }
 
   stateUpdate(_controllerState) {
@@ -54,7 +64,7 @@ class NetflixController {
       type: Constants.Protocol.Messages.UPDATE_STATE,
       controllerState: _controllerState
     };
-    this.port.postMessage(req);
+    window.postMessage(req);
   }
 
   // ==============
@@ -110,7 +120,8 @@ class NetflixController {
       type: Constants.Protocol.Messages.UPDATE_TIME,
       progressState: this.progressState
     };
-    this.port.postMessage(req);
+
+    window.postMessage(req);
   }
 
   onMessage(req) {

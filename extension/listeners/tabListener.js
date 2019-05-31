@@ -44,7 +44,7 @@ export default class TabListener {
     LDNClient.getInstance().user.controllerState =
       Constants.ControllerState.PENDING;
 
-    chrome.tabs.executeScript(
+    /*chrome.tabs.executeScript(
       tabId,
       {
         file: 'scripts/jquery.min.js'
@@ -65,7 +65,7 @@ export default class TabListener {
           );
         } else throw new Error('Failed to start jQuery!');
       }
-    );
+    );*/
   }
 
   _uncacheTab() {
