@@ -118,10 +118,6 @@ export default class TabListener {
     if (tabId === this.tabId) this._uncacheTab();
   }
 
-  // ==============
-  // Static Methods (can be removed)
-  // ==============
-
   static isNetflix(tab) {
     if (!tab) return false;
     return tab.url.includes('https://www.netflix.com/');
