@@ -66,7 +66,7 @@ class LDNServer {
   }
 
   _onClose(event) {
-    // Do we do anything here?
+    // Do we do anything here ??
     console.log('<Warning> A WebSocket client disconnected.');
     return;
   }
@@ -130,11 +130,9 @@ class LDNServer {
       response.code = Constants.Protocol.SUCCESS;
       this.sockets[user.id] = socket;
       // Send controller state if it is active?
-      if (
-        lobby.getController().controllerState !==
-        Constants.ControllerState.INACTIVE
-      )
+      if (lobby.getController().controllerState > 0) {
         response.controller = JSON.stringify(lobby.getController());
+      }
     } catch (err) {
       response.code = Constants.Protocol.FAIL;
       console.log(err);

@@ -14,15 +14,13 @@ export default class LDNClient {
   }
 
   constructor() {
-    console.log('<Info> Starting LDN...');
-
     this.user = new User();
     this.ws = null;
     this.tabListener = new TabListener();
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) =>
       this._onRuntimeMessage(msg, sender, sendResponse)
     );
-    console.log('<Info> LDN has been started!');
+    console.log('<LDN> LDN has been started!');
   }
 
   // ===============
@@ -35,7 +33,7 @@ export default class LDNClient {
         try {
           this.ws = new WebSocket(Constants.WS_URL);
           this.ws.onopen = () => {
-            console.log('<Info> Connected to WebSocket server');
+            console.log('<LDN> Connected to WebSocket server');
             resolve(null);
           };
         } catch (err) {
@@ -113,7 +111,8 @@ export default class LDNClient {
                       urlParams: controller.urlParams
                     })
                   });
-                  this.controllerPort.postMessage({
+                  // Test this
+                  chrome.runtime.sendMessage(this.tabListener.tabId, {
                     type: Constants.Protocol.Messages.UPDATE_STATE_TIME,
                     progressState: controller.progressState,
                     controllerState: controller.controllerState
@@ -176,7 +175,7 @@ export default class LDNClient {
   _onMessage(event) {
     try {
       const data = JSON.parse(event.data);
-      console.log('<Info> Received message with type: ', data.type);
+      console.log('<LDN> Received message with type: ', data.type);
       switch (data.type) {
         case Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK:
           if (data.code === Constants.Protocol.SUCCESS) {

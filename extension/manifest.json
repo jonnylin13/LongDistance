@@ -15,7 +15,12 @@
     "scripts": ["ldn.bundle.js"],
     "persistent": true
   },
-
+  "content_scripts": [
+    {
+      "js": ["scripts/jquery.min.js", "loader.js"],
+      "matches": ["https://www.netflix.com/watch/*"]
+    }
+  ],
   "page_action": {
     "default_popup": "popup.html"
   },
