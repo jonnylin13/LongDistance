@@ -95,6 +95,7 @@ export default class LDNClient {
           this.ws.onmessage = event => {
             try {
               const data = JSON.parse(event.data);
+              console.log(data);
               if (
                 data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
                 data.code === Constants.Protocol.SUCCESS
