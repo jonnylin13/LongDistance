@@ -43,29 +43,17 @@ export default class TabListener {
     // TODO: Reimplement
     LDNClient.getInstance().user.controllerState =
       Constants.ControllerState.PENDING;
-
-    /*chrome.tabs.executeScript(
+    chrome.tabs.executeScript(
       tabId,
       {
-        file: 'scripts/jquery.min.js'
+        file: 'loader.js',
+        runAt: 'document_start'
       },
       results => {
-        if (results[0]) {
-          chrome.tabs.executeScript(
-            tabId,
-            {
-              file: 'controller.bundle.js',
-              runAt: 'document_idle'
-            },
-            results => {
-              if (results[0]) {
-                console.log('<TabListener> Controller script executed!');
-              } else throw new Error('Failed to start controller script.');
-            }
-          );
-        } else throw new Error('Failed to start jQuery!');
+        console.log('<TabListener> Attempted to run loader script!');
+        // throw new Error('Failed to start loader script.');
       }
-    );*/
+    );
   }
 
   _uncacheTab() {
@@ -83,12 +71,16 @@ export default class TabListener {
       chrome.pageAction.show(tab.id, undefined);
       console.log('<TabListener> Updated: ', tab.url);
       if (!this.isTabCached()) this._cacheTab(tab.id);
-      /*if (
+      if (
         tab.url.includes('watch') &&
         LDNClient.getInstance().user.controllerState ===
           Constants.ControllerState.INACTIVE
-      )
-        this._startControllerScript(tab.id);*/
+      ) {
+        this._startControllerScript(tab.id);
+      } else {
+        LDNClient.getInstance().user.controllerState =
+          Constants.ControllerState.INACTIVE;
+      }
 
       const urlParams = TabListener.getUrlParams(tab);
       if (LDNClient.getInstance().user.urlParams !== urlParams) {
@@ -139,5 +131,10 @@ export default class TabListener {
     if (!tab) return '';
     // TODO: Reimplement
     return tab.url.split('netflix.com/')[1].split('?')[0];
+  }
+
+  static reload(tabId) {
+    let code = 'window.location.reload()';
+    chrome.tabs.executeScript(tabId, { code: code });
   }
 }

@@ -11,6 +11,7 @@ class NetflixController {
     this.ready = false;
     this.progressState = new ProgressState();
 
+    // Messages from ldn.js and postMessage
     window.addEventListener('message', event => {
       this.onMessage(event.data);
     });
@@ -110,6 +111,7 @@ class NetflixController {
 
   userSeek(event) {
     // Todo
+    console.log('<Controller> Seek!');
     return;
   }
 

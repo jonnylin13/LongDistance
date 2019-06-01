@@ -206,7 +206,6 @@ export default class LDNClient {
 
   _onRuntimeMessage(msg, sender, sendResponse) {
     try {
-      // console.log(msg);
       switch (msg.type) {
         case Constants.Protocol.Messages.UPDATE_TIME:
           this.user.progressState = msg.progressState;
