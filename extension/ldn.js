@@ -95,7 +95,6 @@ export default class LDNClient {
           this.ws.onmessage = event => {
             try {
               const data = JSON.parse(event.data);
-              console.log(data);
               if (
                 data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
                 data.code === Constants.Protocol.SUCCESS
@@ -120,9 +119,14 @@ export default class LDNClient {
                   });
                 }
                 resolve(true);
-              } else reject(false);
+              } else {
+                console.log('If/else failed');
+                reject(false);
+              }
             } catch (err) {
               // Todo?
+
+              console.log('Try/catch failed');
               reject(false);
             } finally {
               this.ws.onmessage = event => this._onMessage(event);
