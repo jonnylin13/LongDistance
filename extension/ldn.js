@@ -190,17 +190,16 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.UPDATE_URL:
           if (this.user.urlParams !== data.urlParams) {
-            // Should be working
             chrome.tabs.update(this.tabListener.tabId, {
               url: 'https://netflix.com/' + data.urlParams
             });
           }
           break;
-        case Constants.Protocol.Messages.CONTROL_UPDATE:
-          // Needs testing, but simple enough
-          console.log('Updated control: ' + data.code);
+        case Constants.Protocol.Messages.UPDATE_CONTROL:
           this.user.controller = data.code;
           break;
+        default:
+          console.log('<LDN> Unhandled msg: ', data.type);
       }
     } catch (err) {
       console.log(err);
