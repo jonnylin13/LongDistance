@@ -198,6 +198,7 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.CONTROL_UPDATE:
           // Needs testing, but simple enough
+          console.log('Updated control: ' + data.code);
           this.user.controller = data.code;
           break;
       }
