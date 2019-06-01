@@ -120,13 +120,11 @@ export default class LDNClient {
                 }
                 resolve(true);
               } else {
-                console.log('If/else failed');
                 reject(false);
               }
             } catch (err) {
               // Todo?
-
-              console.log('Try/catch failed');
+              console.log(err);
               reject(false);
             } finally {
               this.ws.onmessage = event => this._onMessage(event);
