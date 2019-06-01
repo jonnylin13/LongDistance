@@ -103,8 +103,8 @@ export default class LDNClient {
                 this.user.controller = false;
                 if (this.user.id === null) this.user.id = data.userId;
                 // If the response contains controller
-                if (req.controller) {
-                  const controller = JSON.parse(req.controller);
+                if (data.controller) {
+                  const controller = JSON.parse(data.controller);
                   this._onMessage({
                     data: JSON.stringify({
                       type: Constants.Protocol.Messages.UPDATE_URL,
