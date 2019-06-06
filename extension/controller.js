@@ -133,6 +133,7 @@ class NetflixController {
       case Constants.Protocol.Messages.UPDATE_TIME:
         break;
       case Constants.Protocol.Messages.UPDATE_STATE_TIME:
+        console.log(req);
         switch (req.controllerState) {
           case Constants.ControllerState.PLAY:
             this.play();
