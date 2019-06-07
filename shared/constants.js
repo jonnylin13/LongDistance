@@ -29,6 +29,8 @@ module.exports.Protocol = Object.freeze({
     UPDATE_STATE_ACK: 'update_state_ack',
     UPDATE_STATE_TIME: 'update_state_time',
     UPDATE_STATE_TIME_ACK: 'update_state_time_ack',
+    UPDATE_CONTROL_SCRIPT: 'update_control_script',
+    UPDATE_CONTROL_SCRIPT_ACK: 'update_control_script_ack',
     POPUP_LOADED: 'popup_loaded',
     POPUP_LOADED_ACK: 'popup_loaded_ack'
   }

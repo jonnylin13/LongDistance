@@ -1,7 +1,7 @@
 {
   "name": "Long Distance Netflix",
   "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "manifest_version": 2,
   "permissions": [
     "tabs",
@@ -15,12 +15,6 @@
     "scripts": ["ldn.bundle.js"],
     "persistent": true
   },
-  "content_scripts": [
-    {
-      "js": ["scripts/jquery.min.js", "loader.js"],
-      "matches": ["https://www.netflix.com/watch/*"]
-    }
-  ],
   "page_action": {
     "default_popup": "popup.html"
   },

@@ -6,15 +6,68 @@ import ProgressState from '../shared/model/progressState';
 // https://stackoverflow.com/questions/41985502/how-to-interact-with-netflix-cadmium-video-player-on-the-client
 // https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
 
+const spinner = document.createElement('div');
+spinner.id = 'ldn-spinner';
+spinner.style.position = 'absolute';
+spinner.style.display = 'flex';
+spinner.style.alignItems = 'center';
+spinner.style.justifyContent = 'center';
+spinner.style.top = '50%';
+spinner.style.left = '50%';
+spinner.style.padding = '2rem';
+spinner.style.transform = 'translate(-50%, -50%)';
+spinner.style.height = '100%';
+spinner.style.width = '100%';
+spinner.style.color = 'black';
+spinner.style.backgroundColor = 'white';
+spinner.style.zIndex = '1000';
+
+const memberJoin = 'Please wait while other members join.';
+const videoLoad = 'Please wait while Netflix loads.';
+
+function spinHtml(msg) {
+  return (
+    '<div style="text-align: center;"><h1>' +
+    msg +
+    '</h1><img src="https://cdnjs.cloudflare.com/ajax/libs/galleriffic/2.0.1/css/loader.gif" /></div>'
+  );
+}
+
 class NetflixController {
   constructor() {
-    this.ready = false;
+    this.enabled = false;
+    this.syncing = false;
     this.progressState = new ProgressState();
+    this.ignoreQ = [];
 
     // Messages from ldn.js and postMessage
     window.addEventListener('message', event => {
       this.onMessage(event.data);
     });
+
+    this._enable();
+  }
+
+  // ===============
+  // Private Methods
+  // ===============
+
+  getVP() {
+    return document.getElementsByTagName('video')[0];
+  }
+
+  stateUpdate(_controllerState) {
+    const req = {
+      type: Constants.Protocol.Messages.UPDATE_STATE,
+      controllerState: _controllerState
+    };
+    window.postMessage(req);
+  }
+
+  _enable() {
+    if (this.enabled) return;
+    spinner.innerHTML = spinHtml(videoLoad);
+    this.sync();
 
     const observer = new MutationObserver((mutations, observer) => {
       mutations.forEach(mutation => {
@@ -35,13 +88,12 @@ class NetflixController {
           this.getVP().addEventListener('seeked', event =>
             this.userSeek(event)
           );
-          /** this.getVP().on('play', event => this.userPlay(event));
-          this.getVP().on('pause', event => this.userPause(event));
-          this.getVP().on('timeupdate', event => this.timeUpdate(event));
-          this.getVP().on('seeked', event => this.userSeek(event));*/
 
-          console.log('<Controller> Script started!');
+          console.log('<Controller> Script enabled!');
           observer.disconnect();
+          this.enabled = true;
+          this.pause();
+          spinner.innerHTML = spinHtml(memberJoin);
         }
       });
     });
@@ -52,20 +104,10 @@ class NetflixController {
     });
   }
 
-  // ===============
-  // Private Methods
-  // ===============
-
-  getVP() {
-    return document.getElementsByTagName('video')[0];
-  }
-
-  stateUpdate(_controllerState) {
-    const req = {
-      type: Constants.Protocol.Messages.UPDATE_STATE,
-      controllerState: _controllerState
-    };
-    window.postMessage(req);
+  _disable() {
+    if (!this.enabled) return;
+    this.unlock();
+    this.enabled = false;
   }
 
   // ==============
@@ -73,23 +115,44 @@ class NetflixController {
   // ==============
 
   seek(time) {
-    if (this.ready) this.player.seek(this.currentTime + time);
+    if (this.enabled) {
+      this.player.seek(this.currentTime + time);
+      this.ignoreQ.push('seek');
+    }
   }
 
   play() {
-    if (this.ready) this.player.play();
+    if (this.enabled) {
+      this.player.play();
+      this.ignoreQ.push('play');
+    }
   }
 
   pause() {
-    if (this.ready) this.player.pause();
+    if (this.enabled) {
+      this.player.pause();
+      this.ignoreQ.push('pause');
+    }
+  }
+
+  sync() {
+    document.body.appendChild(spinner);
+    this.syncing = true;
+  }
+
+  unlock() {
+    if (this.enabled) {
+      spinner.remove();
+      this.syncing = false;
+    }
   }
 
   get currentTime() {
-    if (this.ready) return this.player.getCurrentTime();
+    if (this.enabled) return this.player.getCurrentTime();
   }
 
   get duration() {
-    if (this.ready && !this._duration) {
+    if (this.enabled && !this._duration) {
       this._duration = this.player.getDuration();
     }
     return this._duration;
@@ -99,18 +162,34 @@ class NetflixController {
   // Handler methods
   // ==============
 
+  _shouldIgnore(event) {
+    if (this.ignoreQ.length < 1) {
+      return false;
+    }
+    let frontType = this.ignoreQ[0];
+    if (frontType === event.type) {
+      this.ignoreQ.splice(0, 1);
+      return true;
+    }
+    return false;
+  }
   userPlay(event) {
+    if (this._shouldIgnore(event)) return;
     console.log('<Controller> Play!');
+    console.log(event);
     this.stateUpdate(Constants.ControllerState.PLAY);
   }
 
   userPause(event) {
+    if (this._shouldIgnore(event)) return;
     console.log('<Controller> Pause!');
+    console.log(event);
     this.stateUpdate(Constants.ControllerState.PAUSE);
   }
 
   userSeek(event) {
     // Todo
+    if (this._shouldIgnore(event)) return;
     console.log('<Controller> Seek!');
     return;
   }
@@ -127,13 +206,22 @@ class NetflixController {
   }
 
   onMessage(req) {
+    if (req.type === Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT) {
+      console.log(req);
+      if (req.code) this._enable();
+      else this._disable();
+    }
+    if (!this.enabled) {
+      console.log('<Controller> Received a message while disabled.');
+      return;
+    }
     switch (req.type) {
       case Constants.Protocol.Messages.UPDATE_STATE:
         break;
       case Constants.Protocol.Messages.UPDATE_TIME:
         break;
       case Constants.Protocol.Messages.UPDATE_STATE_TIME:
-        console.log(req);
+        // console.log(req);
         switch (req.controllerState) {
           case Constants.ControllerState.PLAY:
             this.play();

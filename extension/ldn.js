@@ -112,7 +112,8 @@ export default class LDNClient {
                     })
                   });
                   // Test this
-                  chrome.runtime.sendMessage(this.tabListener.tabId, {
+                  // Probably not necessary
+                  chrome.tabs.sendMessage(this.tabListener.tabId, {
                     type: Constants.Protocol.Messages.UPDATE_STATE_TIME,
                     progressState: controller.progressState,
                     controllerState: controller.controllerState
@@ -151,15 +152,17 @@ export default class LDNClient {
   setUrlParams(urlParams) {
     this.user.urlParams = urlParams;
     // If the user is a controller && user is watching new content, then send url update request to server
-    if (this.user.controller && urlParams.includes('watch/')) {
-      this._connect().then(() => {
-        const msg = {
-          type: Constants.Protocol.Messages.UPDATE_URL,
-          urlParams: this.user.urlParams,
-          user: JSON.stringify(this.user)
-        };
-        this.ws.send(JSON.stringify(msg));
-      });
+    if (this.user.controller) {
+      if (urlParams.includes('watch/')) {
+        this._connect().then(() => {
+          const msg = {
+            type: Constants.Protocol.Messages.UPDATE_URL,
+            urlParams: this.user.urlParams,
+            user: JSON.stringify(this.user)
+          };
+          this.ws.send(JSON.stringify(msg));
+        });
+      }
     }
   }
 
