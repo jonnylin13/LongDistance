@@ -46,9 +46,7 @@ export default class TabListener {
     );
   }
 
-  // TODO: How do we remove the controller script?
   _startControllerScript() {
-    // TODO: Reimplement
     LDNClient.getInstance().user.controllerState =
       Constants.ControllerState.PENDING;
     if (this.loaded) {

@@ -1,6 +1,6 @@
 {
   "name": "Long Distance Netflix",
-  "description": "This extension allows users to establish a server-client connection to simultaneously stream Netflix content.",
+  "description": "Create lobbies with an invite code and watch Netflix with your friends!",
   "version": "0.0.8",
   "manifest_version": 2,
   "permissions": [
