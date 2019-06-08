@@ -37,6 +37,7 @@ class NetflixController {
   constructor() {
     this.enabled = false;
     this.syncing = false;
+    this.controllerProgress = new ProgressState();
     this.progressState = new ProgressState();
     this.ignoreQ = [];
 
@@ -66,8 +67,7 @@ class NetflixController {
 
   _enable() {
     if (this.enabled) return;
-    spinner.innerHTML = spinHtml(videoLoad);
-    this.sync();
+    this.lock(videoLoad);
 
     const observer = new MutationObserver((mutations, observer) => {
       mutations.forEach(mutation => {
@@ -78,6 +78,8 @@ class NetflixController {
           this.player = this.videoPlayer.getVideoPlayerBySessionId(
             this.sessionId
           );
+          this.progressState.elapsed = this.player.getCurrentTime();
+          this.progressState.duration = this.player.getDuration();
           this.getVP().addEventListener('play', event => this.userPlay(event));
           this.getVP().addEventListener('pause', event =>
             this.userPause(event)
@@ -93,13 +95,10 @@ class NetflixController {
           observer.disconnect();
           this.enabled = true;
 
-          // Enter sync mode, ping ldn.js
+          // Enter sync mode, init sync mode with ldn.js
           this.pause();
           spinner.innerHTML = spinHtml(memberJoin);
-          this.unlock();
-          this.progressState.elapsed = this.player.getCurrentTime();
-          this.progressState.duration = this.player.getDuration();
-          this.ping();
+          this.init();
         }
       });
     });
@@ -141,7 +140,8 @@ class NetflixController {
     }
   }
 
-  sync() {
+  lock(msg) {
+    spinner.innerHTML = spinHtml(msg);
     document.body.appendChild(spinner);
     this.syncing = true;
   }
@@ -209,10 +209,9 @@ class NetflixController {
     window.postMessage(req);
   }
 
-  ping() {
+  init() {
     const req = {
-      type: Constants.Protocol.Messages.SYNC_PING,
-      progressState: this.progressState
+      type: Constants.Protocol.Messages.SYNC_INIT
     };
 
     window.postMessage(req);
@@ -230,8 +229,19 @@ class NetflixController {
         if (req.code) this._enable();
         else this._disable();
         break;
-      case Constants.Protocol.Messages.RESYNC:
+      case Constants.Protocol.Messages.SYNC_TIME:
         // TODO
+        this.controllerProgress = req.progressState;
+        this.seek(this.controllerProgress.getElapsed());
+        const ack = {
+          type: Constants.Protocol.Messages.SYNC_TIME_ACK,
+          code: Constants.Protocol.Messages.SUCCESS
+        };
+        window.postMessage(ack);
+        break;
+      case Constants.Protocol.Messages.SYNC_END:
+        this.unlock();
+        this.play();
         break;
     }
     if (!this.enabled) {
@@ -246,6 +256,7 @@ class NetflixController {
       case Constants.Protocol.Messages.UPDATE_TIME:
         break;
       case Constants.Protocol.Messages.UPDATE_STATE_TIME:
+        // Keep for now, but this should be removed eventually
         // console.log(req);
         switch (req.controllerState) {
           case Constants.ControllerState.PLAY:

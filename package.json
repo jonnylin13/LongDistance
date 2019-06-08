@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "test": "mocha 'test/**/*.spec.js' --exit",
-    "start": "node server.js",
+    "start": "node server/server.js",
     "build": "webpack --prod",
     "dev": "npm run build && npm run start"
   },

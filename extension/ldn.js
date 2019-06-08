@@ -195,9 +195,16 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_CONTROL:
           this.user.controller = data.code;
           break;
-        case Constants.Protocol.Messages.RESYNC:
-          // TODO: Handle resync...
-
+        case Constants.Protocol.Messages.SYNC_TIME:
+          // TODO: Handle sync time...
+          chrome.tabs.sendMessage(this.tabId, data);
+          break;
+        case Constants.Protocol.Messages.SYNC_INIT_ACK:
+          this.user.syncState = data.syncState;
+          break;
+        case Constants.Protocol.Messages.SYNC_END:
+          this.user.syncState = data.syncState;
+          chrome.tabs.sendMessage(this.tabId, data);
           break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);
@@ -216,15 +223,9 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_STATE:
           this.user.controllerState = msg.controllerState;
           break;
-        case Constants.Protocol.Messages.SYNC_PING:
-          this.user.progressState = msg.progressState;
-          if (this.user.controller) {
-            const msg = {
-              type: Constants.Protocol.Messages.SYNC_PING,
-              user: this.user
-            };
-            this.ws.send(JSON.stringify(msg));
-          }
+        case Constants.Protocol.Messages.SYNC_INIT:
+        case Constants.Protocol.Messages.SYNC_TIME_ACK:
+          this.ws.send(JSON.stringify(msg));
           break;
       }
     } catch (err) {
