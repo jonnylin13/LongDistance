@@ -212,11 +212,7 @@ class LDNServer {
     try {
       const user = User.fromJson(data.user);
       const lobby = this.getLobby(user.lobbyId);
-      if (lobby.isController(user)) {
-        user.syncState = Constants.SyncState.SYNCED;
-      } else {
-        user.syncState = Constants.SyncState.PENDING;
-      }
+      user.syncState = Constants.SyncState.PENDING;
       lobby.updateUser(user);
       console.log(lobby.isSynced());
       console.log(lobby.users);
@@ -227,6 +223,9 @@ class LDNServer {
           progressState: lobby.getController().progressState
         };
         this._emit(lobby, syncTime);
+
+        // Set controller sync state to synced?
+        lobby.getController().syncState = Constants.SyncState.SYNCED;
       }
       response.syncState = user.syncState;
       response.code = Constants.Protocol.SUCCESS;

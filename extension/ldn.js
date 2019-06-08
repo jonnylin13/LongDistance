@@ -196,14 +196,14 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.SYNC_TIME:
           // TODO: Handle sync time...
-          chrome.tabs.sendMessage(this.tabId, data);
+          chrome.tabs.sendMessage(this.tabListener.tabId, data);
           break;
         case Constants.Protocol.Messages.SYNC_INIT_ACK:
           this.user.syncState = data.syncState;
           break;
         case Constants.Protocol.Messages.SYNC_END:
           this.user.syncState = data.syncState;
-          chrome.tabs.sendMessage(this.tabId, data);
+          chrome.tabs.sendMessage(this.tabListener.tabId, data);
           break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);
