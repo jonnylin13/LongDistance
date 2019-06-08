@@ -10,8 +10,8 @@ module.exports = class Lobby {
   isSynced() {
     if (this.users.length < 1) return false;
     let syncState = this.getController().syncState;
-    for (let user of this.users) {
-      if (user.syncState !== syncState) return false;
+    for (let userId in this.users) {
+      if (this.users[userId].syncState !== syncState) return false;
     }
     return true;
   }

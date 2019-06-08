@@ -103,7 +103,6 @@ export default class LDNClient {
                 this.user.controller = false;
                 if (this.user.id === null) this.user.id = data.userId;
                 // If the response contains controller
-                console.log(data);
                 if (data.controller) {
                   const controller = JSON.parse(data.controller);
                   this._onMessage({

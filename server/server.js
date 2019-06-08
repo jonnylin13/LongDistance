@@ -218,6 +218,8 @@ class LDNServer {
         user.syncState = Constants.SyncState.PENDING;
       }
       lobby.updateUser(user);
+      console.log(lobby.isSynced());
+      console.log(lobby.users);
       if (lobby.isSynced()) {
         // Emit sync_time
         const syncTime = {
