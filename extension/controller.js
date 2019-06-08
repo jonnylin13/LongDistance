@@ -37,7 +37,7 @@ class NetflixController {
   constructor() {
     this.enabled = false;
     this.syncing = false;
-    this.controllerProgress = new ProgressState();
+    this.controllerProgress = new ProgressState(); // For sync
     this.progressState = new ProgressState();
     this.ignoreQ = [];
 
