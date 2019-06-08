@@ -57,14 +57,6 @@ class NetflixController {
     return document.getElementsByTagName('video')[0];
   }
 
-  stateUpdate(_controllerState) {
-    const req = {
-      type: Constants.Protocol.Messages.UPDATE_STATE,
-      controllerState: _controllerState
-    };
-    window.postMessage(req);
-  }
-
   _enable() {
     if (this.enabled) return;
     this.lock(videoLoad);
@@ -164,6 +156,11 @@ class NetflixController {
     return this._duration;
   }
 
+  _updateProgress() {
+    this.progressState.elapsed = this.player.getCurrentTime();
+    this.progressState.duration = this.player.getDuration();
+  }
+
   // ==============
   // Handler methods
   // ==============
@@ -178,6 +175,33 @@ class NetflixController {
       return true;
     }
     return false;
+  }
+
+  stateUpdate(_controllerState) {
+    const req = {
+      type: Constants.Protocol.Messages.UPDATE_STATE,
+      controllerState: _controllerState
+    };
+    window.postMessage(req);
+  }
+
+  timeUpdate(event) {
+    this._updateProgress();
+    const req = {
+      type: Constants.Protocol.Messages.UPDATE_TIME,
+      progressState: this.progressState
+    };
+
+    window.postMessage(req);
+  }
+
+  seekUpdate() {
+    this._updateProgress();
+    const req = {
+      type: Constants.Protocol.Messages.UPDATE_SEEK,
+      progressState: this.progressState
+    };
+    window.postMessage(req);
   }
   userPlay(event) {
     if (this._shouldIgnore(event)) return;
@@ -195,18 +219,8 @@ class NetflixController {
     // Todo
     if (this._shouldIgnore(event)) return;
     console.log('<Controller> Seek!');
+    this.seekUpdate();
     return;
-  }
-
-  timeUpdate(event) {
-    this.progressState.elapsed = this.player.getCurrentTime();
-    this.progressState.duration = this.player.getDuration();
-    const req = {
-      type: Constants.Protocol.Messages.UPDATE_TIME,
-      progressState: this.progressState
-    };
-
-    window.postMessage(req);
   }
 
   init() {
@@ -218,11 +232,6 @@ class NetflixController {
   }
 
   onMessage(req) {
-    if (req.type === Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT) {
-      console.log(req);
-      if (req.code) this._enable();
-      else this._disable();
-    }
     switch (req.type) {
       case Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT:
         console.log(req);
@@ -251,12 +260,6 @@ class NetflixController {
     }
     switch (req.type) {
       case Constants.Protocol.Messages.UPDATE_STATE:
-        break;
-      case Constants.Protocol.Messages.UPDATE_TIME:
-        break;
-      case Constants.Protocol.Messages.UPDATE_STATE_TIME:
-        // Keep for now, but this should be removed eventually
-        // console.log(req);
         switch (req.controllerState) {
           case Constants.ControllerState.PLAY:
             this.play();
@@ -267,6 +270,8 @@ class NetflixController {
           default:
             break;
         }
+        break;
+      case Constants.Protocol.Messages.UPDATE_SEEK:
         this.seek(req.progressState.elapsed);
         break;
     }

@@ -68,6 +68,10 @@ class LDNServer {
       case Constants.Protocol.Messages.SYNC_TIME_ACK:
         this._syncTimeAck(socket, data);
         break;
+      case Constants.Protocol.Messages.UPDATE_STATE:
+      case Constants.Protocol.Messages.UPDATE_SEEK:
+        this.emitIfController(socket, data);
+        break;
     }
   }
 
@@ -254,6 +258,19 @@ class LDNServer {
     }
   }
 
+  emitIfController(socket, data) {
+    try {
+      const user = User.fromJson(data.user);
+      const lobby = this.getLobby(user.lobbyId);
+      lobby.updateUser(user);
+      if (lobby.isController(user)) {
+        this._emit(lobby, data);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   _emit(lobby, msg, sendController = false) {
     console.log('<Info> Emitting a msg ' + msg.type + ' to ' + lobby.id);
     Object.keys(lobby.users).forEach(userId => {
@@ -304,5 +321,4 @@ class LDNServer {
   }
 }
 
-// So we can do testing?
 module.exports = new LDNServer(true);
