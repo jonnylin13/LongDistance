@@ -97,7 +97,7 @@ export default class LDNClient {
               const data = JSON.parse(event.data);
               if (
                 data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
-                data.code === Constants.Protocol.SUCCESS
+                data.code
               ) {
                 this.user.lobbyId = msg.lobbyId;
                 this.user.controller = false;
