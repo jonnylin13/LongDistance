@@ -212,7 +212,11 @@ class LDNServer {
     try {
       const user = User.fromJson(data.user);
       const lobby = this.getLobby(user.lobbyId);
-      user.syncState = Constants.SyncState.PENDING;
+      if (lobby.isController(user)) {
+        user.syncState = Constants.SyncState.SYNCED;
+      } else {
+        user.syncState = Constants.SyncState.PENDING;
+      }
       lobby.updateUser(user);
       if (lobby.isSynced()) {
         // Emit sync_time

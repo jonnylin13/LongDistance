@@ -225,6 +225,7 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.SYNC_INIT:
         case Constants.Protocol.Messages.SYNC_TIME_ACK:
+          msg.user = JSON.stringify(this.user);
           this.ws.send(JSON.stringify(msg));
           break;
       }
