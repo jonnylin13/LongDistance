@@ -195,11 +195,9 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_CONTROL:
           this.user.controller = data.code;
           break;
-        case Constants.Protocol.Messages.SEEK:
-          chrome.tabs.sendMessage(this.tabListener.tabId, {
-            type: data.type,
-            progressState: data.user.progressState
-          });
+        case Constants.Protocol.Messages.RESYNC:
+          // TODO: Handle resync...
+
           break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);

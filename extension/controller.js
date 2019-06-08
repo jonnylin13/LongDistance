@@ -224,6 +224,16 @@ class NetflixController {
       if (req.code) this._enable();
       else this._disable();
     }
+    switch (req.type) {
+      case Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT:
+        console.log(req);
+        if (req.code) this._enable();
+        else this._disable();
+        break;
+      case Constants.Protocol.Messages.RESYNC:
+        // TODO
+        break;
+    }
     if (!this.enabled) {
       console.log(
         '<Controller> Received a message <' + req.type + '>  while disabled.'

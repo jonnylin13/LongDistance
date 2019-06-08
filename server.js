@@ -211,7 +211,7 @@ class LDNServer {
       const lobby = this.getLobby(user.lobbyId);
       if (lobby.isController(user)) {
         const update = {
-          type: data.type,
+          type: Constants.Protocol.Messages.RESYNC,
           progressState: user.progressState
         };
         lobby.updateUser(user);
