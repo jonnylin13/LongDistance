@@ -19,6 +19,8 @@ module.exports.Protocol = Object.freeze({
     DISCONNECT_LOBBY_ACK: 'disconnect_lobby_ack',
     CONNECT_LOBBY: 'connect_lobby',
     CONNECT_LOBBY_ACK: 'connect_lobby_ack',
+    SYNC_PING: 'sync_ping',
+    SYNC_PING_ACK: 'sync_ping_ack',
     UPDATE_URL: 'update_url',
     UPDATE_URL_ACK: 'update_url_ack',
     UPDATE_CONTROL: 'update_control',

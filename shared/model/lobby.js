@@ -19,6 +19,10 @@ module.exports = class Lobby {
     return this.users[this.controllerId];
   }
 
+  updateUser(user) {
+    this.users[user.id] = user;
+  }
+
   contains(user) {
     return user.id in this.users;
   }

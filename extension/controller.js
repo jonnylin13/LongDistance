@@ -92,8 +92,14 @@ class NetflixController {
           console.log('<Controller> Script enabled!');
           observer.disconnect();
           this.enabled = true;
+
+          // Enter sync mode, ping ldn.js
           this.pause();
           spinner.innerHTML = spinHtml(memberJoin);
+          this.unlock();
+          this.progressState.elapsed = this.player.getCurrentTime();
+          this.progressState.duration = this.player.getDuration();
+          this.ping();
         }
       });
     });
@@ -176,14 +182,12 @@ class NetflixController {
   userPlay(event) {
     if (this._shouldIgnore(event)) return;
     console.log('<Controller> Play!');
-    console.log(event);
     this.stateUpdate(Constants.ControllerState.PLAY);
   }
 
   userPause(event) {
     if (this._shouldIgnore(event)) return;
     console.log('<Controller> Pause!');
-    console.log(event);
     this.stateUpdate(Constants.ControllerState.PAUSE);
   }
 
@@ -195,10 +199,19 @@ class NetflixController {
   }
 
   timeUpdate(event) {
-    this.progressState.elapsed = event.target.currentTime;
-    this.progressState.duration = event.target.duration;
+    this.progressState.elapsed = this.player.getCurrentTime();
+    this.progressState.duration = this.player.getDuration();
     const req = {
       type: Constants.Protocol.Messages.UPDATE_TIME,
+      progressState: this.progressState
+    };
+
+    window.postMessage(req);
+  }
+
+  ping() {
+    const req = {
+      type: Constants.Protocol.Messages.SYNC_PING,
       progressState: this.progressState
     };
 
@@ -212,7 +225,9 @@ class NetflixController {
       else this._disable();
     }
     if (!this.enabled) {
-      console.log('<Controller> Received a message while disabled.');
+      console.log(
+        '<Controller> Received a message <' + req.type + '>  while disabled.'
+      );
       return;
     }
     switch (req.type) {

@@ -62,6 +62,9 @@ class LDNServer {
       case Constants.Protocol.Messages.UPDATE_URL:
         this._updateUrl(socket, data);
         break;
+      case Constants.Protocol.Messages.SYNC_PING:
+        this._sync(socket, data);
+        break;
     }
   }
 
@@ -130,7 +133,7 @@ class LDNServer {
       response.code = Constants.Protocol.SUCCESS;
       this.sockets[user.id] = socket;
       // Send controller state if it is active?
-      if (lobby.getController().controllerState > 0) {
+      if (lobby.getController().urlParams.includes('watch/')) {
         response.controller = JSON.stringify(lobby.getController());
       }
     } catch (err) {
@@ -185,10 +188,36 @@ class LDNServer {
           type: data.type,
           urlParams: data.urlParams
         };
+        lobby.updateUser(user);
         this._emit(lobby, updateRequest);
         response.code = Constants.Protocol.SUCCESS;
       } else {
         response.code = Constants.Protocol.FAIL;
+      }
+    } catch (err) {
+      response.code = Constants.Protocol.FAIL;
+      console.log(err);
+    }
+    socket.send(JSON.stringify(response));
+  }
+
+  _sync(socket, data) {
+    // TODO urgent
+    const response = {
+      type: Constants.Protocol.Messages.SYNC_PING_ACK
+    };
+    try {
+      const user = User.fromJson(data.user);
+      const lobby = this.getLobby(user.lobbyId);
+      if (lobby.isController(user)) {
+        const update = {
+          type: data.type,
+          progressState: user.progressState
+        };
+        lobby.updateUser(user);
+        this._emit(lobby, update);
+        response.code = Constants.Protocol.SUCCESS;
+      } else {
       }
     } catch (err) {
       response.code = Constants.Protocol.FAIL;

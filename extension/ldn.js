@@ -103,6 +103,7 @@ export default class LDNClient {
                 this.user.controller = false;
                 if (this.user.id === null) this.user.id = data.userId;
                 // If the response contains controller
+                console.log(data);
                 if (data.controller) {
                   const controller = JSON.parse(data.controller);
                   this._onMessage({
@@ -110,13 +111,6 @@ export default class LDNClient {
                       type: Constants.Protocol.Messages.UPDATE_URL,
                       urlParams: controller.urlParams
                     })
-                  });
-                  // Test this
-                  // Probably not necessary
-                  chrome.tabs.sendMessage(this.tabListener.tabId, {
-                    type: Constants.Protocol.Messages.UPDATE_STATE_TIME,
-                    progressState: controller.progressState,
-                    controllerState: controller.controllerState
                   });
                 }
                 resolve(true);
@@ -201,6 +195,12 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_CONTROL:
           this.user.controller = data.code;
           break;
+        case Constants.Protocol.Messages.SEEK:
+          chrome.tabs.sendMessage(this.tabListener.tabId, {
+            type: data.type,
+            progressState: data.user.progressState
+          });
+          break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);
       }
@@ -217,6 +217,16 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.UPDATE_STATE:
           this.user.controllerState = msg.controllerState;
+          break;
+        case Constants.Protocol.Messages.SYNC_PING:
+          this.user.progressState = msg.progressState;
+          if (this.user.controller) {
+            const msg = {
+              type: Constants.Protocol.Messages.SYNC_PING,
+              user: this.user
+            };
+            this.ws.send(JSON.stringify(msg));
+          }
           break;
       }
     } catch (err) {
