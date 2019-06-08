@@ -1,8 +1,8 @@
 const expect = require('chai').expect;
-const LDNServer = require('../server');
-const User = require('../shared/model/user');
-const Constants = require('../shared/constants');
-const ProgressState = require('../shared/model/progressState');
+const LDNServer = require('../../server/server');
+const User = require('../../shared/model/user');
+const Constants = require('../../shared/constants');
+const ProgressState = require('../../shared/model/progressState');
 
 let _data = null;
 let socket = {
@@ -11,16 +11,8 @@ let socket = {
     _data = data;
   }
 };
-const _user = new User(
-  Constants.ControllerState.INACTIVE,
-  '',
-  new ProgressState()
-);
-const _user2 = new User(
-  Constants.ControllerState.INACTIVE,
-  '',
-  new ProgressState()
-);
+const _user = new User();
+const _user2 = new User();
 
 describe('LDNServer#startLobby', () => {
   it('should return lobbyId and userId', () => {
