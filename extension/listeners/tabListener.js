@@ -5,6 +5,7 @@ export default class TabListener {
   // TODO: Should we execute the script when popup.js is instantiated?
   constructor() {
     // TODO: Check implementation
+    this.loaded = false;
     this._queryNetflixTab();
     chrome.tabs.onCreated.addListener(tab => {
       this.onCreate(tab);
@@ -14,6 +15,13 @@ export default class TabListener {
     });
     chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
       this.onRemove(tabId, removeInfo);
+    });
+    chrome.webNavigation.onCompleted.addListener(details => {
+      if (TabListener.isNetflix(details) && details.url.includes('watch/')) {
+        // Reload the controller script
+        this.loaded = false;
+        this._startControllerScript();
+      }
     });
     this.tabId = -1; // not found
     console.log('<TabListener> Tab listener started!');
@@ -38,26 +46,40 @@ export default class TabListener {
     );
   }
 
-  // TODO: How do we remove the controller script?
-  _startControllerScript(tabId) {
-    // TODO: Reimplement
+  _startControllerScript() {
     LDNClient.getInstance().user.controllerState =
       Constants.ControllerState.PENDING;
+    if (this.loaded) {
+      chrome.tabs.sendMessage(this.tabId, {
+        type: Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT,
+        code: true
+      });
+      return;
+    }
     chrome.tabs.executeScript(
-      tabId,
+      this.tabId,
       {
         file: 'loader.js',
         runAt: 'document_start'
       },
       results => {
+        this.loaded = true;
         console.log('<TabListener> Attempted to run loader script!');
         // throw new Error('Failed to start loader script.');
       }
     );
   }
 
+  _disableControllerScript() {
+    chrome.tabs.sendMessage(this.tabId, {
+      type: Constants.Protocol.Messages.UPDATE_CONTROL_SCRIPT,
+      code: false
+    });
+  }
+
   _uncacheTab() {
     console.log('<TabListener> Removing tab id: ' + this.tabId);
+    this.loaded = false;
     this.tabId = -1;
   }
 
@@ -76,10 +98,11 @@ export default class TabListener {
         LDNClient.getInstance().user.controllerState ===
           Constants.ControllerState.INACTIVE
       ) {
-        this._startControllerScript(tab.id);
+        this._startControllerScript();
       } else {
         LDNClient.getInstance().user.controllerState =
           Constants.ControllerState.INACTIVE;
+        this._disableControllerScript();
       }
 
       const urlParams = TabListener.getUrlParams(tab);
@@ -87,6 +110,8 @@ export default class TabListener {
         console.log('<TabListener> Updated user url parameters: ' + urlParams);
         LDNClient.getInstance().setUrlParams(urlParams);
       }
+    } else {
+      this._uncacheTab();
     }
   }
 
@@ -127,10 +152,5 @@ export default class TabListener {
     if (!tab) return '';
     // TODO: Reimplement
     return tab.url.split('netflix.com/')[1].split('?')[0];
-  }
-
-  static reload(tabId) {
-    let code = 'window.location.reload()';
-    chrome.tabs.executeScript(tabId, { code: code });
   }
 }

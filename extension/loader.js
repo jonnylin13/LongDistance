@@ -1,19 +1,21 @@
+// Script
+
 var s = document.createElement('script');
+s.id = 'controller.js';
 s.src = chrome.extension.getURL('controller.bundle.js');
 
-s.onload = function() {
+s.onload = () => {
   s.remove();
 };
 
 // Messages from controller.js and any window.postMessage in this context
 window.addEventListener('message', event => {
-  // console.log(event.data);
   chrome.runtime.sendMessage(event.data);
 });
 
 // Messages from ldn.js
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  // console.log(msg);
+  console.log(msg);
   window.postMessage(msg);
 });
 

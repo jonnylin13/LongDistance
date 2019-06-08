@@ -8,7 +8,8 @@ module.exports = class User {
     lobbyId = null,
     id = null,
     controller = false,
-    controllerState = Constants.ControllerState.INACTIVE
+    controllerState = Constants.ControllerState.INACTIVE,
+    syncState = Constants.SyncState.INACTIVE
   ) {
     this.lobbyId = lobbyId;
     this.id = id;
@@ -16,6 +17,7 @@ module.exports = class User {
     this.urlParams = urlParams;
     this.progressState = progressState;
     this.controller = controller;
+    this.syncState = syncState;
   }
 
   static fromJson(jsonString) {
@@ -27,7 +29,8 @@ module.exports = class User {
         data['lobbyId'],
         data['id'],
         data['controller'],
-        data['controllerState']
+        data['controllerState'],
+        data['syncState']
       );
     } catch (err) {
       throw new Error(err);

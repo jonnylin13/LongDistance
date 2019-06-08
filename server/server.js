@@ -1,11 +1,11 @@
-const Lobby = require('./shared/model/lobby');
-const User = require('./shared/model/user');
+const Lobby = require('./model/lobby');
+const User = require('../shared/model/user');
 const WebSocket = require('ws');
-const Constants = require('./shared/constants');
+const Constants = require('../shared/constants');
 // We use hri here because shared cannot import npm modules
 const hri = require('human-readable-ids').hri;
-const Util = require('./shared/util');
-require('./shared/fills');
+const Util = require('../shared/util');
+require('../shared/fills');
 
 const PORT = 3000;
 
@@ -61,6 +61,12 @@ class LDNServer {
         break;
       case Constants.Protocol.Messages.UPDATE_URL:
         this._updateUrl(socket, data);
+        break;
+      case Constants.Protocol.Messages.SYNC_INIT:
+        this._sync(socket, data);
+        break;
+      case Constants.Protocol.Messages.SYNC_TIME_ACK:
+        this._syncTimeAck(socket, data);
         break;
     }
   }
@@ -130,7 +136,7 @@ class LDNServer {
       response.code = Constants.Protocol.SUCCESS;
       this.sockets[user.id] = socket;
       // Send controller state if it is active?
-      if (lobby.getController().controllerState > 0) {
+      if (lobby.getController().urlParams.includes('watch/')) {
         response.controller = JSON.stringify(lobby.getController());
       }
     } catch (err) {
@@ -185,6 +191,7 @@ class LDNServer {
           type: data.type,
           urlParams: data.urlParams
         };
+        lobby.updateUser(user);
         this._emit(lobby, updateRequest);
         response.code = Constants.Protocol.SUCCESS;
       } else {
@@ -195,6 +202,56 @@ class LDNServer {
       console.log(err);
     }
     socket.send(JSON.stringify(response));
+  }
+
+  _sync(socket, data) {
+    // TODO urgent
+    const response = {
+      type: Constants.Protocol.Messages.SYNC_INIT_ACK
+    };
+    try {
+      const user = User.fromJson(data.user);
+      const lobby = this.getLobby(user.lobbyId);
+      user.syncState = Constants.SyncState.PENDING;
+      lobby.updateUser(user);
+      if (lobby.isSynced()) {
+        // Emit sync_time
+        const syncTime = {
+          type: Constants.Protocol.Messages.SYNC_TIME,
+          progressState: lobby.getController().progressState
+        };
+        this._emit(lobby, syncTime);
+
+        // Set controller sync state to synced?
+        lobby.getController().syncState = Constants.SyncState.SYNCED;
+      }
+      response.syncState = user.syncState;
+      response.code = Constants.Protocol.SUCCESS;
+    } catch (err) {
+      response.code = Constants.Protocol.FAIL;
+      console.log(err);
+    }
+    socket.send(JSON.stringify(response));
+  }
+
+  _syncTimeAck(socket, data) {
+    try {
+      const user = User.fromJson(data.user);
+      const lobby = this.getLobby(user.lobbyId);
+
+      user.syncState = Constants.SyncState.SYNCED;
+      lobby.updateUser(user);
+      if (lobby.isSynced()) {
+        // Emit sync_end to all
+        const syncEnd = {
+          type: Constants.Protocol.Messages.SYNC_END,
+          syncState: user.syncState
+        };
+        this._emit(lobby, syncEnd, true);
+      }
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   _emit(lobby, msg, sendController = false) {

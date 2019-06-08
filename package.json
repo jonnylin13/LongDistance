@@ -1,11 +1,11 @@
 {
-  "name": "ldn",
-  "version": "0.0.6",
-  "description": "Long Distance to replace Showgoers and Netflix Party",
+  "name": "long-distance-server",
+  "version": "0.0.8",
+  "description": "Long Distance Netflix extension server",
   "main": "server.js",
   "scripts": {
     "test": "mocha 'test/**/*.spec.js' --exit",
-    "start": "node server.js",
+    "start": "node server/server.js",
     "build": "webpack --prod",
     "dev": "npm run build && npm run start"
   },

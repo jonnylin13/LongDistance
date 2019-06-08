@@ -7,6 +7,15 @@ module.exports = class Lobby {
     console.log('<Lobby> New lobby created: ' + this.id);
   }
 
+  isSynced() {
+    if (this.users.length < 1) return false;
+    let syncState = this.getController().syncState;
+    for (let userId in this.users) {
+      if (this.users[userId].syncState !== syncState) return false;
+    }
+    return true;
+  }
+
   isController(user) {
     return this.isControllerId(user.id);
   }
@@ -17,6 +26,10 @@ module.exports = class Lobby {
 
   getController() {
     return this.users[this.controllerId];
+  }
+
+  updateUser(user) {
+    this.users[user.id] = user;
   }
 
   contains(user) {

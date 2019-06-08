@@ -97,7 +97,7 @@ export default class LDNClient {
               const data = JSON.parse(event.data);
               if (
                 data.type === Constants.Protocol.Messages.CONNECT_LOBBY_ACK &&
-                data.code === Constants.Protocol.SUCCESS
+                data.code
               ) {
                 this.user.lobbyId = msg.lobbyId;
                 this.user.controller = false;
@@ -110,12 +110,6 @@ export default class LDNClient {
                       type: Constants.Protocol.Messages.UPDATE_URL,
                       urlParams: controller.urlParams
                     })
-                  });
-                  // Test this
-                  chrome.runtime.sendMessage(this.tabListener.tabId, {
-                    type: Constants.Protocol.Messages.UPDATE_STATE_TIME,
-                    progressState: controller.progressState,
-                    controllerState: controller.controllerState
                   });
                 }
                 resolve(true);
@@ -151,15 +145,17 @@ export default class LDNClient {
   setUrlParams(urlParams) {
     this.user.urlParams = urlParams;
     // If the user is a controller && user is watching new content, then send url update request to server
-    if (this.user.controller && urlParams.includes('watch/')) {
-      this._connect().then(() => {
-        const msg = {
-          type: Constants.Protocol.Messages.UPDATE_URL,
-          urlParams: this.user.urlParams,
-          user: JSON.stringify(this.user)
-        };
-        this.ws.send(JSON.stringify(msg));
-      });
+    if (this.user.controller) {
+      if (urlParams.includes('watch/')) {
+        this._connect().then(() => {
+          const msg = {
+            type: Constants.Protocol.Messages.UPDATE_URL,
+            urlParams: this.user.urlParams,
+            user: JSON.stringify(this.user)
+          };
+          this.ws.send(JSON.stringify(msg));
+        });
+      }
     }
   }
 
@@ -198,6 +194,17 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_CONTROL:
           this.user.controller = data.code;
           break;
+        case Constants.Protocol.Messages.SYNC_TIME:
+          // TODO: Handle sync time...
+          chrome.tabs.sendMessage(this.tabListener.tabId, data);
+          break;
+        case Constants.Protocol.Messages.SYNC_INIT_ACK:
+          this.user.syncState = data.syncState;
+          break;
+        case Constants.Protocol.Messages.SYNC_END:
+          this.user.syncState = data.syncState;
+          chrome.tabs.sendMessage(this.tabListener.tabId, data);
+          break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);
       }
@@ -214,6 +221,11 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.UPDATE_STATE:
           this.user.controllerState = msg.controllerState;
+          break;
+        case Constants.Protocol.Messages.SYNC_INIT:
+        case Constants.Protocol.Messages.SYNC_TIME_ACK:
+          msg.user = JSON.stringify(this.user);
+          this.ws.send(JSON.stringify(msg));
           break;
       }
     } catch (err) {
