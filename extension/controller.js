@@ -232,7 +232,7 @@ class NetflixController {
       case Constants.Protocol.Messages.SYNC_TIME:
         // TODO
         this.controllerProgress = req.progressState;
-        this.seek(this.controllerProgress.getElapsed());
+        this.seek(this.controllerProgress.elapsed);
         const ack = {
           type: Constants.Protocol.Messages.SYNC_TIME_ACK,
           code: Constants.Protocol.Messages.SUCCESS

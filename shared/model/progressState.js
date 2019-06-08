@@ -4,14 +4,6 @@ module.exports = class ProgressState {
     this.duration = duration;
   }
 
-  getElapsed() {
-    return this.elapsed;
-  }
-
-  getDuration() {
-    return this.duration;
-  }
-
   static fromJson(jsonString) {
     try {
       const data = JSON.parse(jsonString);
