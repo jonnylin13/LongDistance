@@ -113,7 +113,7 @@ class NetflixController {
 
   seek(time) {
     if (this.enabled) {
-      this.player.seek(this.currentTime + time);
+      this.player.seek(time);
       this.ignoreQ.push('seek');
     }
   }
