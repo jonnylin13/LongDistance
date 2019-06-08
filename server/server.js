@@ -214,8 +214,6 @@ class LDNServer {
       const lobby = this.getLobby(user.lobbyId);
       user.syncState = Constants.SyncState.PENDING;
       lobby.updateUser(user);
-      console.log(lobby.isSynced());
-      console.log(lobby.users);
       if (lobby.isSynced()) {
         // Emit sync_time
         const syncTime = {
@@ -240,17 +238,16 @@ class LDNServer {
     try {
       const user = User.fromJson(data.user);
       const lobby = this.getLobby(user.lobbyId);
-      if (data.code) {
-        user.syncState = Constants.SyncState.SYNCED;
-        lobby.updateUser(user);
-        if (lobby.isSynced()) {
-          // Emit sync_end to all
-          const syncEnd = {
-            type: Constants.Protocol.Messages.SYNC_END,
-            syncState: user.syncState
-          };
-          this._emit(socket, syncEnd, true);
-        }
+
+      user.syncState = Constants.SyncState.SYNCED;
+      lobby.updateUser(user);
+      if (lobby.isSynced()) {
+        // Emit sync_end to all
+        const syncEnd = {
+          type: Constants.Protocol.Messages.SYNC_END,
+          syncState: user.syncState
+        };
+        this._emit(lobby, syncEnd, true);
       }
     } catch (err) {
       console.log(err);

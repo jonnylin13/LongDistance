@@ -234,8 +234,7 @@ class NetflixController {
         this.controllerProgress = req.progressState;
         this.seek(this.controllerProgress.elapsed);
         const ack = {
-          type: Constants.Protocol.Messages.SYNC_TIME_ACK,
-          code: Constants.Protocol.Messages.SUCCESS
+          type: Constants.Protocol.Messages.SYNC_TIME_ACK
         };
         window.postMessage(ack);
         break;
