@@ -6,6 +6,7 @@ export default class TabListener {
   constructor() {
     // TODO: Check implementation
     this.loaded = false;
+    this.tabId = -1; // not found
     this._queryNetflixTab();
     chrome.tabs.onCreated.addListener(tab => {
       this.onCreate(tab);
@@ -23,7 +24,6 @@ export default class TabListener {
         this._startControllerScript();
       }
     });
-    this.tabId = -1; // not found
     console.log('<TabListener> Tab listener started!');
   }
 
@@ -93,13 +93,15 @@ export default class TabListener {
       chrome.pageAction.show(tab.id, undefined);
       console.log('<TabListener> Updated: ', tab.url);
       if (!this.isTabCached()) this._cacheTab(tab.id);
-      if (
-        tab.url.includes('watch') &&
-        LDNClient.getInstance().user.controllerState ===
-          Constants.ControllerState.INACTIVE
-      ) {
+      if (tab.url.includes('watch')) {
+        if (LDNClient.getInstance().user.urlParams.includes('watch')) {
+          // Before the URL params get updated,
+          // If the previous URL params included 'watch'
+          // Then we'll restart the controller script
+          this._disableControllerScript();
+        }
         this._startControllerScript();
-      } else {
+      } else if (tab.url.includes('browse')) {
         LDNClient.getInstance().user.controllerState =
           Constants.ControllerState.INACTIVE;
         this._disableControllerScript();

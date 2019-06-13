@@ -10,12 +10,16 @@ s.onload = () => {
 
 // Messages from controller.js and any window.postMessage in this context
 window.addEventListener('message', event => {
+  // Check if the message was sent from this script
+  if (event.data.ignoreLoader) return;
+  event.data.ignoreLoader = true;
   chrome.runtime.sendMessage(event.data);
 });
 
 // Messages from ldn.js
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log(msg);
+  if (msg.ignoreLoader) return;
+  msg.ignoreLoader = true;
   window.postMessage(msg);
 });
 

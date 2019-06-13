@@ -205,6 +205,11 @@ export default class LDNClient {
           this.user.syncState = data.syncState;
           chrome.tabs.sendMessage(this.tabListener.tabId, data);
           break;
+        case Constants.Protocol.Messages.UPDATE_SEEK:
+        case Constants.Protocol.Messages.UPDATE_STATE:
+          delete data.user;
+          chrome.tabs.sendMessage(this.tabListener.tabId, data);
+          break;
         default:
           console.log('<LDN> Unhandled msg: ', data.type);
       }
@@ -221,6 +226,23 @@ export default class LDNClient {
           break;
         case Constants.Protocol.Messages.UPDATE_STATE:
           this.user.controllerState = msg.controllerState;
+          if (this.user.controller) {
+            msg.user = JSON.stringify(this.user);
+            this.ws.send(JSON.stringify(msg));
+          } else {
+            // No longer synced
+          }
+          break;
+        case Constants.Protocol.Messages.UPDATE_SEEK:
+          this.user.progressState = msg.progressState;
+          if (this.user.controller) {
+            msg.user = JSON.stringify(this.user);
+            this.ws.send(JSON.stringify(msg));
+          } else {
+            // No longer synced
+            // Disconnect?
+            // Alert?
+          }
           break;
         case Constants.Protocol.Messages.SYNC_INIT:
         case Constants.Protocol.Messages.SYNC_TIME_ACK:
