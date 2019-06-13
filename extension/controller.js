@@ -203,6 +203,7 @@ class NetflixController {
     };
     window.postMessage(req);
   }
+
   userPlay(event) {
     if (this._shouldIgnore(event)) return;
     console.log('<Controller> Play!');

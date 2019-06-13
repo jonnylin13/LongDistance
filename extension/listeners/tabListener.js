@@ -95,6 +95,9 @@ export default class TabListener {
       if (!this.isTabCached()) this._cacheTab(tab.id);
       if (tab.url.includes('watch')) {
         if (LDNClient.getInstance().user.urlParams.includes('watch')) {
+          // Before the URL params get updated,
+          // If the previous URL params included 'watch'
+          // Then we'll restart the controller script
           this._disableControllerScript();
         }
         this._startControllerScript();
