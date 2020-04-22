@@ -7,6 +7,9 @@ import TabListener from './listeners/tabListener';
 import Constants from '../shared/constants';
 import User from '../shared/model/user';
 
+// Should separate runtime message protocol from websocket protocol
+// Create universal logger
+
 export default class LDNClient {
   static getInstance() {
     if (!this._instance) this._instance = new LDNClient();
@@ -34,6 +37,8 @@ export default class LDNClient {
           this.ws = new WebSocket(Constants.WS_URL);
           this.ws.onopen = () => {
             console.log('<LDN> Connected to WebSocket server');
+            this.ws.onclose = this._onClose;
+            this.ws.onerror = this._onError;
             resolve(null);
           };
         } catch (err) {
@@ -43,6 +48,16 @@ export default class LDNClient {
         resolve(null);
       }
     });
+  }
+
+  _onClose(event) {
+    console.log('<LDN> Server close');
+    console.log(event);
+  }
+
+  _onError(event) {
+    console.log('<LDN> Server error');
+    console.log(event);
   }
 
   // ==============
@@ -56,7 +71,7 @@ export default class LDNClient {
           msg.user = JSON.stringify(this.user);
           this.ws.send(JSON.stringify(msg));
           // This is a one time event listener
-          this.ws.onmessage = event => {
+          this.ws.onmessage = (event) => {
             try {
               const data = JSON.parse(event.data);
               if (
@@ -74,11 +89,11 @@ export default class LDNClient {
               // Todo?
               reject(false);
             } finally {
-              this.ws.onmessage = event => this._onMessage(event);
+              this.ws.onmessage = (event) => this._onMessage(event);
             }
           };
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -92,7 +107,7 @@ export default class LDNClient {
           msg.user = JSON.stringify(this.user);
           this.ws.send(JSON.stringify(msg));
           // 1 time listener
-          this.ws.onmessage = event => {
+          this.ws.onmessage = (event) => {
             try {
               const data = JSON.parse(event.data);
               if (
@@ -108,8 +123,8 @@ export default class LDNClient {
                   this._onMessage({
                     data: JSON.stringify({
                       type: Constants.Protocol.Messages.UPDATE_URL,
-                      urlParams: controller.urlParams
-                    })
+                      urlParams: controller.urlParams,
+                    }),
                   });
                 }
                 resolve(true);
@@ -121,11 +136,11 @@ export default class LDNClient {
               console.log(err);
               reject(false);
             } finally {
-              this.ws.onmessage = event => this._onMessage(event);
+              this.ws.onmessage = (event) => this._onMessage(event);
             }
           };
         })
-        .catch(err => {
+        .catch((err) => {
           reject(err);
         });
     });
@@ -137,7 +152,7 @@ export default class LDNClient {
         msg.user = JSON.stringify(this.user);
         this.ws.send(JSON.stringify(msg));
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -151,7 +166,7 @@ export default class LDNClient {
           const msg = {
             type: Constants.Protocol.Messages.UPDATE_URL,
             urlParams: this.user.urlParams,
-            user: JSON.stringify(this.user)
+            user: JSON.stringify(this.user),
           };
           this.ws.send(JSON.stringify(msg));
         });
@@ -187,7 +202,7 @@ export default class LDNClient {
         case Constants.Protocol.Messages.UPDATE_URL:
           if (this.user.urlParams !== data.urlParams) {
             chrome.tabs.update(this.tabListener.tabId, {
-              url: 'https://netflix.com/' + data.urlParams
+              url: 'https://netflix.com/' + data.urlParams,
             });
           }
           break;

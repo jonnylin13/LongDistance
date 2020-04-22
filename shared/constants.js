@@ -1,18 +1,18 @@
 module.exports.ViewState = Object.freeze({
   IN_LOBBY: 1,
   OUT_LOBBY: 0,
-  CONNECT_LOBBY: 2
+  CONNECT_LOBBY: 2,
 });
 module.exports.ControllerState = Object.freeze({
   INACTIVE: -1,
   PENDING: 0,
   PAUSE: 1,
-  PLAY: 2
+  PLAY: 2,
 });
 module.exports.SyncState = Object.freeze({
   INACTIVE: -1,
   PENDING: 0,
-  SYNCED: 1
+  SYNCED: 1,
 });
 module.exports.Protocol = Object.freeze({
   SUCCESS: 1,
@@ -43,8 +43,8 @@ module.exports.Protocol = Object.freeze({
     UPDATE_CONTROL_SCRIPT: 'update_control_script',
     UPDATE_CONTROL_SCRIPT_ACK: 'update_control_script_ack',
     POPUP_LOADED: 'popup_loaded',
-    POPUP_LOADED_ACK: 'popup_loaded_ack'
-  }
+    POPUP_LOADED_ACK: 'popup_loaded_ack',
+  },
 });
 
-module.exports.WS_URL = Object.freeze('ws://192.168.0.9:3000/');
+module.exports.WS_URL = Object.freeze('ws://192.168.0.22:3000/');

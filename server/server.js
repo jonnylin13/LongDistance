@@ -35,7 +35,7 @@ class LDNServer {
       '<Info> Connection received from: ',
       req.connection.remoteAddress
     );
-    socket.on('message', msg => {
+    socket.on('message', (msg) => {
       this._onMessage(socket, msg);
     });
   }
@@ -86,7 +86,7 @@ class LDNServer {
   // ===============
   _startLobby(socket, data) {
     const response = {
-      type: Constants.Protocol.Messages.START_LOBBY_ACK
+      type: Constants.Protocol.Messages.START_LOBBY_ACK,
     };
 
     try {
@@ -123,7 +123,7 @@ class LDNServer {
 
   _connectLobby(socket, data) {
     const response = {
-      type: Constants.Protocol.Messages.CONNECT_LOBBY_ACK
+      type: Constants.Protocol.Messages.CONNECT_LOBBY_ACK,
     };
 
     try {
@@ -152,7 +152,7 @@ class LDNServer {
 
   _disconnectLobby(socket, data) {
     const response = {
-      type: Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK
+      type: Constants.Protocol.Messages.DISCONNECT_LOBBY_ACK,
     };
     try {
       const user = User.fromJson(data.user);
@@ -168,7 +168,7 @@ class LDNServer {
         if (lobby.controllerId in this.sockets) {
           const controlUpdate = {
             type: Constants.Protocol.Messages.UPDATE_CONTROL,
-            code: true
+            code: true,
           };
           this.sockets[lobby.controllerId].send(JSON.stringify(controlUpdate));
         }
@@ -185,7 +185,7 @@ class LDNServer {
 
   _updateUrl(socket, data) {
     const response = {
-      type: Constants.Protocol.Messages.UPDATE_URL_ACK
+      type: Constants.Protocol.Messages.UPDATE_URL_ACK,
     };
     try {
       const user = User.fromJson(data.user);
@@ -193,7 +193,7 @@ class LDNServer {
       if (lobby.isController(user)) {
         const updateRequest = {
           type: data.type,
-          urlParams: data.urlParams
+          urlParams: data.urlParams,
         };
         lobby.updateUser(user);
         this._emit(lobby, updateRequest);
@@ -211,7 +211,7 @@ class LDNServer {
   _sync(socket, data) {
     // TODO urgent
     const response = {
-      type: Constants.Protocol.Messages.SYNC_INIT_ACK
+      type: Constants.Protocol.Messages.SYNC_INIT_ACK,
     };
     try {
       const user = User.fromJson(data.user);
@@ -222,7 +222,7 @@ class LDNServer {
         // Emit sync_time
         const syncTime = {
           type: Constants.Protocol.Messages.SYNC_TIME,
-          progressState: lobby.getController().progressState
+          progressState: lobby.getController().progressState,
         };
         this._emit(lobby, syncTime);
 
@@ -249,7 +249,7 @@ class LDNServer {
         // Emit sync_end to all
         const syncEnd = {
           type: Constants.Protocol.Messages.SYNC_END,
-          syncState: user.syncState
+          syncState: user.syncState,
         };
         this._emit(lobby, syncEnd, true);
       }
@@ -273,7 +273,7 @@ class LDNServer {
 
   _emit(lobby, msg, sendController = false) {
     console.log('<Info> Emitting a msg ' + msg.type + ' to ' + lobby.id);
-    Object.keys(lobby.users).forEach(userId => {
+    Object.keys(lobby.users).forEach((userId) => {
       if (userId in this.sockets) {
         if (lobby.isControllerId(userId) && !sendController) return;
         const socket = this.sockets[userId];
@@ -294,7 +294,7 @@ class LDNServer {
     this.server.on('connection', (socket, req) =>
       this._onConnection(socket, req)
     );
-    this.server.on('close', event => this._onClose(event));
+    this.server.on('close', (event) => this._onClose(event));
   }
 
   contains(lobbyId) {
