@@ -17,7 +17,7 @@
   "license": "ISC",
   "dependencies": {
     "human-readable-ids": "^1.0.4",
-    "ws": "^6.1.0"
+    "ws": "^7.4.6"
   },
   "devDependencies": {
     "@babel/core": "^7.1.5",
